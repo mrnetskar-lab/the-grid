@@ -782,3 +782,43 @@ function init() {
 
 window.addEventListener("hashchange", bootFromHash);
 window.addEventListener("DOMContentLoaded", init);
+
+// ---------------------------------------------------------
+// PROFILES LIGHTBOX
+// ---------------------------------------------------------
+
+(function () {
+  const lb    = document.getElementById("profilesLightbox");
+  const lbImg = document.getElementById("profilesLightboxImg");
+  const lbClose = document.getElementById("profilesLightboxClose");
+  if (!lb || !lbImg || !lbClose) return;
+
+  function openLb(src) {
+    lbImg.src = src;
+    lb.setAttribute("aria-hidden", "false");
+  }
+  function closeLb() {
+    lb.setAttribute("aria-hidden", "true");
+    lbImg.src = "";
+  }
+
+  document.getElementById("profilesGallery")?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".profiles-shot");
+    if (btn) openLb(btn.dataset.src);
+  });
+
+  lbClose.addEventListener("click", closeLb);
+  lb.addEventListener("click", (e) => { if (e.target === lb) closeLb(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && lb.getAttribute("aria-hidden") === "false") closeLb(); });
+
+  // MESSAGE buttons on profile cards → navigate to inbox with correct contact
+  document.querySelectorAll(".profile-card .btn[data-contact]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const contact = btn.dataset.contact;
+      if (contact) {
+        focusContact(contact);
+        navigateTo("inbox");
+      }
+    });
+  });
+})();

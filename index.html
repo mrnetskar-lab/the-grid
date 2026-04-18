@@ -31,7 +31,7 @@
         <button class="nav-link active" data-nav="home">HOME</button>
         <button class="nav-link" data-nav="hub">HUB</button>
         <button class="nav-link" data-nav="inbox">INBOX</button>
-        <button class="nav-link" data-nav="routes">SIGNAL MAP</button>
+        <button class="nav-link" data-nav="routes">PROFILES</button>
       </nav>
       <div class="wayfinder" id="wayfinder">
         <span class="wf-section" id="currentSection">HOME</span>
@@ -455,7 +455,7 @@
 
               <div class="dossier-cta-wrap">
                 <button class="btn btn-secondary btn-full dossier-cta" id="profileOpenBtn">CONTINUE PRIVATE CHAT</button>
-                <button class="btn btn-ghost btn-full dossier-route-btn" id="dossierRouteBtn" data-nav="routes">SIGNAL MAP</button>
+                <button class="btn btn-ghost btn-full dossier-route-btn" id="dossierRouteBtn" data-nav="routes">PROFILES</button>
               </div>
             </aside>
 
@@ -463,61 +463,115 @@
         </div>
       </section>
 
-      <!-- ROUTES -->
+      <!-- PROFILES -->
       <section id="routes" class="page" data-page="routes">
         <div class="container section-space">
-          <div class="page-title-row">
-            <div>
-              <span class="sys-label">NARRATIVE SYSTEM</span>
-              <h2 class="routes-title">SIGNAL MAP</h2>
-              <p class="subtle">Routes do not progress linearly. They warm, open, destabilize, and close.</p>
-            </div>
+
+          <!-- Hero banner -->
+          <div class="profiles-hero">
+            <span class="sys-label">NODE GALLERY</span>
+            <h2 class="profiles-title">PROFILES</h2>
+            <p class="subtle">Private access nodes. Portraits, signals, fragments.</p>
           </div>
-          <div class="route-map-shell glass">
-            <div class="route-map" id="routeMap">
-              <button class="route-node active" data-room="nina" data-route="return-thread">
-                <span class="route-node-label">Nina</span>
-                <strong>THE RETURN</strong>
-                <span class="route-state-badge state-stable">STABLE</span>
-                <small>62% open</small>
-              </button>
-              <button class="route-node" data-room="hazel" data-route="after-image">
-                <span class="route-node-label">Hazel</span>
-                <strong>AFTER THE PAUSE</strong>
-                <span class="route-state-badge state-watching">WATCHING</span>
-                <small>41% open</small>
-              </button>
-              <button class="route-node" data-room="iris" data-route="low-signal">
-                <span class="route-node-label">Iris</span>
-                <strong>LOW SIGNAL</strong>
-                <span class="route-state-badge state-warming">WARMING</span>
-                <small>28% open</small>
-              </button>
-              <button class="route-node unstable" data-room="vale" data-route="brief-window">
-                <span class="route-node-label">Vale</span>
-                <strong>BRIEF WINDOW</strong>
-                <span class="route-state-badge state-unstable">UNSTABLE</span>
-                <small>open briefly</small>
-              </button>
-            </div>
-            <aside class="route-detail" id="routeDetail">
-              <span class="sys-label">ROUTE DETAIL</span>
-              <h3 id="routeDetailTitle" class="route-detail-title">THE RETURN</h3>
-              <p id="routeDetailCopy" class="subtle">She kept the thread open longer than she should have. You never answered why.</p>
-              <div class="route-detail-meta" id="routeDetailMeta">
-                <span class="pill">stable</span>
-                <span class="pill">62% open</span>
+
+          <!-- 4 profile cards -->
+          <div class="profiles-cards">
+
+            <article class="profile-card profile-card--nina">
+              <div class="profile-card-img">
+                <img src="/images/shot_1776013087613.png" alt="Nina" />
+                <div class="profile-card-outline"></div>
               </div>
-              <div class="route-console">
-                <div class="console-line"><span class="cl-key">NODE</span><span class="cl-val" id="consoleNode">Nina</span></div>
-                <div class="console-line"><span class="cl-key">STATE</span><span class="cl-val" id="consoleState">STABLE</span></div>
-                <div class="console-line"><span class="cl-key">ACCESS</span><span class="cl-val" id="consoleAccess">62% OPEN</span></div>
-                <div class="console-line"><span class="cl-key">SIGNAL</span><span class="cl-val cl-live">LIVE</span></div>
+              <div class="profile-card-body">
+                <div class="profile-status"><span class="profile-dot"></span> ONLINE</div>
+                <h3 class="profile-name">Nina.</h3>
+                <p class="profile-bio">Holding the thread. Quiet signal. Magnetic presence.</p>
+                <div class="profile-meta">
+                  <span class="profile-stat">Signal stable</span>
+                  <button class="btn btn-primary btn-small" type="button" data-nav="inbox" data-contact="nina">MESSAGE</button>
+                </div>
               </div>
-              <button class="btn btn-secondary btn-full" id="routeOpenBtn">CONTINUE IN DMs</button>
-            </aside>
+            </article>
+
+            <article class="profile-card profile-card--hazel">
+              <div class="profile-card-img">
+                <img src="/images/shot_1776094682409.png" alt="Hazel" />
+                <div class="profile-card-outline"></div>
+              </div>
+              <div class="profile-card-body">
+                <div class="profile-status"><span class="profile-dot profile-dot--away"></span> OBSERVANT</div>
+                <h3 class="profile-name">Hazel.</h3>
+                <p class="profile-bio">Precise and still. She watches more than she shows. Slow to open.</p>
+                <div class="profile-meta">
+                  <span class="profile-stat">Pull active</span>
+                  <button class="btn btn-primary btn-small" type="button" data-nav="inbox" data-contact="hazel">MESSAGE</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="profile-card profile-card--iris">
+              <div class="profile-card-img">
+                <img src="/images/shot_1776108599345.png" alt="Iris" />
+                <div class="profile-card-outline"></div>
+              </div>
+              <div class="profile-card-body">
+                <div class="profile-status"><span class="profile-dot"></span> LISTENING</div>
+                <h3 class="profile-name">Iris.</h3>
+                <p class="profile-bio">Few words, heavy weight. Only clear in private.</p>
+                <div class="profile-meta">
+                  <span class="profile-stat">Warming</span>
+                  <button class="btn btn-primary btn-small" type="button" data-nav="inbox" data-contact="iris">MESSAGE</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="profile-card profile-card--vale">
+              <div class="profile-card-img">
+                <img src="/images/shot_1776161755007.png" alt="Vale" />
+                <div class="profile-card-outline"></div>
+              </div>
+              <div class="profile-card-body">
+                <div class="profile-status profile-status--unstable"><span class="profile-dot profile-dot--unstable"></span> UNSTABLE</div>
+                <h3 class="profile-name">Vale.</h3>
+                <p class="profile-bio">Volatile, intense in brief flashes. Open briefly. Then gone.</p>
+                <div class="profile-meta">
+                  <span class="profile-stat">Unstable</span>
+                  <button class="btn btn-primary btn-small" type="button" data-nav="inbox" data-contact="vale">MESSAGE</button>
+                </div>
+              </div>
+            </article>
+
           </div>
+
+          <!-- Gallery grid -->
+          <div class="profiles-gallery-head">
+            <span class="sys-label">SIGNAL FRAGMENTS</span>
+            <h3 class="profiles-gallery-title">GALLERY</h3>
+          </div>
+
+          <div class="profiles-gallery" id="profilesGallery">
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776014429431.png" aria-label="View image"><img src="/images/shot_1776014429431.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776015181091.png" aria-label="View image"><img src="/images/shot_1776015181091.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776015746631.png" aria-label="View image"><img src="/images/shot_1776015746631.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776015889788.png" aria-label="View image"><img src="/images/shot_1776015889788.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776015995949.png" aria-label="View image"><img src="/images/shot_1776015995949.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776016000307.png" aria-label="View image"><img src="/images/shot_1776016000307.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776016145476.png" aria-label="View image"><img src="/images/shot_1776016145476.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776016300251.png" aria-label="View image"><img src="/images/shot_1776016300251.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776016466630.png" aria-label="View image"><img src="/images/shot_1776016466630.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776020143729.png" aria-label="View image"><img src="/images/shot_1776020143729.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776024764684.png" aria-label="View image"><img src="/images/shot_1776024764684.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="/images/shot_1776026633960.png" aria-label="View image"><img src="/images/shot_1776026633960.png" alt="" /></button>
+          </div>
+
         </div>
+
+        <!-- Lightbox -->
+        <div class="profiles-lightbox" id="profilesLightbox" aria-hidden="true">
+          <button class="profiles-lightbox-close" id="profilesLightboxClose" aria-label="Close">×</button>
+          <img id="profilesLightboxImg" src="" alt="" />
+        </div>
+
       </section>
 
     </main>
