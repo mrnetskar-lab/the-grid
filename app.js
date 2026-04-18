@@ -177,6 +177,45 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+// ---------------------------------------------------------
+// CONTOUR SYSTEM
+// ---------------------------------------------------------
+
+// Character identity hues (HSL base)
+const CHAR_HUE = { nina: 264, hazel: 217, iris: 280, vale: 186 };
+
+// Tone modifiers: how each tone bends the hue and shifts lightness
+const TONE_MOD = {
+  soft:     { hShift:  8, lShift:  8, sat: 70 },
+  tender:   { hShift: 14, lShift: 12, sat: 65 },
+  playful:  { hShift:-12, lShift:  6, sat: 85 },
+  guarded:  { hShift: -6, lShift: -8, sat: 50 },
+  cold:     { hShift:-20, lShift:-14, sat: 40 },
+  neutral:  { hShift:  0, lShift:  0, sat: 55 },
+};
+
+function applyContour(el, charKey, toneClass, subtextStrength) {
+  const hue     = CHAR_HUE[charKey] ?? 260;
+  const mod     = TONE_MOD[toneClass] || TONE_MOD.neutral;
+  const baseHue = hue + mod.hShift;
+  const sat     = mod.sat;
+  const light   = 62 + mod.lShift;
+
+  // Intensity drives border opacity and glow spread
+  const intensity = 0.28 + subtextStrength * 0.52;   // 0.28 – 0.80
+  const glowAlpha = 0.06 + subtextStrength * 0.18;   // 0.06 – 0.24
+  const glowSpread = 2 + subtextStrength * 6;         // 2px – 8px
+
+  const borderColor = `hsla(${baseHue}, ${sat}%, ${light}%, ${intensity})`;
+  const glowColor   = `hsla(${baseHue}, ${sat}%, ${light}%, ${glowAlpha})`;
+
+  el.style.borderColor  = borderColor;
+  el.style.borderWidth  = "1px";
+  el.style.borderStyle  = "solid";
+  el.style.boxShadow    = `0 0 ${glowSpread}px ${glowColor}, inset 0 0 ${glowSpread * 0.5}px ${glowColor}`;
+  el.style.background   = `hsla(${baseHue}, ${sat * 0.4}%, 10%, 0.12)`;
+}
+
 function nowClock() {
   return new Date().toLocaleTimeString("no-NO", {
     hour: "2-digit",
@@ -286,7 +325,7 @@ async function sendMessage(contactKey, text) {
   contact.messages.push({ side: "incoming", text: "...", time: "", typing: true });
   renderInbox();
 
-  let reply;
+  let reply, toneClass, subtextStrength;
   try {
     const res = await fetch(`/api/characters/${contactKey}/chat`, {
       method: "POST",
@@ -294,9 +333,13 @@ async function sendMessage(contactKey, text) {
       body: JSON.stringify({ text: text.trim() }),
     });
     const data = await res.json();
-    reply = data.ok ? data.reply : null;
+    reply          = data.ok ? data.reply : null;
+    toneClass      = data.toneClass || 'neutral';
+    subtextStrength = data.subtextStrength ?? 0;
   } catch {
     reply = null;
+    toneClass = 'neutral';
+    subtextStrength = 0;
   }
 
   // Remove typing indicator
@@ -306,6 +349,8 @@ async function sendMessage(contactKey, text) {
     side: "incoming",
     text: reply || "...",
     time: nowClock(),
+    toneClass,
+    subtextStrength,
   });
 
   const rel = getRelationship(contactKey);
@@ -568,7 +613,20 @@ function renderInbox() {
     const bubble = document.createElement("div");
     const latest = index === contact.messages.length - 1;
 
-    bubble.className = `chat-bubble ${message.side}${latest ? " is-latest" : ""}${message.typing ? " typing" : ""}`;
+    bubble.className = [
+      "chat-bubble",
+      message.side,
+      latest ? "is-latest" : "",
+      message.typing ? "typing" : "",
+    ].filter(Boolean).join(" ");
+
+    if (message.side === "incoming") {
+      bubble.dataset.char    = contactKey;
+      bubble.dataset.tone    = message.toneClass || "neutral";
+      bubble.dataset.subtext = String(message.subtextStrength ?? 0);
+      applyContour(bubble, contactKey, message.toneClass || "neutral", message.subtextStrength ?? 0);
+    }
+
     bubble.innerHTML = `
       <p>${escapeHtml(message.text)}</p>
       ${message.typing ? "" : `<time>${escapeHtml(message.time)}</time>`}
