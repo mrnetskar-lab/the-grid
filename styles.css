@@ -1791,20 +1791,18 @@ h3 {
 }
 
 @media (max-width: 980px) {
-  .hub-world { grid-template-columns: 220px minmax(0, 1fr); }
+  .hub-world { grid-template-columns: 200px minmax(0, 1fr); }
   .rooms-grid { grid-template-columns: repeat(2, 1fr); }
   .home-nodes-visual { display: none; }
 }
 
 @media (max-width: 760px) {
-  :root { --topbar-h: 84px; }
-  .topbar { top: 0.35rem; border-radius: 8px; flex-wrap: wrap; align-items: flex-start; }
+  :root { --topbar-h: 52px; }
+  .topbar { top: 0.35rem; border-radius: 8px; }
   .menu-toggle { display: inline-flex; }
   .nav { width: 100%; display: none; flex-direction: column; align-items: stretch; padding-top: 0.25rem; }
   .nav.open { display: flex; }
   .nav-link { text-align: left; border-radius: 6px; padding: 0.6rem 0.75rem; }
-  .hub-world { grid-template-columns: 1fr; }
-  .hub-sidebar { order: 2; max-height: 280px; overflow-y: auto; }
   .rooms-grid { grid-template-columns: 1fr; }
   .inbox-layout { grid-template-columns: 1fr; height: calc(100vh - 90px); border-radius: 0; }
   .node-rail { display: none; }
@@ -1817,44 +1815,35 @@ h3 {
   .route-node[data-route="brief-window"]  { top: 78%; left: 5%; right: 5%; bottom: auto; }
 }
 
-/* Tweak hub layout: cap chat width on desktop and improve mobile collapse */
-@media (max-width: 1200px) {
-  /* narrower desktops: keep sidebar slightly smaller while preserving cap */
-  .hub-chat-panel { max-width: 640px; }
-}
-
-@media (max-width: 800px) {
-  .hub-world { grid-template-columns: 200px minmax(0, 1fr); }
-  .hub-sidebar { width: 200px; }
-  .hub-chat-panel { max-width: 620px; }
-}
-
+/* Mobile hub: horizontal avatar strip + full-width chat */
 @media (max-width: 600px) {
-  /* Mobile: single-column hub, make the sidebar a compact horizontal strip */
-  .hub-world { grid-template-columns: 1fr; }
+  :root { --topbar-h: 52px; }
+  .topbar { padding: 0.35rem 0.6rem; }
+  .topbar .topbar-live { display: none; }
+  .hub-world { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
   .hub-sidebar {
-    display: flex;
     order: -1;
     flex-direction: row;
     align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    height: 72px;
-    max-height: 72px;
+    gap: 8px;
+    padding: 6px 10px;
+    height: 64px;
+    max-height: 64px;
+    border-radius: 12px;
     overflow-x: auto;
     overflow-y: hidden;
-    border-radius: 12px;
     background: linear-gradient(180deg, rgba(18,6,26,0.95), rgba(12,4,18,0.95));
   }
-  .hub-sidebar .hub-sidebar-title { font-size: 1rem; margin: 0 8px 0 6px; white-space: nowrap; }
-  .hub-contact-list { display: flex; flex-direction: row; gap: 8px; align-items: center; overflow-x: auto; padding: 0; margin: 0; }
-  .hub-contact-row { display: flex; flex-direction: column; align-items: center; min-width: 74px; padding: 6px; border-radius: 10px; background: transparent; }
-  .hub-contact-row .hub-contact-info { display: none; }
-  .hub-contact-row .hub-contact-avatar { width: 44px; height: 44px; }
-  .hub-chat-panel { max-width: none; width: 100%; justify-self: stretch; }
-  .topbar { padding: 0.35rem 0.6rem; }
-  .topbar .topbar-live { display: none; }
-  .page-stack { padding-top: calc(var(--topbar-h) + 0.5rem); }
+  .hub-sidebar-title { font-size: 0.9rem; margin: 0 4px 0 0; white-space: nowrap; flex-shrink: 0; }
+  .hub-search, .hub-filters, .hub-signal-log { display: none; }
+  .hub-contact-list { flex-direction: row; gap: 6px; align-items: center; overflow-x: auto; overflow-y: hidden; padding: 0; min-height: unset; }
+  .hub-contact-row { flex-direction: column; align-items: center; min-width: 52px; max-width: 52px; padding: 4px; border-radius: 10px; min-height: unset; gap: 2px; }
+  .hub-contact-info, .hub-contact-time, .hub-contact-divider { display: none; }
+  .hub-contact-avatar { width: 40px; height: 40px; font-size: 0.78rem; }
+  .hub-contact-row .hub-contact-name { display: block; font-size: 0.6rem; color: var(--muted); white-space: nowrap; }
+  .hub-contact-info { display: flex; flex-direction: column; align-items: center; }
+  .hub-chat-panel { max-width: none; width: 100%; }
+  #hub.page { height: calc(100vh - var(--topbar-h) - 1rem); }
 }
 
 @media (max-width: 480px) {
