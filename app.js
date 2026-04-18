@@ -194,26 +194,29 @@ const TONE_MOD = {
   neutral:  { hShift:  0, lShift:  0, sat: 55 },
 };
 
-function applyContour(el, charKey, toneClass, subtextStrength) {
-  const hue     = CHAR_HUE[charKey] ?? 260;
-  const mod     = TONE_MOD[toneClass] || TONE_MOD.neutral;
+function applyContour(el, charKey, toneClass = "neutral", subtextStrength = 0) {
+  const hue = CHAR_HUE[charKey] ?? 260;
+  const mod = TONE_MOD[toneClass] || TONE_MOD.neutral;
+
   const baseHue = hue + mod.hShift;
   const sat     = mod.sat;
   const light   = 62 + mod.lShift;
+  const strength = Math.max(0, Math.min(1, Number(subtextStrength) || 0));
 
-  // Intensity drives border opacity and glow spread
-  const intensity = 0.28 + subtextStrength * 0.52;   // 0.28 – 0.80
-  const glowAlpha = 0.06 + subtextStrength * 0.18;   // 0.06 – 0.24
-  const glowSpread = 2 + subtextStrength * 6;         // 2px – 8px
+  const borderAlpha      = 0.48 + strength * 0.20;
+  const glowAlpha        = 0.14 + strength * 0.10;
+  const glowStrongAlpha  = 0.20 + strength * 0.12;
+  const fillAlpha        = 0.02 + strength * 0.015;
 
-  const borderColor = `hsla(${baseHue}, ${sat}%, ${light}%, ${intensity})`;
-  const glowColor   = `hsla(${baseHue}, ${sat}%, ${light}%, ${glowAlpha})`;
-
-  el.style.borderColor  = borderColor;
-  el.style.borderWidth  = "1px";
-  el.style.borderStyle  = "solid";
-  el.style.boxShadow    = `0 0 ${glowSpread}px ${glowColor}, inset 0 0 ${glowSpread * 0.5}px ${glowColor}`;
-  el.style.background   = `hsla(${baseHue}, ${sat * 0.4}%, 10%, 0.12)`;
+  el.style.setProperty("--msg-hue-a",            `${baseHue - 22}`);
+  el.style.setProperty("--msg-hue-b",            `${baseHue}`);
+  el.style.setProperty("--msg-hue-c",            `${baseHue + 28}`);
+  el.style.setProperty("--msg-sat",              `${sat}%`);
+  el.style.setProperty("--msg-light",            `${light}%`);
+  el.style.setProperty("--msg-border-alpha",     `${borderAlpha}`);
+  el.style.setProperty("--msg-glow-alpha",       `${glowAlpha}`);
+  el.style.setProperty("--msg-glow-strong-alpha",`${glowStrongAlpha}`);
+  el.style.setProperty("--msg-fill-alpha",       `${fillAlpha}`);
 }
 
 function nowClock() {
@@ -296,6 +299,7 @@ function focusContact(contactKey) {
   renderPresenceStack();
   renderContactsPage();
   renderHub();
+  renderHubChat();
   renderInbox();
   syncAvatarRings();
 }
@@ -333,9 +337,10 @@ async function sendMessage(contactKey, text) {
       body: JSON.stringify({ text: text.trim() }),
     });
     const data = await res.json();
-    reply          = data.ok ? data.reply : null;
-    toneClass      = data.toneClass || 'neutral';
-    subtextStrength = data.subtextStrength ?? 0;
+    reply = data?.ok ? data.reply : null;
+    const meta = data?.meta || {};
+    toneClass = meta?.toneClass || 'neutral';
+    subtextStrength = typeof meta?.subtextStrength === 'number' ? meta.subtextStrength : 0;
   } catch {
     reply = null;
     toneClass = 'neutral';
@@ -351,6 +356,7 @@ async function sendMessage(contactKey, text) {
     time: nowClock(),
     toneClass,
     subtextStrength,
+    char: contactKey,
   });
 
   const rel = getRelationship(contactKey);
@@ -368,6 +374,7 @@ async function sendMessage(contactKey, text) {
   }
 
   renderHub();
+  renderHubChat();
   renderContactsPage();
   renderInbox();
   syncAvatarRings();
@@ -624,6 +631,8 @@ function renderInbox() {
       bubble.dataset.char    = contactKey;
       bubble.dataset.tone    = message.toneClass || "neutral";
       bubble.dataset.subtext = String(message.subtextStrength ?? 0);
+      // expose numeric subtext to CSS and apply JS contour for fine control
+      bubble.style.setProperty('--subtext', String(message.subtextStrength ?? 0));
       applyContour(bubble, contactKey, message.toneClass || "neutral", message.subtextStrength ?? 0);
     }
 
@@ -693,6 +702,69 @@ dmForm?.addEventListener("submit", (event) => {
 });
 
 // ---------------------------------------------------------
+// HUB CHAT
+// ---------------------------------------------------------
+
+const hubChatThread = document.getElementById("hubChatThread");
+const hubChatForm   = document.getElementById("hubChatForm");
+const hubChatInput  = document.getElementById("hubChatInput");
+const hubFocusRing  = document.getElementById("hubFocusRing");
+
+function renderHubChat() {
+  const contactKey = appState.activeContact;
+  const contact    = characterDirectory[contactKey];
+  if (!contact || !hubChatThread) return;
+
+  // Update header
+  const nameEl   = document.getElementById("sceneFocusName");
+  const statusEl = document.getElementById("hubSceneTitle");
+  if (nameEl)   nameEl.textContent = contact.name;
+  if (statusEl) statusEl.textContent = getStateLabel(getRelationship(contactKey).state);
+
+  if (hubFocusRing) {
+    hubFocusRing.dataset.char      = contactKey;
+    hubFocusRing.dataset.ringState = ringStateMap[getRelationship(contactKey).state] || "locked";
+    const avatarEl = hubFocusRing.querySelector(".avatar");
+    if (avatarEl) {
+      avatarEl.className = `avatar avatar-${contactKey}`;
+      avatarEl.textContent = contact.avatar;
+    }
+  }
+
+  // Render last 8 messages
+  hubChatThread.innerHTML = "";
+  const msgs = contact.messages.slice(-8);
+  msgs.forEach((message, i) => {
+    const bubble = document.createElement("div");
+    const latest = i === msgs.length - 1;
+    bubble.className = [
+      "chat-bubble",
+      message.side,
+      latest ? "is-latest" : "",
+      message.typing ? "typing" : "",
+    ].filter(Boolean).join(" ");
+
+    if (message.side === "incoming") {
+      applyContour(bubble, contactKey, message.toneClass || "neutral", message.subtextStrength ?? 0);
+    }
+
+    bubble.innerHTML = `<p>${escapeHtml(message.text)}</p>${message.typing ? "" : `<time>${escapeHtml(message.time)}</time>`}`;
+    hubChatThread.appendChild(bubble);
+  });
+
+  hubChatThread.scrollTop = hubChatThread.scrollHeight;
+}
+
+hubChatForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = hubChatInput?.value.trim();
+  if (!text) return;
+  hubChatInput.value = "";
+  await sendMessage(appState.activeContact, text);
+  renderHubChat();
+});
+
+// ---------------------------------------------------------
 // INIT
 // ---------------------------------------------------------
 
@@ -703,6 +775,7 @@ function init() {
   renderPresenceStack();
   renderContactsPage();
   renderHub();
+  renderHubChat();
   renderInbox();
   syncAvatarRings();
 }

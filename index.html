@@ -201,56 +201,47 @@
               </div>
             </aside>
 
-            <!-- RIGHT: Glass chat / focus panel -->
-            <div class="hub-focus-panel">
-              <div class="hub-focus-inner">
+            <!-- RIGHT: Live chat panel -->
+            <div class="hub-chat-panel">
 
-                <!-- Top: identity bar -->
-                <div class="hub-focus-head">
-                  <div class="hub-focus-identity">
-                    <div class="avatar-ring" data-char="hazel" data-ring-state="invited" id="hubFocusRing">
-                      <div class="avatar avatar-hazel" id="sceneFocusAvatar">H</div>
-                    </div>
-                    <div>
-                      <strong class="hub-focus-name" id="sceneFocusName">Hazel</strong>
-                      <p class="hub-focus-status" id="hubSceneTitle">PULL ACTIVE</p>
-                    </div>
+              <!-- Chat header -->
+              <div class="hub-chat-head">
+                <div class="hub-chat-identity">
+                  <div class="avatar-ring" data-char="hazel" data-ring-state="invited" id="hubFocusRing">
+                    <div class="avatar avatar-hazel" id="sceneFocusAvatar">H</div>
                   </div>
-                  <div class="hub-focus-actions">
-                    <button type="button" class="btn btn-primary" id="hubEnterFocusedBtn">OPEN THREAD</button>
-                    <button type="button" class="btn btn-ghost" id="quickOpenThreadBtn">CONTINUE IN DMs</button>
+                  <div>
+                    <strong class="hub-chat-name" id="sceneFocusName">Hazel</strong>
+                    <p class="hub-chat-status" id="hubSceneTitle">PULL ACTIVE</p>
                   </div>
                 </div>
-
-                <!-- Body: scene copy -->
-                <div class="hub-focus-body">
-                  <p class="hub-focus-kicker">PRIVATE — INVITE ONLY</p>
-                  <p class="hub-focus-copy" id="hubSceneCopy">Watch the grid shift, then choose where to go private.</p>
-                  <p class="hub-focus-note" id="sceneFocusPreview">Still holding the thread.</p>
+                <div class="hub-chat-actions">
+                  <button type="button" class="btn btn-ghost btn-small" id="quickViewRouteBtn" data-nav="routes">MAP</button>
+                  <button type="button" class="btn btn-primary btn-small" id="hubEnterFocusedBtn">FULL THREAD</button>
                 </div>
-
-                <!-- Spotlight panel -->
-                <div class="hub-spotlight-row">
-                  <div class="hub-spotlight-meta">
-                    <span class="sys-label">ACTIVE PULL</span>
-                    <p class="spotlight-copy" id="spotlightCopy">She makes the room feel like you were expected.</p>
-                    <div class="spotlight-tags" id="spotlightTags"></div>
-                  </div>
-                  <div class="hub-spotlight-actions">
-                    <div id="spotlightAvatar" class="avatar avatar-hazel hub-hidden"></div>
-                    <span id="spotlightName" class="hub-hidden"></span>
-                    <span id="spotlightStatus" class="hub-hidden"></span>
-                    <button type="button" class="btn btn-ghost btn-small" id="spotlightOpenBtn">OPEN PRIVATE</button>
-                    <button type="button" class="btn btn-ghost btn-small" id="quickViewRouteBtn" data-nav="routes">SIGNAL MAP</button>
-                  </div>
-                </div>
-
-                <!-- Signal bar at bottom -->
-                <div class="hub-focus-footer">
-                  <div class="main-activity-strip" id="mainActivityStrip"></div>
-                  <div class="hub-enc-note">END-TO-END ENCRYPTED · GRID PRIVATE NETWORK</div>
-                </div>
+                <!-- hidden els JS still references -->
+                <div id="hubSceneCopy" class="hub-hidden"></div>
+                <div id="sceneFocusPreview" class="hub-hidden"></div>
+                <div id="spotlightCopy" class="hub-hidden"></div>
+                <div id="spotlightTags" class="hub-hidden"></div>
+                <div id="spotlightAvatar" class="hub-hidden"></div>
+                <span id="spotlightName" class="hub-hidden"></span>
+                <span id="spotlightStatus" class="hub-hidden"></span>
+                <button type="button" id="spotlightOpenBtn" class="hub-hidden" aria-hidden="true" title="Open private">x</button>
+                <button type="button" id="quickOpenThreadBtn" class="hub-hidden" aria-hidden="true" title="Continue DMs">x</button>
+                <div id="mainActivityStrip" class="hub-hidden"></div>
               </div>
+
+              <!-- Message thread -->
+              <div class="hub-chat-thread" id="hubChatThread"></div>
+
+              <!-- Composer -->
+              <form class="hub-chat-compose" id="hubChatForm">
+                <input type="text" id="hubChatInput" class="hub-chat-input" placeholder="Transmit…" autocomplete="off" />
+                <button type="submit" class="hub-chat-send" aria-label="Send">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </form>
             </div>
 
           </div>
