@@ -165,19 +165,20 @@ h3 {
 
 /* ── Topbar ── */
 .topbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: min(calc(100% - 1rem), var(--max));
-  margin: 0.6rem auto 0;
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
+  position: fixed;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: min(calc(100% - 1.5rem), var(--max));
+  border-radius: 10px;
+  padding: 0.45rem 0.9rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   border-color: var(--border-hot);
-  box-shadow: 0 0 0 1px rgba(0,245,255,0.06), var(--shadow);
+  box-shadow: 0 0 0 1px rgba(0,245,255,0.08), 0 4px 24px rgba(0,0,0,0.55);
 }
 
 .brand {
@@ -257,15 +258,25 @@ h3 {
 
 .menu-toggle span { width: 16px; height: 1.5px; background: var(--text); border-radius: 999px; }
 
-.page-stack { position: relative; z-index: 1; }
+.page-stack { position: relative; z-index: 1; padding-top: calc(var(--topbar-h) + 1rem); }
 
 .page {
   display: none;
-  min-height: calc(100vh - 80px);
-  padding: 1.25rem 0 4rem;
+  min-height: calc(100vh - var(--topbar-h) - 1.5rem);
+  padding: 0.75rem 0 2rem;
 }
 
 .page.active { display: block; }
+
+/* Hub is a fixed-height viewport panel — no vertical scroll, fills below topbar */
+#hub.page {
+  height: calc(100vh - var(--topbar-h) - 1.5rem);
+  min-height: unset;
+  padding: 0;
+  overflow: hidden;
+  display: none;
+}
+#hub.page.active { display: flex; flex-direction: column; }
 .section-space { padding-top: 0.75rem; }
 
 .page-title-row {
@@ -669,7 +680,8 @@ h3 {
   flex-direction: column;
   isolation: isolate;
   overflow: hidden;
-  padding: 1rem 1rem 1.25rem;
+  padding: 0.6rem 0.75rem 0.75rem;
+  min-height: 0;
 }
 
 /* Stars / alive sky */
@@ -779,9 +791,10 @@ h3 {
   z-index: 2;
   flex: 1;
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 0.65rem;
   align-items: stretch;
+  min-height: 0;
 }
 
 /* ── SIDEBAR ── */
@@ -1385,7 +1398,7 @@ h3 {
 }
 
 @media (max-width: 760px) {
-  .topbar { border-radius: 8px; flex-wrap: wrap; align-items: flex-start; }
+  .topbar { top: 0.35rem; border-radius: 8px; flex-wrap: wrap; align-items: flex-start; }
   .menu-toggle { display: inline-flex; }
   .nav { width: 100%; display: none; flex-direction: column; align-items: stretch; padding-top: 0.25rem; }
   .nav.open { display: flex; }
