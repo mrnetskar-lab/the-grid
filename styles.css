@@ -665,13 +665,6 @@ h3 {
    HUB V2 — Glass communication world
    ══════════════════════════════════════════ */
 
-/* Page takes full viewport height, no scroll */
-#hub.page {
-  padding: 0;
-  min-height: calc(100vh - var(--topbar-h));
-  display: flex;
-  flex-direction: column;
-}
 
 .hub-v2 {
   position: relative;
