@@ -272,7 +272,7 @@ function pushSignalEvent(text) {
   }
 }
 
-function sendMessage(contactKey, text) {
+async function sendMessage(contactKey, text) {
   const contact = characterDirectory[contactKey];
   if (!contact || !text.trim()) return;
 
@@ -282,41 +282,50 @@ function sendMessage(contactKey, text) {
     time: nowClock(),
   });
 
+  // Typing indicator
+  contact.messages.push({ side: "incoming", text: "...", time: "", typing: true });
   renderInbox();
 
-  window.setTimeout(() => {
-    const replyMap = {
-      nina: "Then stay with me for a second.",
-      hazel: "Closer. But you're still protecting the sentence.",
-      iris: "Don't explain it yet. Just hold it in words.",
-      vale: "Less hesitation.",
-    };
-
-    contact.messages.push({
-      side: "incoming",
-      text: replyMap[contactKey] || "I'm still here.",
-      time: nowClock(),
+  let reply;
+  try {
+    const res = await fetch(`/api/characters/${contactKey}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text.trim() }),
     });
+    const data = await res.json();
+    reply = data.ok ? data.reply : null;
+  } catch {
+    reply = null;
+  }
 
-    const rel = getRelationship(contactKey);
-    rel.memory = Math.min(1, rel.memory + 0.04);
-    rel.pull = Math.min(1, rel.pull + 0.05);
+  // Remove typing indicator
+  contact.messages = contact.messages.filter((m) => !m.typing);
 
-    if (rel.pull > 0.75 && rel.state === "warming") {
-      rel.state = "pull-active";
-      pushSignalEvent(`${contact.name} moved closer`);
-    }
+  contact.messages.push({
+    side: "incoming",
+    text: reply || "...",
+    time: nowClock(),
+  });
 
-    if (rel.pull > 0.9 && rel.state === "pull-active") {
-      rel.state = "opening";
-      pushSignalEvent(`${contact.name} opened something shared`);
-    }
+  const rel = getRelationship(contactKey);
+  rel.memory = Math.min(1, rel.memory + 0.04);
+  rel.pull = Math.min(1, rel.pull + 0.05);
 
-    renderHub();
-    renderContactsPage();
-    renderInbox();
-    syncAvatarRings();
-  }, 900);
+  if (rel.pull > 0.75 && rel.state === "warming") {
+    rel.state = "pull-active";
+    pushSignalEvent(`${contact.name} moved closer`);
+  }
+
+  if (rel.pull > 0.9 && rel.state === "pull-active") {
+    rel.state = "opening";
+    pushSignalEvent(`${contact.name} opened something shared`);
+  }
+
+  renderHub();
+  renderContactsPage();
+  renderInbox();
+  syncAvatarRings();
 }
 
 // ---------------------------------------------------------
@@ -559,10 +568,10 @@ function renderInbox() {
     const bubble = document.createElement("div");
     const latest = index === contact.messages.length - 1;
 
-    bubble.className = `chat-bubble ${message.side}${latest ? " is-latest" : ""}`;
+    bubble.className = `chat-bubble ${message.side}${latest ? " is-latest" : ""}${message.typing ? " typing" : ""}`;
     bubble.innerHTML = `
       <p>${escapeHtml(message.text)}</p>
-      <time>${escapeHtml(message.time)}</time>
+      ${message.typing ? "" : `<time>${escapeHtml(message.time)}</time>`}
     `;
     dmThread.appendChild(bubble);
   });

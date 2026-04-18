@@ -810,6 +810,7 @@ h3 {
 .chat-bubble p { margin: 0 0 0.1rem; }
 .chat-bubble time { display: block; font-size: 0.68rem; opacity: 0.45; margin-top: 0.25rem; text-align: right; }
 .chat-bubble.incoming time { text-align: left; }
+.chat-bubble.typing { opacity: 0.5; font-style: italic; letter-spacing: 0.1em; }
 
 .channel-typing { display: flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.15rem; flex-shrink: 0; }
 .channel-typing.hidden { display: none; }
