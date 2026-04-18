@@ -1,4 +1,4 @@
-// GRID — clean rewrite
+// GRID – clean rewrite
 // Relationship-first, contacts-based, invite/opening aware UI
 
 // ---------------------------------------------------------
@@ -10,6 +10,10 @@ const characterDirectory = {
     key: "nina",
     name: "Nina",
     avatar: "N",
+    hue: 14,
+    route: "THE RETURN",
+    img: "profile_pictures/nina_profile.png",
+    whisper: "Still holding the thread, years later.",
     status: "ONLINE",
     preview: "Still holding the thread.",
     mood: "Warm signal. Pulls you back.",
@@ -25,6 +29,10 @@ const characterDirectory = {
     key: "hazel",
     name: "Hazel",
     avatar: "H",
+    hue: 38,
+    route: "AFTER THE PAUSE",
+    img: "profile_pictures/hazel.png",
+    whisper: "Notices everything. Gives nothing for free.",
     status: "OBSERVANT",
     preview: "You disappeared too early.",
     mood: "Precise. Watching.",
@@ -40,6 +48,10 @@ const characterDirectory = {
     key: "iris",
     name: "Iris",
     avatar: "I",
+    hue: 275,
+    route: "LOW SIGNAL",
+    img: "profile_pictures/iris_profile.png",
+    whisper: "Listens more than she speaks. Hears everything.",
     status: "LISTENING",
     preview: "Only clear in private.",
     mood: "Quiet. Slow. Intimate.",
@@ -55,6 +67,10 @@ const characterDirectory = {
     key: "vale",
     name: "Vale",
     avatar: "V",
+    hue: 186,
+    route: "BRIEF WINDOW",
+    img: "profile_pictures/vale_profile.png",
+    whisper: "Brief windows. Intense. Then gone.",
     status: "UNSTABLE",
     preview: "Open briefly. Then gone.",
     mood: "Brief windows. No comfort.",
@@ -302,6 +318,51 @@ function focusContact(contactKey) {
   renderHubChat();
   renderInbox();
   syncAvatarRings();
+
+  // Fire an AI greeting when switching to a character in hub with no prior exchange
+  const contact = characterDirectory[contactKey];
+  const hasUserMessages = contact.messages.some((m) => m.side === "outgoing");
+  if (!hasUserMessages && appState.page === "hub") {
+    triggerCharacterGreeting(contactKey);
+  }
+}
+
+async function triggerCharacterGreeting(contactKey) {
+  const contact = characterDirectory[contactKey];
+  if (!contact) return;
+
+  // Show typing indicator
+  contact.messages.push({ side: "incoming", text: "...", time: "", typing: true });
+  renderHubChat();
+
+  let reply = null, toneClass = "neutral", subtextStrength = 0;
+  try {
+    const res = await fetch(`/api/characters/${contactKey}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: "__greeting__" }),
+    });
+    const data = await res.json();
+    if (data?.ok) {
+      reply = data.reply;
+      toneClass = data.meta?.toneClass || "neutral";
+      subtextStrength = data.meta?.subtextStrength || 0;
+    }
+  } catch { /* silent fallback */ }
+
+  contact.messages = contact.messages.filter((m) => !m.typing);
+  if (reply) {
+    contact.messages.push({
+      side: "incoming",
+      text: reply,
+      time: nowClock(),
+      toneClass,
+      subtextStrength,
+      char: contactKey,
+    });
+  }
+  renderHubChat();
+  renderInbox();
 }
 
 function pushSignalEvent(text) {
@@ -631,7 +692,6 @@ function renderInbox() {
       bubble.dataset.char    = contactKey;
       bubble.dataset.tone    = message.toneClass || "neutral";
       bubble.dataset.subtext = String(message.subtextStrength ?? 0);
-      // expose numeric subtext to CSS and apply JS contour for fine control
       bubble.style.setProperty('--subtext', String(message.subtextStrength ?? 0));
       applyContour(bubble, contactKey, message.toneClass || "neutral", message.subtextStrength ?? 0);
     }
@@ -715,18 +775,46 @@ function renderHubChat() {
   const contact    = characterDirectory[contactKey];
   if (!contact || !hubChatThread) return;
 
+  const rel = getRelationship(contactKey);
+
   // Update header
   const nameEl   = document.getElementById("sceneFocusName");
   const statusEl = document.getElementById("hubSceneTitle");
   if (nameEl)   nameEl.textContent = contact.name;
-  if (statusEl) statusEl.textContent = getStateLabel(getRelationship(contactKey).state);
+  if (statusEl) statusEl.textContent = getStateLabel(rel.state);
+
+  // — NIGHT STUDIO HERO —
+  const head       = document.getElementById("hubChatHead");
+  const routeEl    = document.getElementById("hubFocusRoute");
+  const whisperEl  = document.getElementById("hubFocusWhisper");
+  const imgEl      = document.getElementById("hubFocusImg");
+  const typingEl   = document.getElementById("hubFocusTyping");
+  const idleEl     = document.getElementById("hubFocusIdle");
+
+  if (head && contact.hue != null) {
+    head.style.setProperty("--channel-hue", String(contact.hue));
+    const panel = head.closest(".hub-chat-panel");
+    if (panel) panel.style.setProperty("--channel-hue", String(contact.hue));
+  }
+  if (routeEl)   routeEl.textContent   = contact.route || "";
+  if (whisperEl) whisperEl.textContent = contact.whisper || "";
+  if (imgEl && contact.img) {
+    if (!imgEl.getAttribute("src") || !imgEl.getAttribute("src").endsWith(contact.img)) {
+      imgEl.src = contact.img;
+    }
+    imgEl.alt = contact.name;
+  }
+
+  const isTyping = contact.messages.some((m) => m.typing);
+  if (typingEl) typingEl.style.display = isTyping ? "inline-flex" : "none";
+  if (idleEl)   idleEl.style.display   = isTyping ? "none" : "inline";
 
   if (hubFocusRing) {
     hubFocusRing.dataset.char      = contactKey;
-    hubFocusRing.dataset.ringState = ringStateMap[getRelationship(contactKey).state] || "locked";
+    hubFocusRing.dataset.ringState = ringStateMap[rel.state] || "locked";
     const avatarEl = hubFocusRing.querySelector(".avatar");
     if (avatarEl) {
-      avatarEl.className = `avatar avatar-${contactKey}`;
+      avatarEl.className = `avatar avatar-${contactKey} hub-hidden`;
       avatarEl.textContent = contact.avatar;
     }
   }
@@ -811,13 +899,13 @@ window.addEventListener("DOMContentLoaded", init);
   lb.addEventListener("click", (e) => { if (e.target === lb) closeLb(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && lb.getAttribute("aria-hidden") === "false") closeLb(); });
 
-  // MESSAGE buttons on profile cards → navigate to inbox with correct contact
+  // MESSAGE buttons on profile cards — navigate to inbox with correct contact
   document.querySelectorAll(".profile-card .btn[data-contact]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const contact = btn.dataset.contact;
       if (contact) {
         focusContact(contact);
-        navigateTo("inbox");
+        setActivePage("inbox");
       }
     });
   });
