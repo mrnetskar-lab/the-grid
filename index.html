@@ -30,7 +30,6 @@
       <nav id="primaryNav" class="nav" aria-label="Primary navigation">
         <button class="nav-link active" data-nav="home">HOME</button>
         <button class="nav-link" data-nav="hub">HUB</button>
-        <button class="nav-link" data-nav="rooms">CONTACTS</button>
         <button class="nav-link" data-nav="inbox">INBOX</button>
         <button class="nav-link" data-nav="routes">SIGNAL MAP</button>
       </nav>
@@ -121,155 +120,139 @@
         </div>
       </section>
 
-      <!-- HUB -->
+      <!-- HUB V2 -->
       <section id="hub" class="page" data-page="hub">
-        <div class="container section-space">
-          <div class="hub-header">
-            <div class="hub-header-left">
-              <span class="sys-label">LIVE NETWORK STATE</span>
-              <h2 class="hub-title">HUB</h2>
-            </div>
-            <div class="hub-quick-actions">
-              <button class="btn btn-small" id="quickOpenThreadBtn">CONTINUE IN DMs</button>
-              <button class="btn btn-small" id="quickViewRouteBtn" data-nav="routes">SIGNAL MAP</button>
-              <button class="btn btn-small" data-nav="rooms">CONTACTS</button>
-            </div>
-            <div class="hub-status-cluster">
-              <span class="pill" id="hubNodesPill">12 nodes</span>
-              <span class="pill" id="hubRoomsPill">4 rooms locked</span>
-              <span class="pulse-pill" id="inviteStatusPill">warming</span>
-            </div>
-          </div>
+        <div class="hub-v2">
 
-          <div class="hub-shell">
-            <!-- Left rail: NODES + SIGNAL LOG -->
-            <aside class="hub-rail glass">
-              <div class="hub-block">
-                <div class="hub-block-head">
-                  <span class="sys-label">NODES</span>
-                  <span class="subtle">who is close</span>
-                </div>
-                <div class="presence-stack" id="presenceStack">
-                  <button class="presence-card glass" data-room="nina">
-                    <div class="presence-top">
-                      <div class="avatar-ring" data-char="nina" data-ring-state="warming">
-                        <div class="avatar avatar-nina">N</div>
-                      </div>
+          <!-- Background layers -->
+          <div class="hub-stars" aria-hidden="true"></div>
+          <div class="hub-edge-glow" aria-hidden="true"></div>
+          <div class="hub-rail-left" aria-hidden="true"></div>
+          <div class="hub-rail-right" aria-hidden="true"></div>
+          <div class="hub-top-soft" aria-hidden="true"></div>
+
+          <!-- Inner world -->
+          <div class="hub-world">
+
+            <!-- LEFT: Contacts sidebar -->
+            <aside class="hub-sidebar">
+              <div class="hub-sidebar-head">
+                <span class="sys-label">NODES</span>
+                <span class="hub-node-count" id="hubNodeCount">4</span>
+              </div>
+
+              <div class="presence-stack" id="presenceStack">
+                <button type="button" class="presence-card" data-room="nina">
+                  <div class="presence-card-inner">
+                    <div class="avatar-ring" data-char="nina" data-ring-state="warming">
+                      <div class="avatar avatar-nina">N</div>
+                    </div>
+                    <div class="presence-info">
+                      <strong class="presence-name">Nina</strong>
                       <span class="node-sig sig-online">ONLINE</span>
                     </div>
-                    <strong>Nina</strong>
-                    <p class="subtle">Still holding the thread.</p>
-                  </button>
-                  <button class="presence-card glass" data-room="hazel">
-                    <div class="presence-top">
-                      <div class="avatar-ring" data-char="hazel" data-ring-state="locked">
-                        <div class="avatar avatar-hazel">H</div>
-                      </div>
+                  </div>
+                  <p class="presence-note">Still holding the thread.</p>
+                </button>
+
+                <button type="button" class="presence-card" data-room="hazel">
+                  <div class="presence-card-inner">
+                    <div class="avatar-ring" data-char="hazel" data-ring-state="locked">
+                      <div class="avatar avatar-hazel">H</div>
+                    </div>
+                    <div class="presence-info">
+                      <strong class="presence-name">Hazel</strong>
                       <span class="node-sig sig-away">OBSERVANT</span>
                     </div>
-                    <strong>Hazel</strong>
-                    <p class="subtle">You disappeared too early.</p>
-                  </button>
-                  <button class="presence-card glass" data-room="iris">
-                    <div class="presence-top">
-                      <div class="avatar-ring" data-char="iris" data-ring-state="warming">
-                        <div class="avatar avatar-iris">I</div>
-                      </div>
+                  </div>
+                  <p class="presence-note">You disappeared too early.</p>
+                </button>
+
+                <button type="button" class="presence-card" data-room="iris">
+                  <div class="presence-card-inner">
+                    <div class="avatar-ring" data-char="iris" data-ring-state="warming">
+                      <div class="avatar avatar-iris">I</div>
+                    </div>
+                    <div class="presence-info">
+                      <strong class="presence-name">Iris</strong>
                       <span class="node-sig sig-online">LISTENING</span>
                     </div>
-                    <strong>Iris</strong>
-                    <p class="subtle">Only clear in private.</p>
-                  </button>
-                  <button class="presence-card glass" data-room="vale">
-                    <div class="presence-top">
-                      <div class="avatar-ring" data-char="vale" data-ring-state="locked">
-                        <div class="avatar avatar-vale">V</div>
-                      </div>
+                  </div>
+                  <p class="presence-note">Only clear in private.</p>
+                </button>
+
+                <button type="button" class="presence-card" data-room="vale">
+                  <div class="presence-card-inner">
+                    <div class="avatar-ring" data-char="vale" data-ring-state="locked">
+                      <div class="avatar avatar-vale">V</div>
+                    </div>
+                    <div class="presence-info">
+                      <strong class="presence-name">Vale</strong>
                       <span class="node-sig sig-unstable">UNSTABLE</span>
                     </div>
-                    <strong>Vale</strong>
-                    <p class="subtle">Open briefly. Then gone.</p>
-                  </button>
-                </div>
+                  </div>
+                  <p class="presence-note">Open briefly. Then gone.</p>
+                </button>
               </div>
-              <div class="hub-block">
-                <div class="hub-block-head">
-                  <span class="sys-label">SIGNAL LOG</span>
-                  <span class="subtle">live motion</span>
-                </div>
+
+              <div class="hub-signal-log">
+                <span class="sys-label">SIGNAL LOG</span>
                 <div class="signal-feed" id="signalFeed" aria-live="polite"></div>
               </div>
             </aside>
 
-            <!-- Center: open channel -->
-            <section class="hub-main glass">
-              <div class="hub-main-head">
-                <div>
-                  <span class="sys-label">ACTIVE PULL</span>
-                  <h3 id="hubSceneTitle" class="hub-main-title">The network is awake.</h3>
-                </div>
-                <div class="main-presence">
-                  <span class="node-sig sig-away">warming</span>
-                </div>
-              </div>
-              <div class="main-scene">
-                <div class="main-scene-copy">
-                  <p class="main-scene-kicker">PRIVATE CONNECTIONS — INVITE ONLY</p>
-                  <p id="hubSceneCopy" class="hub-scene-body">Watch the grid shift, then choose where to go private.</p>
-                  <div class="main-scene-actions">
-                    <button class="btn btn-primary" id="hubEnterFocusedBtn">CONTINUE PRIVATE CHAT</button>
-                    <button class="btn btn-ghost" data-nav="rooms">CONTACTS</button>
-                  </div>
-                </div>
-                <div class="main-scene-visual">
-                  <div class="scene-orbit">
-                    <span class="scene-node scene-node-a"></span>
-                    <span class="scene-node scene-node-b"></span>
-                    <span class="scene-node scene-node-c"></span>
-                    <span class="scene-node scene-node-d"></span>
-                    <div class="scene-focus-card glass" id="sceneFocusCard">
-                      <div class="avatar avatar-nina" id="sceneFocusAvatar">N</div>
-                      <div>
-                        <strong id="sceneFocusName">Nina</strong>
-                        <p id="sceneFocusPreview">Still holding the thread.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="hub-main-footer">
-                <div class="main-activity-strip" id="mainActivityStrip"></div>
-              </div>
-            </section>
+            <!-- RIGHT: Glass chat / focus panel -->
+            <div class="hub-focus-panel">
+              <div class="hub-focus-inner">
 
-            <!-- Right rail: ACTIVE PULL + LIVE ROUTES -->
-            <aside class="hub-spotlight glass">
-              <div class="hub-block">
-                <div class="hub-block-head">
-                  <span class="sys-label">ACTIVE PULL</span>
-                  <span class="subtle">selected node</span>
-                </div>
-                <div class="spotlight-card" id="spotlightCard">
-                  <div class="spotlight-top">
-                    <div class="avatar avatar-nina" id="spotlightAvatar">N</div>
+                <!-- Top: identity bar -->
+                <div class="hub-focus-head">
+                  <div class="hub-focus-identity">
+                    <div class="avatar-ring" data-char="hazel" data-ring-state="invited" id="hubFocusRing">
+                      <div class="avatar avatar-hazel" id="sceneFocusAvatar">H</div>
+                    </div>
                     <div>
-                      <strong id="spotlightName">Nina</strong>
-                      <p id="spotlightStatus" class="subtle">online now</p>
+                      <strong class="hub-focus-name" id="sceneFocusName">Hazel</strong>
+                      <p class="hub-focus-status" id="hubSceneTitle">PULL ACTIVE</p>
                     </div>
                   </div>
-                  <p class="spotlight-copy" id="spotlightCopy">She makes the room feel like you were expected.</p>
-                  <div class="spotlight-tags" id="spotlightTags"></div>
-                  <button class="btn btn-primary btn-full" id="spotlightOpenBtn">CONTINUE IN DMs</button>
+                  <div class="hub-focus-actions">
+                    <button type="button" class="btn btn-primary" id="hubEnterFocusedBtn">OPEN THREAD</button>
+                    <button type="button" class="btn btn-ghost" id="quickOpenThreadBtn">CONTINUE IN DMs</button>
+                  </div>
+                </div>
+
+                <!-- Body: scene copy -->
+                <div class="hub-focus-body">
+                  <p class="hub-focus-kicker">PRIVATE — INVITE ONLY</p>
+                  <p class="hub-focus-copy" id="hubSceneCopy">Watch the grid shift, then choose where to go private.</p>
+                  <p class="hub-focus-note" id="sceneFocusPreview">Still holding the thread.</p>
+                </div>
+
+                <!-- Spotlight panel -->
+                <div class="hub-spotlight-row">
+                  <div class="hub-spotlight-meta">
+                    <span class="sys-label">ACTIVE PULL</span>
+                    <p class="spotlight-copy" id="spotlightCopy">She makes the room feel like you were expected.</p>
+                    <div class="spotlight-tags" id="spotlightTags"></div>
+                  </div>
+                  <div class="hub-spotlight-actions">
+                    <div id="spotlightAvatar" class="avatar avatar-hazel hub-hidden"></div>
+                    <span id="spotlightName" class="hub-hidden"></span>
+                    <span id="spotlightStatus" class="hub-hidden"></span>
+                    <button type="button" class="btn btn-ghost btn-small" id="spotlightOpenBtn">OPEN PRIVATE</button>
+                    <button type="button" class="btn btn-ghost btn-small" id="quickViewRouteBtn" data-nav="routes">SIGNAL MAP</button>
+                  </div>
+                </div>
+
+                <!-- Signal bar at bottom -->
+                <div class="hub-focus-footer">
+                  <div class="main-activity-strip" id="mainActivityStrip"></div>
+                  <div class="hub-enc-note">END-TO-END ENCRYPTED · GRID PRIVATE NETWORK</div>
                 </div>
               </div>
-              <div class="hub-block">
-                <div class="hub-block-head">
-                  <span class="sys-label">LIVE ROUTES</span>
-                  <span class="subtle">unstable pathways</span>
-                </div>
-                <div class="route-rail" id="routeRail"></div>
-              </div>
-            </aside>
+            </div>
+
           </div>
         </div>
       </section>
