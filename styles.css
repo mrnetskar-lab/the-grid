@@ -1564,7 +1564,8 @@ h3 {
   overflow: hidden;
   flex-shrink: 0;
 }
-.profile-card-img img {
+.profile-card-img img,
+.profile-card-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1573,7 +1574,8 @@ h3 {
   filter: saturate(1.05) contrast(1.02);
   transition: transform 0.4s ease;
 }
-.profile-card:hover .profile-card-img img { transform: scale(1.03); }
+.profile-card:hover .profile-card-img img,
+.profile-card:hover .profile-card-video { transform: scale(1.03); }
 
 /* Bottom fade over image */
 .profile-card-img::after {
