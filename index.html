@@ -136,69 +136,72 @@
 
             <!-- LEFT: Contacts sidebar -->
             <aside class="hub-sidebar">
-              <div class="hub-sidebar-head">
-                <span class="sys-label">NODES</span>
-                <span class="hub-node-count" id="hubNodeCount">4</span>
+              <!-- Header -->
+              <h2 class="hub-sidebar-title">CHANNELS</h2>
+
+              <!-- Search -->
+              <label class="hub-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input id="hubSearchInput" type="text" placeholder="Search signals…" autocomplete="off" />
+              </label>
+
+              <!-- Filter chips -->
+              <div class="hub-filters">
+                <button class="hub-chip active" type="button" data-filter="all">ALL</button>
+                <button class="hub-chip" type="button" data-filter="online">ONLINE</button>
               </div>
 
-              <div class="presence-stack" id="presenceStack">
-                <button type="button" class="presence-card" data-room="nina">
-                  <div class="presence-card-inner">
-                    <div class="avatar-ring" data-char="nina" data-ring-state="warming">
-                      <div class="avatar avatar-nina">N</div>
-                    </div>
-                    <div class="presence-info">
-                      <strong class="presence-name">Nina</strong>
-                      <span class="node-sig sig-online">ONLINE</span>
-                    </div>
+              <!-- Contact rows -->
+              <div class="hub-contact-list" id="presenceStack">
+                <button type="button" class="hub-contact-row" data-room="nina">
+                  <div class="hub-contact-avatar avatar-nina-grad">N</div>
+                  <div class="hub-contact-info">
+                    <span class="hub-contact-name">Nina</span>
+                    <span class="hub-contact-preview">Still holding the thread.</span>
                   </div>
-                  <p class="presence-note">Still holding the thread.</p>
+                  <span class="hub-contact-time">ONLINE</span>
+                  <span class="hub-contact-divider"></span>
                 </button>
 
-                <button type="button" class="presence-card" data-room="hazel">
-                  <div class="presence-card-inner">
-                    <div class="avatar-ring" data-char="hazel" data-ring-state="locked">
-                      <div class="avatar avatar-hazel">H</div>
-                    </div>
-                    <div class="presence-info">
-                      <strong class="presence-name">Hazel</strong>
-                      <span class="node-sig sig-away">OBSERVANT</span>
-                    </div>
+                <button type="button" class="hub-contact-row" data-room="hazel">
+                  <div class="hub-contact-avatar avatar-hazel-grad">H</div>
+                  <div class="hub-contact-info">
+                    <span class="hub-contact-name">Hazel</span>
+                    <span class="hub-contact-preview">You disappeared too early.</span>
                   </div>
-                  <p class="presence-note">You disappeared too early.</p>
+                  <span class="hub-contact-time">AWAY</span>
+                  <span class="hub-contact-divider"></span>
                 </button>
 
-                <button type="button" class="presence-card" data-room="iris">
-                  <div class="presence-card-inner">
-                    <div class="avatar-ring" data-char="iris" data-ring-state="warming">
-                      <div class="avatar avatar-iris">I</div>
-                    </div>
-                    <div class="presence-info">
-                      <strong class="presence-name">Iris</strong>
-                      <span class="node-sig sig-online">LISTENING</span>
-                    </div>
+                <button type="button" class="hub-contact-row" data-room="iris">
+                  <div class="hub-contact-avatar avatar-iris-grad">I</div>
+                  <div class="hub-contact-info">
+                    <span class="hub-contact-name">Iris</span>
+                    <span class="hub-contact-preview">Only clear in private.</span>
                   </div>
-                  <p class="presence-note">Only clear in private.</p>
+                  <span class="hub-contact-time">LIVE</span>
+                  <span class="hub-contact-divider"></span>
                 </button>
 
-                <button type="button" class="presence-card" data-room="vale">
-                  <div class="presence-card-inner">
-                    <div class="avatar-ring" data-char="vale" data-ring-state="locked">
-                      <div class="avatar avatar-vale">V</div>
-                    </div>
-                    <div class="presence-info">
-                      <strong class="presence-name">Vale</strong>
-                      <span class="node-sig sig-unstable">UNSTABLE</span>
-                    </div>
+                <button type="button" class="hub-contact-row" data-room="vale">
+                  <div class="hub-contact-avatar avatar-vale-grad">V</div>
+                  <div class="hub-contact-info">
+                    <span class="hub-contact-name">Vale</span>
+                    <span class="hub-contact-preview">Open briefly. Then gone.</span>
                   </div>
-                  <p class="presence-note">Open briefly. Then gone.</p>
+                  <span class="hub-contact-time">UNSTABLE</span>
+                  <span class="hub-contact-divider"></span>
                 </button>
               </div>
 
+              <!-- Signal log at bottom -->
               <div class="hub-signal-log">
                 <span class="sys-label">SIGNAL LOG</span>
                 <div class="signal-feed" id="signalFeed" aria-live="polite"></div>
               </div>
+
+              <!-- hidden count for JS -->
+              <span id="hubNodeCount" class="hub-hidden">4</span>
             </aside>
 
             <!-- RIGHT: Live chat panel -->
