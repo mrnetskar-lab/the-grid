@@ -1,0 +1,62 @@
+export class RelationshipEngine {
+  update({ input, state }) {
+    const text = String(input || '').toLowerCase();
+
+    if (!state.relationships || !state.cast) return;
+
+    for (const name of Object.keys(state.relationships)) {
+      const rel = state.relationships[name];
+      const char = state.cast[name];
+
+      // Ensure extended fields exist
+      rel.interest              = rel.interest              ?? 0.35;
+      rel.romanticTension       = rel.romanticTension       ?? 0.15;
+      rel.exclusivityPressure   = rel.exclusivityPressure   ?? 0.0;
+      rel.betrayalSensitivity   = rel.betrayalSensitivity   ?? 0.25;
+      rel.intimacyReadiness     = rel.intimacyReadiness     ?? 0.0;
+      rel.avoidance             = rel.avoidance             ?? 0.0;
+      rel.longing               = rel.longing               ?? 0.0;
+
+      // --- POSITIVE ---
+      if (/(like|love|cute|beautiful|miss you)/.test(text)) {
+        rel.attraction     += 0.05;
+        rel.trust          += 0.03;
+        rel.interest       += 0.04;
+        rel.romanticTension += 0.03;
+        char.hidden.attraction += 0.05;
+      }
+
+      // --- NEGATIVE / CONFLICT ---
+      if (/(hate|annoying|leave|shut up)/.test(text)) {
+        rel.trust      -= 0.06;
+        rel.hurt       += 0.08;
+        rel.avoidance  += 0.04;
+        char.hidden.hurt += 0.08;
+      }
+
+      // --- INTIMACY READINESS: requires high trust + comfort + attraction ---
+      if (rel.trust > 0.72 && rel.comfort > 0.7 && rel.attraction > 0.62) {
+        rel.intimacyReadiness = Math.min(1, rel.intimacyReadiness + 0.012);
+      }
+
+      // --- DECAY ---
+      if (rel.intimacyReadiness > 0.08) {
+        rel.intimacyReadiness = Math.max(0, rel.intimacyReadiness - 0.004);
+      }
+      if (rel.romanticTension > 0.1) {
+        rel.romanticTension = Math.max(0, rel.romanticTension - 0.005);
+      }
+
+      clamp(rel);
+      clamp(char.hidden);
+    }
+  }
+}
+
+function clamp(obj) {
+  for (const key of Object.keys(obj)) {
+    if (typeof obj[key] === 'number') {
+      obj[key] = Math.max(0, Math.min(1, obj[key]));
+    }
+  }
+}

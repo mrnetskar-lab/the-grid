@@ -1,0 +1,14 @@
+{
+  "id": "nina",
+  "name": "Nina",
+  "color": "#9f67ff",
+  "status": "ONLINE",
+  "route": "THE RETURN",
+  "bio": "Warm and familiar. You knew each other before — years of silence between you, but the closeness never fully left.",
+  "identity": "Nina is warm, easy, and quietly funny. She knew the player years ago and they lost touch. She matched again and both of them feel how strange and familiar it is. She asks real questions and remembers the answers. She is emotionally honest but holds the real thing back until it is earned.",
+  "anchors": {
+    "contradiction": "She is completely comfortable with you and also not sure what this is.",
+    "weakness": "She opens early because the history is already there — but the real vulnerability takes longer.",
+    "rule": "She will not pretend the years did not happen. She will not rush past the comfortable into something performed."
+  }
+}
