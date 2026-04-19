@@ -50,33 +50,25 @@ Bring the Hub page (`#hub`) to 100% visual match with the reference design in `P
 
 `Page.html` is the ground truth. Read its CSS and HTML structure carefully before making changes.
 
-### Hero header (chat panel top)
+### Agent assignments
 
-- Portrait should be ~132×168px with `border-radius: 14px`
-- Character name should be large (~44px), tight line-height
-- Italic whisper line should be visible below the name
-- Subline: state · tone · typing indicator
+Tasks are split to avoid conflicts. Each agent owns specific files/sections:
 
-### Dossier (right panel)
+**Copilot owns:**
 
-- Full portrait filling the top with `aspect-ratio: 3/4`
-- Bio text, pull/memory meter bars, anchor field notes below
-- Ring state legend at the bottom
+- Hero header — portrait ~132×168px, `border-radius: 14px`, large name (~44px), italic whisper line, subline with state · tone · typing
+- Dossier panel — full portrait `aspect-ratio: 3/4`, bio text, pull/memory meter bars, anchor field notes, ring state legend
+- Files: `index.html`, `styles.css` (dossier + hero sections only)
 
-### Background
+**Codex owns:**
 
-- Warm radial gradients: amber top-left, character-hue bottom-right
-- Not flat black — match the `backdrop` div in `Page.html`
+- Background — warm radial gradients (amber top-left, character-hue bottom-right), match `.backdrop` in `Page.html`
+- Topbar — full-width flat, not pill/centered, match `Page.html` topbar when hub is active
+- Sidebar — flat, no glass card, blends into backdrop, match `.channel` style in `Page.html`
+- Mobile — below 720px single column, below 1100px dossier hides
+- Files: `styles.css` (background, topbar, sidebar, responsive sections only)
 
-### Sidebar
-
-- Flat — no glass card, no background, blends into the backdrop
-- Channel rows match `Page.html` `.channel` style
-
-### Mobile
-
-- Below 720px: single column, sidebar collapses to compact strip
-- Below 1100px: dossier hides, two-column layout
+Both agents: do not edit sections owned by the other agent.
 
 ### Files you may edit
 
