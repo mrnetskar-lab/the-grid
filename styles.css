@@ -2106,10 +2106,10 @@ h3 {
 /* Mobile hub: horizontal avatar strip + full-width chat */
 @media (max-width: 600px) {
   :root { --topbar-h: 52px; }
-  .topbar { padding: 0.35rem 0.6rem; }
-  .topbar .topbar-live { display: none; }
-  .hub-world { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  .hub-sidebar {
+  .site-shell:has(#hub.page.active) .topbar { padding: 0.35rem 0.6rem; }
+  .site-shell:has(#hub.page.active) .topbar .topbar-live { display: none; }
+  #hub .hub-world { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  #hub .hub-sidebar {
     order: -1;
     flex-direction: row;
     align-items: center;
@@ -2122,16 +2122,16 @@ h3 {
     overflow-y: hidden;
     background: linear-gradient(180deg, rgba(18,6,26,0.95), rgba(12,4,18,0.95));
   }
-  .hub-sidebar-title { font-size: 0.9rem; margin: 0 4px 0 0; white-space: nowrap; flex-shrink: 0; }
-  .hub-search, .hub-filters { display: none; }
-  .hub-contact-list { flex-direction: row; gap: 6px; align-items: center; overflow-x: auto; overflow-y: hidden; padding: 0; min-height: unset; }
-  .hub-contact-row { flex-direction: column; align-items: center; min-width: 52px; max-width: 52px; padding: 4px; border-radius: 10px; min-height: unset; gap: 2px; }
-  .hub-contact-info, .hub-contact-time, .hub-contact-divider { display: none; }
-  .hub-contact-avatar { width: 40px; height: 40px; font-size: 0.78rem; }
-  .hub-contact-row .hub-contact-name { display: block; font-size: 0.6rem; color: var(--muted); white-space: nowrap; }
-  .hub-contact-info { display: flex; flex-direction: column; align-items: center; }
-  .hub-chat-panel { max-width: none; width: 100%; }
-  #hub.page { height: calc(100vh - var(--topbar-h) - 1rem); }
+  #hub .hub-sidebar-title { font-size: 0.9rem; margin: 0 4px 0 0; white-space: nowrap; flex-shrink: 0; }
+  #hub .hub-search, #hub .hub-filters { display: none; }
+  #hub .hub-contact-list { flex-direction: row; gap: 6px; align-items: center; overflow-x: auto; overflow-y: hidden; padding: 0; min-height: unset; }
+  #hub .hub-contact-row { flex-direction: column; align-items: center; min-width: 52px; max-width: 52px; padding: 4px; border-radius: 10px; min-height: unset; gap: 2px; }
+  #hub .hub-contact-info, #hub .hub-contact-time, #hub .hub-contact-divider { display: none; }
+  #hub .hub-contact-avatar { width: 40px; height: 40px; font-size: 0.78rem; }
+  #hub .hub-contact-row .hub-contact-name { display: block; font-size: 0.6rem; color: var(--muted); white-space: nowrap; }
+  #hub .hub-contact-info { display: flex; flex-direction: column; align-items: center; }
+  #hub .hub-chat-panel { max-width: none; width: 100%; }
+  #hub.page { min-height: calc(100dvh - var(--topbar-h) - 1rem); height: auto; }
 }
 
 @media (max-width: 480px) {
@@ -3726,7 +3726,8 @@ h3 {
   }
 
   #hub.page {
-    height: calc(100vh - 52px);
+    min-height: calc(100dvh - 52px);
+    height: auto;
   }
 
   #hub .hub-reference-shell {
