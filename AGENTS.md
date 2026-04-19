@@ -25,4 +25,6 @@ git log --oneline -3
 
 You may edit `index.html`, `styles.css`, and `app.js`. Use `Page.html` (in the repo root) as the visual and structural reference for the Hub page. Match its layout, markup patterns, and class names where possible.
 
+To push, always use `git push origin HEAD:master` — not `git push origin master` (no local master branch in this environment).
+
 Never force push.
