@@ -2157,3 +2157,208 @@ h3 {
 .hub-chat-input:focus {
   border-color: hsla(var(--channel-hue, 220), 55%, 60%, 0.45) !important;
 }
+
+
+/* ═══════════════════════════════════════════════════════
+   HUB DOSSIER — right panel + 3-column layout + bubble styles
+   ═══════════════════════════════════════════════════════ */
+
+/* 3-column grid: sidebar + chat + dossier */
+.hub-world {
+  grid-template-columns: 260px 1fr 300px !important;
+}
+
+/* ── Dossier panel ── */
+.hub-dossier {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(180deg, rgba(12, 9, 16, 0.97), rgba(9, 7, 12, 0.99));
+  border-left: 1px solid rgba(255, 246, 232, 0.06);
+  scrollbar-width: none;
+}
+.hub-dossier::-webkit-scrollbar { display: none; }
+
+.hd-portrait-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.hd-portrait {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  filter: saturate(0.9) contrast(1.05);
+  transition: opacity 0.6s ease;
+}
+.hd-portrait-shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(9, 7, 12, 0.88) 100%);
+  pointer-events: none;
+}
+
+.hd-identity {
+  padding: 0.9rem 1rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 246, 232, 0.06);
+}
+.hd-eyebrow {
+  margin: 0 0 0.3rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: hsl(var(--channel-hue, 220), 62%, 70%);
+  opacity: 0.9;
+}
+.hd-name {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: rgba(239, 231, 220, 0.95);
+  line-height: 1;
+}
+.hd-bio {
+  margin: 0;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: rgba(239, 231, 220, 0.5);
+  line-height: 1.5;
+}
+
+/* Meters */
+.hd-meters {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 246, 232, 0.06);
+}
+.hd-meter-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 28px;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hd-meter-label {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: rgba(239, 231, 220, 0.4);
+  text-transform: uppercase;
+}
+.hd-meter-track {
+  height: 3px;
+  background: rgba(255, 246, 232, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.hd-meter-bar {
+  height: 100%;
+  width: calc(var(--v, 0) * 100%);
+  background: linear-gradient(90deg,
+    hsl(var(--channel-hue, 220), 50%, 55%),
+    hsl(var(--channel-hue, 220), 70%, 72%));
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+.hd-meter-val {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.6rem;
+  color: rgba(239, 231, 220, 0.45);
+  text-align: right;
+}
+
+/* Anchors */
+.hd-anchors {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  border-bottom: 1px solid rgba(255, 246, 232, 0.06);
+}
+.hd-anchor-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.hd-anchor-key {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--channel-hue, 220), 55%, 65%);
+  opacity: 0.7;
+}
+.hd-anchor-val {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: rgba(239, 231, 220, 0.62);
+  line-height: 1.45;
+}
+
+/* Ring state legend */
+.hd-ring-legend {
+  padding: 0.75rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.hd-legend-title {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(239, 231, 220, 0.35);
+  margin: 0 0 0.3rem;
+}
+.hd-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: rgba(239, 231, 220, 0.45);
+}
+.hd-ring {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  flex-shrink: 0;
+}
+.hd-ring--warming  { color: hsl(38, 65%, 62%);  box-shadow: 0 0 4px hsla(38, 65%, 62%, 0.4); }
+.hd-ring--invited  { color: hsl(275, 65%, 68%); box-shadow: 0 0 6px hsla(275, 65%, 68%, 0.5); }
+.hd-ring--open     { color: hsl(155, 65%, 62%); box-shadow: 0 0 8px hsla(155, 65%, 62%, 0.6); }
+.hd-ring--faded    { color: rgba(239, 231, 220, 0.25); }
+
+/* ── Chat bubbles — outgoing bone-white, incoming contour ── */
+.hub-chat-thread .chat-bubble.outgoing {
+  align-self: flex-end;
+  background: rgba(239, 231, 220, 0.92);
+  color: #1a1218;
+  border: none;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.32);
+}
+.hub-chat-thread .chat-bubble.outgoing time {
+  color: rgba(26, 18, 24, 0.45);
+}
+
+.hub-chat-thread .chat-bubble.incoming {
+  align-self: flex-start;
+  background: hsla(var(--msg-hue-b, 220), var(--msg-sat, 55%), 16%, calc(var(--msg-fill-alpha, 0.04) * 12 + 0.06));
+  border: 1px solid hsla(var(--msg-hue-b, 220), var(--msg-sat, 55%), var(--msg-light, 62%), var(--msg-border-alpha, 0.28));
+  box-shadow:
+    0 0 12px hsla(var(--msg-hue-b, 220), var(--msg-sat, 55%), var(--msg-light, 62%), var(--msg-glow-alpha, 0.10)),
+    inset 0 1px 0 rgba(255, 246, 232, 0.04);
+  color: rgba(239, 231, 220, 0.90);
+}
+
+/* ── Responsive: hide dossier below 1200px ── */
+@media (max-width: 1200px) {
+  .hub-world { grid-template-columns: 260px 1fr !important; }
+  .hub-dossier { display: none; }
+}
