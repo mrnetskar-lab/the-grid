@@ -3600,6 +3600,71 @@ h3 {
   }
 }
 
+@media (max-width: 720px) {
+  #hub .hub-world {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 0.55rem !important;
+  }
+
+  #hub .hub-sidebar {
+    width: 100%;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    border: 0;
+    margin: 0;
+  }
+
+  #hub .hub-sidebar-head,
+  #hub .hub-search,
+  #hub .hub-contact-info,
+  #hub .hub-contact-time,
+  #hub .hub-contact-divider,
+  #hub .hub-contact-preview {
+    display: none !important;
+  }
+
+  #hub .hub-contact-list {
+    display: flex !important;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 0 0.2rem;
+    margin: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  #hub .hub-contact-list::-webkit-scrollbar { display: none; }
+
+  #hub .hub-contact-row {
+    flex: 0 0 auto;
+    width: 50px;
+    min-width: 50px;
+    min-height: 50px !important;
+    padding: 0 !important;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+  }
+
+  #hub .hub-contact-avatar {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  #hub .hub-chat-panel {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  #hub .hub-dossier {
+    display: none !important;
+  }
+}
+
 /* --- HUB HERO & DOSSIER OVERRIDES (final) --- */
 /* Ensure hero portrait matches Page.html (132×168, 14px radius) and dossier renders */
 #hub .hub-hero-portrait {
