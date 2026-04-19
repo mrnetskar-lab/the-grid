@@ -120,38 +120,28 @@
         </div>
       </section>
 
-      <!-- HUB V2 -->
+      <!-- HUB V3 -->
       <section id="hub" class="page" data-page="hub">
-        <div class="hub-v2">
-
-          <!-- Background layers -->
-          <div class="hub-stars" aria-hidden="true"></div>
-          <div class="hub-edge-glow" aria-hidden="true"></div>
-          <div class="hub-rail-left" aria-hidden="true"></div>
-          <div class="hub-rail-right" aria-hidden="true"></div>
-          <div class="hub-top-soft" aria-hidden="true"></div>
-
-          <!-- Inner world -->
+        <div class="hub-v2 hub-reference-shell">
           <div class="hub-world">
 
-            <!-- LEFT: Contacts sidebar -->
-            <aside class="hub-sidebar">
-              <!-- Header -->
-              <h2 class="hub-sidebar-title">CHANNELS</h2>
+            <!-- LEFT: flat channel sidebar -->
+            <aside class="hub-sidebar" aria-label="Channels">
+              <div class="hub-sidebar-head">
+                <h2 class="hub-sidebar-title">CHANNELS</h2>
+                <span id="hubNodeCount" class="hub-node-count">4</span>
+              </div>
 
-              <!-- Search -->
-              <label class="hub-search">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <label class="hub-search" for="hubSearchInput">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
                 <input id="hubSearchInput" type="text" placeholder="Search signals…" autocomplete="off" />
               </label>
 
-              <!-- Filter chips -->
-              <div class="hub-filters">
+              <div class="hub-filters" role="tablist" aria-label="Channel filters">
                 <button class="hub-chip active" type="button" data-filter="all">ALL</button>
                 <button class="hub-chip" type="button" data-filter="online">ONLINE</button>
               </div>
 
-              <!-- Contact rows -->
               <div class="hub-contact-list" id="presenceStack">
                 <button type="button" class="hub-contact-row" data-room="nina" style="--ch-hue: 14;">
                   <span class="hub-contact-avatar avatar-nina-grad">
@@ -206,26 +196,20 @@
                 </button>
               </div>
 
-              <!-- Signal log at bottom -->
               <div class="hub-signal-log">
                 <span class="sys-label">SIGNAL LOG</span>
                 <div class="signal-feed" id="signalFeed" aria-live="polite"></div>
               </div>
-
-              <!-- hidden count for JS -->
-              <span id="hubNodeCount" class="hub-hidden">4</span>
             </aside>
 
-            <!-- RIGHT: Live chat panel -->
-            <div class="hub-chat-panel">
-
-              <!-- Chat header — Night Studio hero -->
+            <!-- CENTER: one-glass chat surface -->
+            <section class="hub-chat-panel" aria-label="Active chat">
               <div class="hub-chat-head hub-hero" id="hubChatHead">
                 <div class="hub-hero-portrait" id="hubFocusRing" data-char="hazel" data-ring-state="invited">
                   <img id="hubFocusImg" src="profile_pictures/hazel.png" alt="" />
-                  <!-- legacy avatar kept for JS back-compat -->
                   <div class="avatar avatar-hazel hub-hidden" id="sceneFocusAvatar">H</div>
                 </div>
+
                 <div class="hub-hero-meta">
                   <p class="hub-hero-eyebrow" id="hubFocusRoute">AFTER THE PAUSE</p>
                   <strong class="hub-hero-name hub-chat-name" id="sceneFocusName">Hazel</strong>
@@ -233,17 +217,18 @@
                   <div class="hub-hero-sub">
                     <span class="hub-hero-state hub-chat-status" id="hubSceneTitle">PULL ACTIVE</span>
                     <span class="hub-hero-sep">·</span>
-                    <span class="hub-hero-typing" id="hubFocusTyping" style="display:none;">
-                      transmitting<span class="hub-typing-dots"><span></span><span></span><span></span></span>
-                    </span>
+                    <span class="hub-hero-tone" id="hubFocusTone">SOFT</span>
+                    <span class="hub-hero-sep">·</span>
+                    <span class="hub-hero-typing" id="hubFocusTyping" style="display:none;">transmitting<span class="hub-typing-dots"><span></span><span></span><span></span></span></span>
                     <span class="hub-hero-idle" id="hubFocusIdle">signal stable</span>
                   </div>
                 </div>
+
                 <div class="hub-chat-actions">
-                  <button type="button" class="btn btn-ghost btn-small" id="quickViewRouteBtn" data-nav="routes">MAP</button>
+                  <button type="button" class="btn btn-ghost btn-small" id="quickViewRouteBtn" data-nav="routes">ROUTE</button>
                   <button type="button" class="btn btn-primary btn-small" id="hubEnterFocusedBtn">FULL THREAD</button>
                 </div>
-                <!-- hidden els JS still references -->
+
                 <div id="hubSceneCopy" class="hub-hidden"></div>
                 <div id="sceneFocusPreview" class="hub-hidden"></div>
                 <div id="spotlightCopy" class="hub-hidden"></div>
@@ -256,20 +241,20 @@
                 <div id="mainActivityStrip" class="hub-hidden"></div>
               </div>
 
-              <!-- Message thread -->
               <div class="hub-chat-thread" id="hubChatThread"></div>
 
-              <!-- Composer -->
               <form class="hub-chat-compose" id="hubChatForm">
-                <input type="text" id="hubChatInput" class="hub-chat-input" placeholder="Transmit…" autocomplete="off" />
+                <div class="hub-compose-input-wrap">
+                  <input type="text" id="hubChatInput" class="hub-chat-input" placeholder="Transmit…" autocomplete="off" />
+                </div>
                 <button type="submit" class="hub-chat-send" aria-label="Send">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
               </form>
-            </div>
+            </section>
 
-            <!-- DOSSIER � right panel -->
-            <aside class="hub-dossier" id="hubDossier">
+            <!-- RIGHT: dossier -->
+            <aside class="hub-dossier" id="hubDossier" aria-label="Character dossier">
               <div class="hd-portrait-wrap">
                 <img class="hd-portrait" id="hdPortrait" src="profile_pictures/hazel.png" alt="" />
                 <div class="hd-portrait-shade"></div>

@@ -874,6 +874,7 @@ function renderHubChat() {
   const imgEl      = document.getElementById("hubFocusImg");
   const typingEl   = document.getElementById("hubFocusTyping");
   const idleEl     = document.getElementById("hubFocusIdle");
+  const toneEl     = document.getElementById("hubFocusTone");
 
   if (head && contact.hue != null) {
     head.style.setProperty("--channel-hue", String(contact.hue));
@@ -892,6 +893,8 @@ function renderHubChat() {
   const isTyping = contact.messages.some((m) => m.typing);
   if (typingEl) typingEl.style.display = isTyping ? "inline-flex" : "none";
   if (idleEl)   idleEl.style.display   = isTyping ? "none" : "inline";
+  const lastIncoming = [...contact.messages].reverse().find((m) => m.side === "incoming" && !m.typing);
+  if (toneEl) toneEl.textContent = (lastIncoming?.toneClass || "soft").toUpperCase();
 
   if (hubFocusRing) {
     hubFocusRing.dataset.char      = contactKey;

@@ -3075,8 +3075,8 @@ h3 {
   background:
     radial-gradient(120% 80% at 50% 115%, hsla(var(--channel-hue, 260), 55%, 55%, 0.14), transparent 55%),
     linear-gradient(180deg, rgba(30, 24, 32, 0.55), rgba(18, 14, 20, 0.62)) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.1) !important;
   backdrop-filter: blur(24px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.1) !important;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.36);
 }
 
@@ -3244,5 +3244,98 @@ h3 {
 @media (max-width: 1200px) {
   #hub .hub-world {
     grid-template-columns: 230px minmax(0, 1fr) !important;
+  }
+}
+
+/* ─────────────────────────────────────────
+   HUB STRUCTURAL MIGRATION (index.html v3)
+   ───────────────────────────────────────── */
+
+#hub .hub-reference-shell {
+  padding: 0.5rem 1.2rem 1rem;
+}
+
+#hub .hub-world {
+  align-items: stretch;
+}
+
+#hub .hub-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+#hub .hub-node-count {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  color: rgba(239, 231, 220, 0.45);
+}
+
+#hub .hub-contact-list {
+  gap: 0.1rem;
+}
+
+#hub .hub-chat-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+#hub .hub-chat-head.hub-hero {
+  border-bottom: 1px solid rgba(239, 231, 220, 0.08);
+}
+
+#hub .hub-hero-tone {
+  color: rgba(239, 231, 220, 0.58);
+}
+
+#hub .hub-chat-thread {
+  overflow-y: auto;
+}
+
+#hub .hub-chat-compose {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+#hub .hub-compose-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(239, 231, 220, 0.08);
+  border-radius: 12px;
+  background: rgba(10, 8, 12, 0.45);
+  padding: 0 0.35rem;
+}
+
+#hub .hub-compose-input-wrap:focus-within {
+  border-color: hsla(var(--channel-hue, 260), 55%, 60%, 0.5);
+  box-shadow: 0 0 0 3px hsla(var(--channel-hue, 260), 55%, 60%, 0.08);
+}
+
+#hub .hub-chat-input {
+  border: 0;
+  background: transparent;
+  box-shadow: none !important;
+}
+
+#hub .hub-dossier {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (max-width: 760px) {
+  .site-shell:has(#hub.page.active) .topbar {
+    padding: 0.65rem 0.9rem;
+  }
+
+  #hub.page {
+    height: calc(100vh - 52px);
+  }
+
+  #hub .hub-reference-shell {
+    padding: 0.35rem 0.55rem 0.8rem;
   }
 }
