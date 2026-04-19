@@ -78,3 +78,42 @@ Do not touch pages outside the current task.
 ```bash
 git push origin HEAD:master
 ```
+
+---
+
+## Copilot Task: Wire hub_salvage.js into app.js
+
+`hub_salvage.js` is a complete Hub render layer that exists as a standalone file but is not yet connected to the app. Wire it in so it runs on startup.
+
+### Steps
+
+1. In `index.html`, add a script tag loading `hub_salvage.js` **after** the `app.js` script tag:
+
+```html
+<script src="hub_salvage.js"></script>
+```
+
+2. In `app.js`, find the startup/init block (look for `focusContact`, `renderHub`, or `DOMContentLoaded`) and call `initHubSalvage()` at the end of that block — after existing hub render calls, not before.
+
+3. Wrap in a guard before calling:
+
+```js
+if (typeof initHubSalvage === 'function') initHubSalvage();
+```
+
+### Copilot — do not touch
+
+- `styles.css`
+- Any backend files
+- `escapeHtml()` — never remove
+
+### Copilot — files you may edit
+
+- `index.html` — script tag only
+- `app.js` — startup call only
+
+### Copilot — push when done
+
+```bash
+git push origin HEAD:master
+```
