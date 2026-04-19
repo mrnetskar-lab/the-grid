@@ -33,10 +33,11 @@ Never force push.
 
 ## Roadmap
 
-1. **Hub** — current task. Get it to 100% match `Page.html`. This is the foundation.
-2. **Inbox** — redesign after Hub is solid. Reference will be provided.
-3. **Home** — redesign after Inbox. Reference will be provided.
-4. **Profiles** — last. Reference will be provided.
+1. **Hub polish** — current task. Get it to 100% match `Page.html` visually.
+2. **Hub blueprint refactor** — after polish is done. Read `BLUEPRINT.md` for full spec. Establishes the page-module pattern all future pages will follow.
+3. **Inbox** — after blueprint refactor. Reference will be provided.
+4. **Home** — after Inbox. Reference will be provided.
+5. **Profiles** — last. Reference will be provided.
 
 Do not touch pages outside the current task.
 
