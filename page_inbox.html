@@ -1,0 +1,88 @@
+<section id="inbox" class="page" data-page="inbox">
+  <div class="inbox-shell page-shell">
+    <aside class="inbox-rail" aria-label="Private threads">
+      <div class="rail-head">
+        <span class="rail-eyebrow">INBOX</span>
+        <span class="rail-count">4</span>
+      </div>
+
+      <label class="rail-search" for="inboxSearchInput">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <input id="inboxSearchInput" type="text" placeholder="Search private threads…" autocomplete="off" />
+      </label>
+
+      <div id="nodeRailList" class="inbox-thread-list">
+        <!-- app.js can render thread rows here -->
+      </div>
+    </aside>
+
+    <section class="inbox-thread-panel panel" aria-label="Conversation">
+      <header class="inbox-thread-head">
+        <div id="dmAvatar" class="inbox-thread-avatar avatar-hazel">H</div>
+
+        <div class="inbox-thread-meta">
+          <div class="sys-label">ACTIVE THREAD</div>
+          <h1 id="dmName">Hazel</h1>
+          <p id="dmStatus">OBSERVANT · precise · watching</p>
+        </div>
+
+        <div class="inbox-thread-actions">
+          <button class="btn btn-secondary btn-small" data-nav="hub">HUB</button>
+          <button class="btn btn-ghost btn-small" data-nav="routes">PROFILE</button>
+        </div>
+      </header>
+
+      <div id="dmThread" class="inbox-thread-body" aria-live="polite">
+        <!-- app.js renders messages here -->
+      </div>
+
+      <form id="dmForm" class="inbox-composer" autocomplete="off">
+        <label class="sr-only" for="dmInput">Send a private message</label>
+        <input
+          id="dmInput"
+          name="message"
+          type="text"
+          placeholder="Type carefully. Meaning builds here."
+          maxlength="900"
+        />
+        <button type="submit" class="btn btn-primary">SEND</button>
+      </form>
+    </section>
+
+    <aside class="inbox-side" aria-label="Thread dossier">
+      <section class="panel inbox-side-card">
+        <div class="sys-label">DOSSIER</div>
+        <div class="inbox-side-portrait">
+          <img src="profile_pictures/hazel.png" alt="Hazel portrait" />
+        </div>
+        <h3>Hazel</h3>
+        <p>Precise observer who reveals little. Waits for you to stop pretending.</p>
+      </section>
+
+      <section class="panel inbox-side-card">
+        <div class="sys-label">DIAGNOSTICS</div>
+
+        <div class="meter-row">
+          <span>Pull</span>
+          <div class="meter-track"><div class="meter-bar" style="width: 82%;"></div></div>
+          <strong>82%</strong>
+        </div>
+
+        <div class="meter-row">
+          <span>Memory</span>
+          <div class="meter-track"><div class="meter-bar" style="width: 43%;"></div></div>
+          <strong>43%</strong>
+        </div>
+
+        <div class="pill-row">
+          <span class="pill">AFTER THE PAUSE</span>
+          <span class="pill">OBSERVANT</span>
+          <span class="pill">PRIVATE</span>
+        </div>
+      </section>
+    </aside>
+  </div>
+</section>
