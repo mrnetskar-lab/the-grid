@@ -105,13 +105,8 @@ router.post('/:id/chat', async (req, res) => {
     history.push({ role: 'assistant', content: reply });
     saveHistory(req.params.id, history);
 
-    return res.json({
-      ok: true,
-      reply,
-      character: char.name,
-      toneClass: ai?.meta?.toneClass || 'neutral',
-      subtextStrength: ai?.meta?.subtextStrength ?? 0,
-    });
+    const metaResp = ai?.meta || { toneClass: 'neutral', subtextStrength: 0.0 };
+    return res.json({ ok: true, reply, character: char.name, meta: metaResp });
   } catch (error) {
     console.error('Character chat error:', error);
     return res.status(500).json({ ok: false, error: error.message || 'Character chat failed' });

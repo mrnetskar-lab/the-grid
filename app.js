@@ -302,6 +302,51 @@ function focusContact(contactKey) {
   renderHubChat();
   renderInbox();
   syncAvatarRings();
+
+  // Fire an AI greeting when switching to a character in hub with no prior exchange
+  const contact = characterDirectory[contactKey];
+  const hasUserMessages = contact.messages.some((m) => m.side === "outgoing");
+  if (!hasUserMessages && appState.page === "hub") {
+    triggerCharacterGreeting(contactKey);
+  }
+}
+
+async function triggerCharacterGreeting(contactKey) {
+  const contact = characterDirectory[contactKey];
+  if (!contact) return;
+
+  // Show typing indicator
+  contact.messages.push({ side: "incoming", text: "...", time: "", typing: true });
+  renderHubChat();
+
+  let reply = null, toneClass = "neutral", subtextStrength = 0;
+  try {
+    const res = await fetch(`/api/characters/${contactKey}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: "__greeting__" }),
+    });
+    const data = await res.json();
+    if (data?.ok) {
+      reply = data.reply;
+      toneClass = data.meta?.toneClass || "neutral";
+      subtextStrength = data.meta?.subtextStrength || 0;
+    }
+  } catch { /* silent fallback */ }
+
+  contact.messages = contact.messages.filter((m) => !m.typing);
+  if (reply) {
+    contact.messages.push({
+      side: "incoming",
+      text: reply,
+      time: nowClock(),
+      toneClass,
+      subtextStrength,
+      char: contactKey,
+    });
+  }
+  renderHubChat();
+  renderInbox();
 }
 
 function pushSignalEvent(text) {

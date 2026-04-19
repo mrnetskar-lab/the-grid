@@ -153,41 +153,53 @@
 
               <!-- Contact rows -->
               <div class="hub-contact-list" id="presenceStack">
-                <button type="button" class="hub-contact-row" data-room="nina">
-                  <div class="hub-contact-avatar avatar-nina-grad">N</div>
+                <button type="button" class="hub-contact-row" data-room="nina" style="--ch-hue: 14;">
+                  <span class="hub-contact-avatar avatar-nina-grad">
+                    <img src="profile_pictures/nina_profile.png" alt="" onerror="this.remove()" />
+                    <span class="hub-contact-initial">N</span>
+                  </span>
                   <div class="hub-contact-info">
                     <span class="hub-contact-name">Nina</span>
-                    <span class="hub-contact-preview">Still holding the thread.</span>
+                    <span class="hub-contact-preview" data-contact-preview="nina">Still holding the thread.</span>
                   </div>
                   <span class="hub-contact-time">ONLINE</span>
                   <span class="hub-contact-divider"></span>
                 </button>
 
-                <button type="button" class="hub-contact-row" data-room="hazel">
-                  <div class="hub-contact-avatar avatar-hazel-grad">H</div>
+                <button type="button" class="hub-contact-row" data-room="hazel" style="--ch-hue: 38;">
+                  <span class="hub-contact-avatar avatar-hazel-grad">
+                    <img src="profile_pictures/hazel.png" alt="" onerror="this.remove()" />
+                    <span class="hub-contact-initial">H</span>
+                  </span>
                   <div class="hub-contact-info">
                     <span class="hub-contact-name">Hazel</span>
-                    <span class="hub-contact-preview">You disappeared too early.</span>
+                    <span class="hub-contact-preview" data-contact-preview="hazel">You disappeared too early.</span>
                   </div>
                   <span class="hub-contact-time">AWAY</span>
                   <span class="hub-contact-divider"></span>
                 </button>
 
-                <button type="button" class="hub-contact-row" data-room="iris">
-                  <div class="hub-contact-avatar avatar-iris-grad">I</div>
+                <button type="button" class="hub-contact-row" data-room="iris" style="--ch-hue: 275;">
+                  <span class="hub-contact-avatar avatar-iris-grad">
+                    <img src="profile_pictures/iris_profile.png" alt="" onerror="this.remove()" />
+                    <span class="hub-contact-initial">I</span>
+                  </span>
                   <div class="hub-contact-info">
                     <span class="hub-contact-name">Iris</span>
-                    <span class="hub-contact-preview">Only clear in private.</span>
+                    <span class="hub-contact-preview" data-contact-preview="iris">Only clear in private.</span>
                   </div>
                   <span class="hub-contact-time">LIVE</span>
                   <span class="hub-contact-divider"></span>
                 </button>
 
-                <button type="button" class="hub-contact-row" data-room="vale">
-                  <div class="hub-contact-avatar avatar-vale-grad">V</div>
+                <button type="button" class="hub-contact-row" data-room="vale" style="--ch-hue: 186;">
+                  <span class="hub-contact-avatar avatar-vale-grad">
+                    <img src="profile_pictures/vale_profile.png" alt="" onerror="this.remove()" />
+                    <span class="hub-contact-initial">V</span>
+                  </span>
                   <div class="hub-contact-info">
                     <span class="hub-contact-name">Vale</span>
-                    <span class="hub-contact-preview">Open briefly. Then gone.</span>
+                    <span class="hub-contact-preview" data-contact-preview="vale">Open briefly. Then gone.</span>
                   </div>
                   <span class="hub-contact-time">UNSTABLE</span>
                   <span class="hub-contact-divider"></span>
@@ -479,7 +491,7 @@
 
             <article class="profile-card profile-card--nina">
               <div class="profile-card-img">
-                <img src="/profile_pictures/nina_profile.png" alt="Nina" />
+                <img src="profile_pictures/nina_profile.png" alt="Nina" />
                 <div class="profile-card-outline"></div>
               </div>
               <div class="profile-card-body">
@@ -496,7 +508,7 @@
             <article class="profile-card profile-card--hazel">
               <div class="profile-card-img">
                 <video
-                  src="/profile_pictures/hazel_450x_auto__.mp4"
+                  src="profile_pictures/hazel_450x_auto__.mp4"
                   autoplay loop muted playsinline
                   aria-label="Hazel"
                   class="profile-card-video"
@@ -516,7 +528,7 @@
 
             <article class="profile-card profile-card--iris">
               <div class="profile-card-img">
-                <img src="/profile_pictures/iris_profile.png" alt="Iris" />
+                <img src="profile_pictures/iris_profile.png" alt="Iris" />
                 <div class="profile-card-outline"></div>
               </div>
               <div class="profile-card-body">
@@ -532,7 +544,7 @@
 
             <article class="profile-card profile-card--vale">
               <div class="profile-card-img">
-                <img src="/profile_pictures/vale_profile.png" alt="Vale" />
+                <img src="profile_pictures/vale_profile.png" alt="Vale" />
                 <div class="profile-card-outline"></div>
               </div>
               <div class="profile-card-body">
@@ -554,19 +566,13 @@
             <h3 class="profiles-gallery-title">GALLERY</h3>
           </div>
 
+          <!-- Profiles gallery replaced with local images (Railway-hosted images removed) -->
           <div class="profiles-gallery" id="profilesGallery">
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776014429431.png" aria-label="View image"><img src="/images/shot_1776014429431.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776015181091.png" aria-label="View image"><img src="/images/shot_1776015181091.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776015746631.png" aria-label="View image"><img src="/images/shot_1776015746631.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776015889788.png" aria-label="View image"><img src="/images/shot_1776015889788.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776015995949.png" aria-label="View image"><img src="/images/shot_1776015995949.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776016000307.png" aria-label="View image"><img src="/images/shot_1776016000307.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776016145476.png" aria-label="View image"><img src="/images/shot_1776016145476.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776016300251.png" aria-label="View image"><img src="/images/shot_1776016300251.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776016466630.png" aria-label="View image"><img src="/images/shot_1776016466630.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776020143729.png" aria-label="View image"><img src="/images/shot_1776020143729.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776024764684.png" aria-label="View image"><img src="/images/shot_1776024764684.png" alt="" /></button>
-            <button type="button" class="profiles-shot" data-src="/images/shot_1776026633960.png" aria-label="View image"><img src="/images/shot_1776026633960.png" alt="" /></button>
+            <button type="button" class="profiles-shot" data-src="profile_pictures/nina_profile.png" aria-label="View Nina"><img src="profile_pictures/nina_profile.png" alt="Nina" /></button>
+            <button type="button" class="profiles-shot" data-src="profile_pictures/hazel_large_picture.png" aria-label="View Hazel"><img src="profile_pictures/hazel_large_picture.png" alt="Hazel" /></button>
+            <button type="button" class="profiles-shot" data-src="profile_pictures/iris_profile.png" aria-label="View Iris"><img src="profile_pictures/iris_profile.png" alt="Iris" /></button>
+            <button type="button" class="profiles-shot" data-src="profile_pictures/vale_profile.png" aria-label="View Vale"><img src="profile_pictures/vale_profile.png" alt="Vale" /></button>
+            <button type="button" class="profiles-shot" data-src="profile_pictures/someone.png" aria-label="View Unknown"><img src="profile_pictures/someone.png" alt="Unknown" /></button>
           </div>
 
         </div>
