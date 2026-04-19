@@ -1,5 +1,17 @@
 # The Grid — AI Context
 
+## Codex Session Setup
+
+Before doing any git push, run this command (ask the user for the token if missing):
+
+```bash
+git remote set-url origin https://mrnetskar-lab:<GITHUB_TOKEN>@github.com/mrnetskar-lab/the-grid.git
+```
+
+The token is never stored in the repo. The user will provide it at session start.
+
+---
+
 ## Hva er dette
 
 **The Grid** er et privat, invite-only sosialt nettverk der brukeren kommuniserer med fire fiktive AI-karakterer via private DM-kanaler. Estetikken er mørk cyberpunk — signal-metaforer, glassmorfisme, scanlines, neon-glow. Ingen sosiale features, ingen real users. Bare deg og karakterene.
