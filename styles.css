@@ -297,8 +297,9 @@ h3 {
 /* Hub is a fixed-height viewport panel — no vertical scroll, fills below topbar */
 /* --- HUB PAGE POLISH --- */
 #hub.page {
-  height: calc(100vh - var(--topbar-h) - 2.5rem);
-  min-height: unset;
+  min-height: calc(100dvh - var(--topbar-h));
+  height: auto;
+  overflow: visible;
   padding: 0.5rem 0 0;
   display: none;
   background: none;
@@ -3238,7 +3239,9 @@ h3 {
 }
 
 #hub.page {
-  height: calc(100vh - 60px);
+  min-height: calc(100dvh - 60px);
+  height: auto;
+  overflow: visible;
   padding-top: 0;
 }
 
