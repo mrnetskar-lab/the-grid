@@ -1,2 +1,4 @@
 node_modules/
 Sublime Text/
+codex-setup.sh
+.env
