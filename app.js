@@ -119,12 +119,6 @@ const relationshipState = {
   },
 };
 
-const signalLogSeed = [
-  "Hazel stayed present without replying",
-  "Iris warmed a quiet route",
-  "Nina reopened an intimate thread",
-  "Vale let a window collapse",
-];
 
 // ---------------------------------------------------------
 // APP STATE
@@ -162,7 +156,6 @@ const stats = {
 
 const nodeRailList = document.getElementById("nodeRailList");
 const presenceStack = document.getElementById("presenceStack");
-const signalFeed = document.getElementById("signalFeed");
 
 const hubSceneTitle = document.getElementById("hubSceneTitle");
 const hubSceneCopy = document.getElementById("hubSceneCopy");
@@ -375,17 +368,6 @@ async function triggerCharacterGreeting(contactKey) {
   renderInbox();
 }
 
-function pushSignalEvent(text) {
-  const item = document.createElement("div");
-  item.className = "signal-item";
-  item.innerHTML = `<strong>${escapeHtml(text)}</strong><time>${escapeHtml(nowClock())}</time>`;
-  signalFeed?.prepend(item);
-
-  if (signalFeed && signalFeed.children.length > 8) {
-    signalFeed.lastElementChild?.remove();
-  }
-}
-
 async function sendMessage(contactKey, text) {
   const contact = characterDirectory[contactKey];
   if (!contact || !text.trim()) return;
@@ -436,12 +418,10 @@ async function sendMessage(contactKey, text) {
 
   if (rel.pull > 0.75 && rel.state === "warming") {
     rel.state = "pull-active";
-    pushSignalEvent(`${contact.name} moved closer`);
   }
 
   if (rel.pull > 0.9 && rel.state === "pull-active") {
     rel.state = "opening";
-    pushSignalEvent(`${contact.name} opened something shared`);
   }
 
   saveRelationshipState();
@@ -622,28 +602,10 @@ function renderContactsPage() {
 
       if (canEnterSharedSpace(contactKey)) {
         setActivePage("hub");
-        pushSignalEvent(`${contact.name} opened a shared space`);
       } else {
         setActivePage("inbox");
-        pushSignalEvent(`${contact.name} redirected to DMs`);
       }
     };
-  });
-}
-
-// ---------------------------------------------------------
-// RENDER: SIGNAL FEED
-// ---------------------------------------------------------
-
-function renderSignalFeed() {
-  if (!signalFeed) return;
-  signalFeed.innerHTML = "";
-
-  signalLogSeed.forEach((entry) => {
-    const item = document.createElement("div");
-    item.className = "signal-item";
-    item.innerHTML = `<strong>${escapeHtml(entry)}</strong><time>just now</time>`;
-    signalFeed.appendChild(item);
   });
 }
 
@@ -780,7 +742,6 @@ hubEnterFocusedBtn?.addEventListener("click", () => {
 spotlightOpenBtn?.addEventListener("click", () => {
   const active = appState.activeContact;
   if (canEnterSharedSpace(active)) {
-    pushSignalEvent(`${characterDirectory[active].name} shared space entered`);
     setActivePage("hub");
     return;
   }
@@ -948,7 +909,6 @@ function init() {
   loadRelationshipState();
   bootFromHash();
   renderStats();
-  renderSignalFeed();
   renderPresenceStack();
   renderContactsPage();
   renderHub();
