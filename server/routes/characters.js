@@ -109,8 +109,10 @@ router.post('/:id/chat', async (req, res) => {
       ok: true,
       reply,
       character: char.name,
-      toneClass: ai?.meta?.toneClass || 'neutral',
-      subtextStrength: ai?.meta?.subtextStrength ?? 0,
+      meta: {
+        toneClass: ai?.meta?.toneClass || 'neutral',
+        subtextStrength: ai?.meta?.subtextStrength ?? 0,
+      },
     });
   } catch (error) {
     console.error('Character chat error:', error);
