@@ -210,6 +210,14 @@ const TONE_MOD = {
   neutral:  { hShift:  0, lShift:  0, sat: 55 },
 };
 
+
+const characterAnchors = {
+  nina:  { contradiction: "Warm presence who guards the thread carefully.", weakness: "Returns to connection no matter how long the silence.", rule: "Hold the thread." },
+  hazel: { contradiction: "Precise observer who reveals nothing.", weakness: "Waits for you to stop pretending.", rule: "Nothing for free." },
+  iris:  { contradiction: "Says least, understands most.", weakness: "Clarity only appears when pressure lifts.", rule: "Let it finish forming." },
+  vale:  { contradiction: "Opens intensely, vanishes without warning.", weakness: "Every window closes. Timing is everything.", rule: "Come in or lose it." },
+};
+
 function applyContour(el, charKey, toneClass = "neutral", subtextStrength = 0) {
   const hue = CHAR_HUE[charKey] ?? 260;
   const mod = TONE_MOD[toneClass] || TONE_MOD.neutral;
@@ -761,6 +769,53 @@ dmForm?.addEventListener("submit", (event) => {
   dmInput.value = "";
 });
 
+
+// ---------------------------------------------------------
+// RENDER: HUB DOSSIER
+// ---------------------------------------------------------
+
+function renderHubDossier() {
+  const contactKey = appState.activeContact;
+  const contact    = characterDirectory[contactKey];
+  const rel        = getRelationship(contactKey);
+  if (!contact) return;
+
+  const dossier = document.getElementById("hubDossier");
+  if (!dossier) return;
+
+  if (contact.hue != null) dossier.style.setProperty("--channel-hue", String(contact.hue));
+
+  const portrait = document.getElementById("hdPortrait");
+  if (portrait && contact.img) portrait.src = contact.img;
+
+  const eyebrow = document.getElementById("hdEyebrow");
+  if (eyebrow) eyebrow.textContent = contact.route || "";
+
+  const nameEl = document.getElementById("hdName");
+  if (nameEl) nameEl.textContent = contact.name;
+
+  const bioEl = document.getElementById("hdBio");
+  if (bioEl) bioEl.textContent = contact.whisper || "";
+
+  const pullBar = document.getElementById("hdPullBar");
+  const pullVal = document.getElementById("hdPullVal");
+  if (pullBar) pullBar.style.setProperty("--v", String(rel.pull));
+  if (pullVal) pullVal.textContent = String(Math.round(rel.pull * 100));
+
+  const memBar = document.getElementById("hdMemoryBar");
+  const memVal = document.getElementById("hdMemoryVal");
+  if (memBar) memBar.style.setProperty("--v", String(rel.memory));
+  if (memVal) memVal.textContent = String(Math.round(rel.memory * 100));
+
+  const anchors = characterAnchors[contactKey] || {};
+  const contEl  = document.getElementById("hdContradiction");
+  const weakEl  = document.getElementById("hdWeakness");
+  const ruleEl  = document.getElementById("hdRule");
+  if (contEl) contEl.textContent = anchors.contradiction || "";
+  if (weakEl) weakEl.textContent = anchors.weakness || "";
+  if (ruleEl) ruleEl.textContent = anchors.rule || "";
+}
+
 // ---------------------------------------------------------
 // HUB CHAT
 // ---------------------------------------------------------
@@ -841,6 +896,7 @@ function renderHubChat() {
   });
 
   hubChatThread.scrollTop = hubChatThread.scrollHeight;
+  renderHubDossier();
 }
 
 hubChatForm?.addEventListener("submit", async (e) => {
@@ -864,6 +920,7 @@ function init() {
   renderContactsPage();
   renderHub();
   renderHubChat();
+  renderHubDossier();
   renderInbox();
   syncAvatarRings();
 }
