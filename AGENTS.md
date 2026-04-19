@@ -31,9 +31,20 @@ Never force push.
 
 ---
 
+## Roadmap
+
+1. **Hub** — current task. Get it to 100% match `Page.html`. This is the foundation.
+2. **Inbox** — redesign after Hub is solid. Reference will be provided.
+3. **Home** — redesign after Inbox. Reference will be provided.
+4. **Profiles** — last. Reference will be provided.
+
+Do not touch pages outside the current task.
+
+---
+
 ## Current Task: Hub Visual Polish
 
-Bring the Hub page (`#hub`) visually in line with the reference design in `Page.html`.
+Bring the Hub page (`#hub`) to 100% visual match with the reference design in `Page.html`. This page is the foundation — get it right before anything else.
 
 ### Reference
 
