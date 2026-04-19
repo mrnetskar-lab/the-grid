@@ -3861,3 +3861,128 @@ h3 {
     grid-template-columns: 190px minmax(0, 1fr) !important;
   }
 }
+
+/* ─────────────────────────────────────────
+   CODEX HUB PASS — backdrop/topbar/sidebar/mobile
+   Scoped + final precedence for Hub foundation
+   ───────────────────────────────────────── */
+.site-shell:has(#hub.page.active) .backdrop {
+  background:
+    radial-gradient(ellipse at 18% 8%, rgba(255, 216, 170, 0.10), transparent 40%),
+    radial-gradient(ellipse at 82% 92%, hsla(var(--channel-hue, 260), 70%, 60%, 0.09), transparent 42%),
+    radial-gradient(ellipse at 50% 110%, rgba(40, 30, 50, 0.55), transparent 60%),
+    linear-gradient(180deg, #0f0b11 0%, #141014 50%, #0b080c 100%);
+}
+
+.site-shell:has(#hub.page.active) .topbar {
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  transform: none;
+  border-radius: 0;
+  box-shadow: none;
+  border: 0;
+  border-bottom: 1px solid rgba(239, 231, 220, 0.08);
+  background: linear-gradient(180deg, rgba(15, 11, 17, 0.85), rgba(15, 11, 17, 0));
+}
+
+#hub.page {
+  height: auto !important;
+  min-height: calc(100dvh - var(--topbar-h));
+  overflow: visible !important;
+  padding-top: 0 !important;
+}
+
+#hub.page.active {
+  display: flex;
+  flex-direction: column;
+}
+
+#hub .hub-v2,
+#hub .hub-reference-shell {
+  flex: 1;
+  min-height: 0;
+}
+
+#hub .hub-world {
+  grid-template-columns: 208px minmax(0, 1fr) 286px !important;
+  gap: 0.8rem !important;
+}
+
+#hub .hub-sidebar {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding-left: 0.1rem !important;
+  padding-right: 0.1rem !important;
+}
+
+#hub .hub-contact-row {
+  border-radius: 8px;
+}
+
+@media (max-width: 1100px) {
+  #hub .hub-world {
+    grid-template-columns: 208px minmax(0, 1fr) !important;
+  }
+
+  #hub .hub-dossier {
+    display: none !important;
+  }
+}
+
+@media (max-width: 720px) {
+  #hub .hub-world {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 0.55rem !important;
+  }
+
+  #hub .hub-sidebar {
+    width: 100%;
+    padding: 0 !important;
+  }
+
+  #hub .hub-sidebar-head,
+  #hub .hub-search,
+  #hub .hub-contact-info,
+  #hub .hub-contact-time,
+  #hub .hub-contact-divider,
+  #hub .hub-contact-preview {
+    display: none !important;
+  }
+
+  #hub .hub-contact-list {
+    display: flex !important;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    padding: 0 0 0.15rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  #hub .hub-contact-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  #hub .hub-contact-row {
+    flex: 0 0 auto;
+    width: 50px;
+    min-width: 50px;
+    min-height: 50px !important;
+    padding: 0 !important;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+  }
+
+  #hub .hub-contact-avatar {
+    width: 42px !important;
+    height: 42px !important;
+  }
+}
