@@ -1,11 +1,28 @@
-# Agent Startup Instruction
+# Agent Startup Instructions
 
-At the start of each Codex session, run:
+At the start of every session, before touching any files:
+
+1. Set the authenticated remote (ask the user for the token if missing):
 
 ```bash
-bash codex-setup.sh
+git remote set-url origin https://mrnetskar-lab:<GITHUB_TOKEN>@github.com/mrnetskar-lab/the-grid.git
+```
+
+2. Sync to the latest remote state:
+
+```bash
+git fetch origin
+git reset --hard origin/master
+```
+
+3. Confirm you are on the correct base before making changes:
+
+```bash
+git log --oneline -3
 ```
 
 ## Scope
 
-You are allowed to edit both `index.html` and `styles.css`. Use `Page.html` (in the repo root) as the visual and structural reference for the Hub page. Match its layout, markup patterns, and class names where possible.
+You may edit `index.html`, `styles.css`, and `app.js`. Use `Page.html` (in the repo root) as the visual and structural reference for the Hub page. Match its layout, markup patterns, and class names where possible.
+
+Never force push.
