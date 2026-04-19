@@ -122,7 +122,9 @@ body {
 /* Hub layout */
 .hub {
   position: relative; z-index: 1;
-  height: 100vh;
+  min-height: 100dvh;
+  height: auto;
+  overflow: visible;
   padding: 70px 28px 28px;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr) 320px;
