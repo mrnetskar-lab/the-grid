@@ -5,7 +5,7 @@ At the start of every session, before touching any files:
 1. Set the authenticated remote (ask the user for the token if missing):
 
 ```bash
-git remote set-url origin https://mrnetskar-lab:<GITHUB_TOKEN>@github.com/mrnetskar-lab/the-grid.git
+git remote add origin https://mrnetskar-lab:<GITHUB_TOKEN>@github.com/mrnetskar-lab/the-grid.git 2>/dev/null || git remote set-url origin https://mrnetskar-lab:<GITHUB_TOKEN>@github.com/mrnetskar-lab/the-grid.git
 ```
 
 2. Sync to the latest remote state:
