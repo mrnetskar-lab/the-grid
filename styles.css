@@ -3310,3 +3310,70 @@ h3 {
     padding: 0.3rem 0.45rem 0.7rem;
   }
 }
+
+/* Hub refinement: flatten + tighten against reference */
+.site-shell:has(#hub.page.active) .topbar-live {
+  gap: 0.35rem;
+  font-size: 0.63rem;
+  letter-spacing: 0.14em;
+  color: rgba(239, 231, 220, 0.52);
+}
+
+#hub .hub-world {
+  grid-template-columns: 208px minmax(0, 1fr) 286px !important;
+  gap: 0.78rem !important;
+}
+
+#hub .hub-sidebar {
+  padding: 0.58rem 0.5rem 0.52rem !important;
+  border-radius: 12px !important;
+}
+
+#hub .hub-sidebar-head {
+  margin-bottom: 0.38rem;
+  padding: 0 0.16rem;
+}
+
+#hub .hub-search {
+  margin-bottom: 0.42rem !important;
+}
+
+#hub .hub-contact-row {
+  min-height: 52px !important;
+  padding: 0.44rem 0.22rem 0.44rem 0.38rem !important;
+}
+
+#hub .hub-chat-head.hub-hero {
+  grid-template-columns: 88px minmax(0, 1fr) auto !important;
+  gap: 0.72rem !important;
+  padding: 0.78rem 0.84rem 0.7rem !important;
+}
+
+#hub .hub-hero-portrait {
+  width: 88px !important;
+  height: 112px !important;
+}
+
+#hub .hub-hero-name {
+  font-size: clamp(1.45rem, 2.5vw, 2rem) !important;
+}
+
+#hub .hub-chat-thread {
+  padding: 0.68rem 0.8rem 0.36rem !important;
+  gap: 0.42rem !important;
+}
+
+#hub .hub-chat-compose {
+  padding: 0.58rem 0.74rem 0.68rem !important;
+}
+
+#hub .hub-dossier {
+  padding: 0.56rem 0.58rem !important;
+  border-radius: 12px !important;
+}
+
+@media (max-width: 1200px) {
+  #hub .hub-world {
+    grid-template-columns: 190px minmax(0, 1fr) !important;
+  }
+}
