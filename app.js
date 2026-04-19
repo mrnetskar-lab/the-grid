@@ -134,6 +134,7 @@ const appState = {
   page: "home",
   activeContact: "hazel",
   activeThread: "hazel",
+  greeted: new Set(),
 };
 
 // ---------------------------------------------------------
@@ -330,7 +331,8 @@ function focusContact(contactKey) {
   // Fire an AI greeting when switching to a character in hub with no prior exchange
   const contact = characterDirectory[contactKey];
   const hasUserMessages = contact.messages.some((m) => m.side === "outgoing");
-  if (!hasUserMessages && appState.page === "hub") {
+  if (!hasUserMessages && !appState.greeted.has(contactKey) && appState.page === "hub") {
+    appState.greeted.add(contactKey);
     triggerCharacterGreeting(contactKey);
   }
 }
