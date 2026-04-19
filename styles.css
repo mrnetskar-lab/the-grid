@@ -388,10 +388,11 @@ h3 {
 }
 
 #hub .hub-chat-head.hub-hero {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 1.2rem 1.2rem 1.1rem 1.2rem;
+  display: grid;
+  grid-template-columns: 132px 1fr auto;
+  align-items: end;
+  gap: 1.4rem;
+  padding: 1.6rem 1.6rem 1.4rem;
   border-bottom: 1px solid rgba(255,255,255,0.07);
   background: none;
 }
@@ -430,17 +431,20 @@ h3 {
   letter-spacing: 0.18em;
 }
 #hub .hub-hero-name {
-  font-size: 2.6rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 1.02;
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
   margin-bottom: 0.12rem;
 }
 #hub .hub-hero-whisper {
-  font-size: 1.1rem;
+  font-size: 0.88rem;
   font-style: italic;
   color: var(--muted);
-  margin-bottom: 0.22rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  max-width: 42ch;
+  letter-spacing: -0.003em;
 }
 #hub .hub-hero-sub {
   display: flex;
