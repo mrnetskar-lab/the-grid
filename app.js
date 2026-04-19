@@ -442,11 +442,38 @@ async function sendMessage(contactKey, text) {
     pushSignalEvent(`${contact.name} opened something shared`);
   }
 
+  saveRelationshipState();
   renderHub();
   renderHubChat();
   renderContactsPage();
   renderInbox();
   syncAvatarRings();
+}
+
+
+// ---------------------------------------------------------
+// PERSISTENCE — localStorage for relationship state
+// ---------------------------------------------------------
+
+const LS_KEY = 'grid_relationship_state';
+
+function saveRelationshipState() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(relationshipState));
+  } catch {}
+}
+
+function loadRelationshipState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    Object.keys(saved).forEach((key) => {
+      if (relationshipState[key]) {
+        Object.assign(relationshipState[key], saved[key]);
+      }
+    });
+  } catch {}
 }
 
 // ---------------------------------------------------------
@@ -913,6 +940,7 @@ hubChatForm?.addEventListener("submit", async (e) => {
 // ---------------------------------------------------------
 
 function init() {
+  loadRelationshipState();
   bootFromHash();
   renderStats();
   renderSignalFeed();
