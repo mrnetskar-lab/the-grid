@@ -44,77 +44,183 @@
 
       <!-- HOME -->
       <section id="home" class="page active" data-page="home">
-        <div class="home-scene">
-          <div class="home-grid-lines" aria-hidden="true"></div>
-            <div class="home-wordmark-block">
-            <div class="home-eyebrow">PRIVATE SIGNAL NETWORK</div>
-            <h1 class="home-wordmark">GRID</h1>
-            <p class="home-sub">Private conversations build memory. A shared space forms between you — if something builds. Start in your Inbox.</p>
-          </div>
-          <div class="home-cta-row">
-            <button class="btn btn-primary btn-cta" data-nav="inbox">CONTINUE PRIVATE CHAT</button>
-            <button class="btn btn-ghost btn-cta" data-nav="rooms">CONTACTS</button>
-          </div>
-          <div class="home-stats-bar">
-            <div class="home-stat">
-              <span class="home-stat-val" id="statNodes">12</span>
-              <span class="home-stat-label">NODES ONLINE</span>
-            </div>
-            <div class="home-stat-sep"></div>
-            <div class="home-stat">
-              <span class="home-stat-val" id="statRooms">4</span>
-              <span class="home-stat-label">CONTACTS</span>
-            </div>
-            <div class="home-stat-sep"></div>
-            <div class="home-stat">
-              <span class="home-stat-val" id="statInvites">1</span>
-              <span class="home-stat-label">LIVE INVITES</span>
-            </div>
-          </div>
-          <div class="home-nodes-visual" aria-hidden="true">
-            <div class="home-node-card glass" style="--nd:0s;--nx:12%;--ny:22%;">
-              <div class="avatar-ring" data-char="nina" data-ring-state="warming">
-                <div class="avatar avatar-nina">N</div>
-              </div>
-              <div class="home-node-info">
-                <strong>Nina</strong>
-                <span class="node-sig sig-online">ONLINE</span>
-              </div>
-              <p class="home-node-line">Still holding the thread.</p>
-            </div>
-            <div class="home-node-card glass" style="--nd:.4s;--nx:62%;--ny:14%;">
-              <div class="avatar-ring" data-char="hazel" data-ring-state="locked">
-                <div class="avatar avatar-hazel">H</div>
-              </div>
-              <div class="home-node-info">
-                <strong>Hazel</strong>
-                <span class="node-sig sig-away">OBSERVANT</span>
-              </div>
-              <p class="home-node-line">You disappeared too early.</p>
-            </div>
-            <div class="home-node-card glass" style="--nd:.8s;--nx:28%;--ny:62%;">
-              <div class="avatar-ring" data-char="iris" data-ring-state="warming">
-                <div class="avatar avatar-iris">I</div>
-              </div>
-              <div class="home-node-info">
-                <strong>Iris</strong>
-                <span class="node-sig sig-online">LISTENING</span>
-              </div>
-              <p class="home-node-line">Only clear in private.</p>
-            </div>
-            <div class="home-node-card glass" style="--nd:1.1s;--nx:70%;--ny:58%;">
-              <div class="avatar-ring" data-char="vale" data-ring-state="locked">
-                <div class="avatar avatar-vale">V</div>
-              </div>
-              <div class="home-node-info">
-                <strong>Vale</strong>
-                <span class="node-sig sig-unstable">UNSTABLE</span>
-              </div>
-              <p class="home-node-line">Open briefly. Then gone.</p>
-            </div>
+  <div class="home-shell page-shell">
+    <aside class="home-rail" aria-label="Signal index">
+      <div class="rail-head">
+        <span class="rail-eyebrow">SIGNALS</span>
+        <span class="rail-count">4</span>
+      </div>
+
+      <div class="home-rail-list">
+        <button class="home-node-row active" type="button" data-room="hazel" style="--ch-hue: 38;">
+          <span class="home-node-avatar avatar-hazel-grad">
+            <img src="profile_pictures/hazel.png" alt="" onerror="this.remove()" />
+            <span>H</span>
+          </span>
+          <span class="home-node-copy">
+            <strong>Hazel</strong>
+            <small>You disappeared too early.</small>
+          </span>
+          <span class="home-node-state">AWAY</span>
+        </button>
+
+        <button class="home-node-row" type="button" data-room="nina" style="--ch-hue: 14;">
+          <span class="home-node-avatar avatar-nina-grad">
+            <img src="profile_pictures/nina_profile.png" alt="" onerror="this.remove()" />
+            <span>N</span>
+          </span>
+          <span class="home-node-copy">
+            <strong>Nina</strong>
+            <small>Still holding the thread.</small>
+          </span>
+          <span class="home-node-state">ONLINE</span>
+        </button>
+
+        <button class="home-node-row" type="button" data-room="iris" style="--ch-hue: 275;">
+          <span class="home-node-avatar avatar-iris-grad">
+            <img src="profile_pictures/iris_profile.png" alt="" onerror="this.remove()" />
+            <span>I</span>
+          </span>
+          <span class="home-node-copy">
+            <strong>Iris</strong>
+            <small>Only clear in private.</small>
+          </span>
+          <span class="home-node-state">LIVE</span>
+        </button>
+
+        <button class="home-node-row" type="button" data-room="vale" style="--ch-hue: 186;">
+          <span class="home-node-avatar avatar-vale-grad">
+            <img src="profile_pictures/vale_profile.png" alt="" onerror="this.remove()" />
+            <span>V</span>
+          </span>
+          <span class="home-node-copy">
+            <strong>Vale</strong>
+            <small>Open briefly. Then gone.</small>
+          </span>
+          <span class="home-node-state">UNSTABLE</span>
+        </button>
+      </div>
+    </aside>
+
+    <section class="home-main" aria-label="Overview">
+      <header class="home-hero panel panel-hero" style="--ch-hue: 38;">
+        <div class="home-hero-portrait">
+          <img src="profile_pictures/hazel.png" alt="Hazel portrait" />
+        </div>
+
+        <div class="home-hero-copy">
+          <div class="home-hero-eyebrow">ACTIVE SIGNAL</div>
+          <h1 class="home-hero-name">Hazel</h1>
+          <p class="home-hero-whisper">Notices everything. Gives nothing for free.</p>
+          <div class="home-hero-sub">
+            <span>OBSERVANT</span>
+            <span aria-hidden="true">·</span>
+            <span>PULL ACTIVE</span>
+            <span aria-hidden="true">·</span>
+            <span>TYPING WINDOW OPEN</span>
           </div>
         </div>
+
+        <div class="home-hero-actions">
+          <button class="btn btn-primary" data-nav="inbox">OPEN INBOX</button>
+          <button class="btn btn-ghost" data-nav="hub">OPEN HUB</button>
+        </div>
+      </header>
+
+      <div class="home-overview-grid">
+        <article class="home-card panel">
+          <span class="sys-label">NETWORK</span>
+          <strong class="home-card-value" id="statNodes">12</strong>
+          <p class="home-card-copy">Nodes currently visible in the grid.</p>
+        </article>
+
+        <article class="home-card panel">
+          <span class="sys-label">CONTACTS</span>
+          <strong class="home-card-value" id="statRooms">4</strong>
+          <p class="home-card-copy">Private channels available right now.</p>
+        </article>
+
+        <article class="home-card panel">
+          <span class="sys-label">LIVE INVITES</span>
+          <strong class="home-card-value" id="statInvites">1</strong>
+          <p class="home-card-copy">Brief openings that can collapse without warning.</p>
+        </article>
+
+        <article class="home-card panel">
+          <span class="sys-label">FOCUS</span>
+          <strong class="home-card-value">Hazel</strong>
+          <p class="home-card-copy">Hazel is closest right now. Precision over comfort.</p>
+        </article>
+      </div>
+
+      <section class="home-signal-feed panel" aria-label="Recent signal shifts">
+        <div class="panel-head">
+          <div>
+            <span class="sys-label">RECENT SHIFTS</span>
+            <h2>What changed in the network</h2>
+          </div>
+        </div>
+
+        <div class="home-feed-list">
+          <article class="home-feed-item">
+            <span class="feed-dot is-hazel"></span>
+            <div>
+              <strong>Hazel</strong>
+              <p>Pull increased after the last return. Window feels narrower, but warmer.</p>
+            </div>
+            <time>now</time>
+          </article>
+
+          <article class="home-feed-item">
+            <span class="feed-dot is-nina"></span>
+            <div>
+              <strong>Nina</strong>
+              <p>Memory thread remains stable. Private continuity is intact.</p>
+            </div>
+            <time>20:39</time>
+          </article>
+
+          <article class="home-feed-item">
+            <span class="feed-dot is-iris"></span>
+            <div>
+              <strong>Iris</strong>
+              <p>Signal stays low, but clarity is improving in one-to-one contact.</p>
+            </div>
+            <time>20:32</time>
+          </article>
+        </div>
       </section>
+    </section>
+
+    <aside class="home-side" aria-label="Diagnostics">
+      <section class="panel home-side-card">
+        <span class="sys-label">RELATIONSHIP STATE</span>
+        <h3>Hazel</h3>
+
+        <div class="meter-row">
+          <span>Pull</span>
+          <div class="meter-track"><div class="meter-bar" style="width: 82%;"></div></div>
+          <strong>82%</strong>
+        </div>
+
+        <div class="meter-row">
+          <span>Memory</span>
+          <div class="meter-track"><div class="meter-bar" style="width: 43%;"></div></div>
+          <strong>43%</strong>
+        </div>
+      </section>
+
+      <section class="panel home-side-card">
+        <span class="sys-label">QUICK ROUTES</span>
+        <div class="stack-actions">
+          <button class="btn btn-secondary" data-nav="inbox">Continue private chat</button>
+          <button class="btn btn-secondary" data-nav="routes">Open profiles</button>
+          <button class="btn btn-secondary" data-nav="hub">Return to hub</button>
+        </div>
+      </section>
+    </aside>
+  </div>
+</section>
 
       <!-- HUB -->
       <section id="hub" class="page" data-page="hub">
@@ -360,268 +466,234 @@
         </div>
       </section>
 
-      <!-- INBOX — PRIVATE SIGNAL TERMINAL -->
+      <!-- INBOX -->
       <section id="inbox" class="page" data-page="inbox">
-        <div class="inbox-shell">
-          <div class="inbox-layout">
+  <div class="inbox-shell page-shell">
+    <aside class="inbox-rail" aria-label="Private threads">
+      <div class="rail-head">
+        <span class="rail-eyebrow">INBOX</span>
+        <span class="rail-count">4</span>
+      </div>
 
-            <!-- COL 1: THREAD LIST -->
-            <aside class="thread-list node-rail" aria-label="Message threads">
-              <div class="node-rail-header">
-                <svg class="nrh-icon" width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5" r="1.5" fill="currentColor"/></svg>
-                <span class="sys-label">NODE CHANNELS</span>
-                <span class="nrh-count" id="nrhCount">4</span>
-              </div>
-              <div class="node-rail-list" id="nodeRailList"></div>
-              <div class="node-rail-floor">
-                <div class="nrf-line"><span class="cl-key">ACTIVE</span><span class="cl-val" id="railActiveNode">NINA</span></div>
-                <div class="nrf-line"><span class="cl-key">CHANNELS</span><span class="cl-val">4</span></div>
-              </div>
-            </aside>
+      <label class="rail-search" for="inboxSearchInput">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <input id="inboxSearchInput" type="text" placeholder="Search private threads…" autocomplete="off" />
+      </label>
 
-            <!-- COL 2: CHAT PANEL -->
-            <div class="comms-deck dm-panel" id="commsDeck">
-              <div class="channel-header dm-head" id="channelHeader">
-                <div class="ch-left">
-                  <div class="ch-avatar-wrap">
-                    <div class="avatar-ring" data-char="nina" data-ring-state="warming">
-                      <div class="avatar avatar-nina" id="dmAvatar">N</div>
-                    </div>
-                    <span class="ch-avatar-pulse"></span>
-                  </div>
-                  <div class="ch-identity">
-                    <div class="ch-name-row">
-                      <strong class="ch-name" id="dmName">Nina</strong>
-                      <span class="ch-channel-id" id="dmChannelId">#nina-private</span>
-                    </div>
-                    <p class="ch-status" id="dmStatus">ONLINE</p>
-                  </div>
-                </div>
-                <div class="ch-center">
-                  <p class="ch-scene-state" id="dmSceneState">The room is open, but not relaxed.</p>
-                </div>
-                <div class="ch-right">
-                  <button class="ch-action" data-nav="hub" title="Back to Hub">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-                    HUB
-                  </button>
-                  <button class="ch-action" id="dmViewRouteBtn" title="View Route">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12h3M19 12h3M12 2v3M12 19v3"/></svg>
-                    ROUTE
-                  </button>
-                  <button class="ch-action ch-toggle" id="toggleThreadsBtn" title="Toggle threads">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg>
-                  </button>
-                  <button class="ch-action ch-toggle" id="toggleDossierBtn" title="Toggle dossier">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
-                  </button>
-                </div>
-              </div>
+      <div id="nodeRailList" class="inbox-thread-list">
+        <!-- app.js can render thread rows here -->
+      </div>
+    </aside>
 
-              <div class="channel-signal-bar" id="channelSignalBar">
-                <div class="csb-trace" aria-hidden="true">
-                  <svg width="100%" height="12" preserveAspectRatio="none" viewBox="0 0 600 12">
-                    <polyline points="0,6 60,6 80,2 100,10 120,6 200,6 220,2 240,10 260,6 400,6 420,2 440,10 460,6 600,6"
-                      fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
-                  </svg>
-                </div>
-                <span class="csb-label" id="csbLabel">SIGNAL STABLE</span>
-              </div>
+    <section class="inbox-thread-panel panel" aria-label="Conversation">
+      <header class="inbox-thread-head">
+        <div id="dmAvatar" class="inbox-thread-avatar avatar-hazel">H</div>
 
-              <div class="channel-messages dm-thread" id="dmThread"></div>
+        <div class="inbox-thread-meta">
+          <div class="sys-label">ACTIVE THREAD</div>
+          <h1 id="dmName">Hazel</h1>
+          <p id="dmStatus">OBSERVANT · precise · watching</p>
+        </div>
 
-              <div class="channel-typing hidden" id="typingIndicator">
-                <span class="typing-dot"></span>
-                <span class="typing-dot"></span>
-                <span class="typing-dot"></span>
-                <span class="typing-label" id="typingLabel">Nina is transmitting…</span>
-              </div>
+        <div class="inbox-thread-actions">
+          <button class="btn btn-secondary btn-small" type="button" data-nav="hub">HUB</button>
+          <button class="btn btn-ghost btn-small" type="button" data-nav="routes">PROFILE</button>
+        </div>
+      </header>
 
-              <div class="transmit-bar chat-compose">
-                <div class="tb-frame">
-                  <div class="tb-corner tb-corner-tl"></div>
-                  <div class="tb-corner tb-corner-tr"></div>
-                  <form id="dmForm" class="tb-form">
-                    <button type="button" id="cameraBtn" class="tb-action compose-action" title="Inject media">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    </button>
-                    <input type="text" id="dmInput" class="tb-input" placeholder="Transmit signal…" autocomplete="off" />
-                    <button type="submit" class="tb-send compose-send" aria-label="Transmit">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </button>
-                  </form>
-                </div>
-                <div class="tb-meta">
-                  <span class="tb-enc">END-TO-END ENCRYPTED</span>
-                  <span class="tb-node" id="tbNodeLabel">NODE: NINA</span>
-                </div>
-              </div>
-            </div>
+      <div id="dmThread" class="inbox-thread-body" aria-live="polite">
+        <!-- app.js renders messages here -->
+      </div>
 
-            <!-- COL 3: CHARACTER PROFILE -->
-            <aside class="node-dossier character-profile-panel" id="characterProfilePanel">
-              <div class="dossier-frame profile-gallery" id="dossierFrame">
-                <div class="dossier-frame-border"></div>
-                <div class="dossier-frame-corner df-tl"></div>
-                <div class="dossier-frame-corner df-tr"></div>
-                <div class="dossier-frame-corner df-bl"></div>
-                <div class="dossier-frame-corner df-br"></div>
-                <img id="profileImg" src="" alt="" class="dossier-img" style="display:none;" />
-                <div class="dossier-placeholder" id="profilePlaceholder">N</div>
-                <div class="dossier-overlay">
-                  <span class="dossier-node-id" id="dossierNodeId">NODE-NINA</span>
-                </div>
-              </div>
+      <form id="dmForm" class="inbox-composer" autocomplete="off">
+        <label class="sr-only" for="dmInput">Send a private message</label>
+        <input
+          id="dmInput"
+          name="message"
+          type="text"
+          placeholder="Type carefully. Meaning builds here."
+          maxlength="900"
+        />
+        <button type="submit" class="btn btn-primary">SEND</button>
+      </form>
+    </section>
 
-              <div class="dossier-identity profile-info">
-                <div class="dossier-name-row">
-                  <h3 class="dossier-name" id="profileName">Nina</h3>
-                  <span class="node-sig sig-online" id="profileSig">ONLINE</span>
-                </div>
-                <p class="dossier-bio" id="profileBio">Still holding the thread.</p>
-              </div>
+    <aside class="inbox-side" aria-label="Thread dossier">
+      <section class="panel inbox-side-card">
+        <div class="sys-label">DOSSIER</div>
+        <div class="inbox-side-portrait">
+          <img src="profile_pictures/hazel.png" alt="Hazel portrait" />
+        </div>
+        <h3>Hazel</h3>
+        <p>Precise observer who reveals little. Waits for you to stop pretending.</p>
+      </section>
 
-              <div class="dossier-diagnostics" id="dossierDiagnostics">
-                <div class="dd-header">
-                  <svg width="8" height="8" viewBox="0 0 8 8"><rect x="1" y="1" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1"/><rect x="3" y="3" width="2" height="2" fill="currentColor"/></svg>
-                  <span class="sys-label">NODE DIAGNOSTICS</span>
-                </div>
-                <div class="dd-grid">
-                  <div class="dd-row"><span class="dd-key">SIGNAL</span><span class="dd-val dd-live" id="ddSignal">LIVE</span></div>
-                  <div class="dd-row"><span class="dd-key">ACCESS</span><span class="dd-val" id="ddAccess">OPEN</span></div>
-                  <div class="dd-row"><span class="dd-key">ROUTE</span><span class="dd-val" id="ddRoute">THE RETURN</span></div>
-                  <div class="dd-row"><span class="dd-key">STATE</span><span class="dd-val" id="ddState">STABLE</span></div>
-                  <div class="dd-row"><span class="dd-key">VECTOR</span><span class="dd-val" id="ddVector">WARM</span></div>
-                </div>
-              </div>
+      <section class="panel inbox-side-card">
+        <div class="sys-label">DIAGNOSTICS</div>
 
-              <div class="dossier-tags-block">
-                <div class="dd-header">
-                  <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="none" stroke="currentColor" stroke-width="1"/></svg>
-                  <span class="sys-label">SIGNAL TAGS</span>
-                </div>
-                <div class="dossier-tags" id="profileTags"></div>
-              </div>
+        <div class="meter-row">
+          <span>Pull</span>
+          <div class="meter-track"><div class="meter-bar" style="width: 82%;"></div></div>
+          <strong>82%</strong>
+        </div>
 
-              <div class="dossier-cta-wrap">
-                <button class="btn btn-secondary btn-full dossier-cta" id="profileOpenBtn">CONTINUE PRIVATE CHAT</button>
-                <button class="btn btn-ghost btn-full dossier-route-btn" id="dossierRouteBtn" data-nav="routes">PROFILES</button>
-              </div>
-            </aside>
+        <div class="meter-row">
+          <span>Memory</span>
+          <div class="meter-track"><div class="meter-bar" style="width: 43%;"></div></div>
+          <strong>43%</strong>
+        </div>
 
-          </div>
+        <div class="pill-row">
+          <span class="pill">AFTER THE PAUSE</span>
+          <span class="pill">OBSERVANT</span>
+          <span class="pill">PRIVATE</span>
         </div>
       </section>
+    </aside>
+  </div>
+</section>
 
       <!-- PROFILES -->
       <section id="routes" class="page" data-page="routes">
-        <div class="container section-space">
+  <div class="profiles-shell page-shell">
+    <aside class="profiles-index" aria-label="Profile index">
+      <div class="rail-head">
+        <span class="rail-eyebrow">PROFILES</span>
+        <span class="rail-count">4</span>
+      </div>
 
-          <!-- Hero banner -->
-          <div class="profiles-hero">
-            <span class="sys-label">NODE GALLERY</span>
-            <h2 class="profiles-title">PROFILES</h2>
-            <p class="subtle">Private access nodes. Portraits, signals, fragments.</p>
-          </div>
+      <div class="profiles-index-list">
+        <button class="profile-index-row active" type="button" data-room="hazel" style="--ch-hue: 38;">
+          <span class="profile-index-avatar avatar-hazel-grad">
+            <img src="profile_pictures/hazel.png" alt="" onerror="this.remove()" />
+            <span>H</span>
+          </span>
+          <span class="profile-index-copy">
+            <strong>Hazel</strong>
+            <small>AFTER THE PAUSE</small>
+          </span>
+        </button>
 
-          <!-- 4 profile cards -->
-          <div class="profiles-cards">
+        <button class="profile-index-row" type="button" data-room="nina" style="--ch-hue: 14;">
+          <span class="profile-index-avatar avatar-nina-grad">
+            <img src="profile_pictures/nina_profile.png" alt="" onerror="this.remove()" />
+            <span>N</span>
+          </span>
+          <span class="profile-index-copy">
+            <strong>Nina</strong>
+            <small>THE RETURN</small>
+          </span>
+        </button>
 
-            <article class="profile-card profile-card--nina">
-              <div class="profile-card-img">
-                <img src="profile_pictures/nina_profile.png" alt="Nina" />
-                <div class="profile-card-outline"></div>
-              </div>
-              <div class="profile-card-body">
-                <div class="profile-status"><span class="profile-dot"></span> ONLINE</div>
-                <h3 class="profile-name">Nina.</h3>
-                <p class="profile-bio">Holding the thread. Quiet signal. Magnetic presence.</p>
-                <div class="profile-meta">
-                  <span class="profile-stat">Signal stable</span>
-                  <button class="btn btn-primary btn-small" type="button" data-nav="inbox" data-contact="nina">MESSAGE</button>
-                </div>
-              </div>
-            </article>
+        <button class="profile-index-row" type="button" data-room="iris" style="--ch-hue: 275;">
+          <span class="profile-index-avatar avatar-iris-grad">
+            <img src="profile_pictures/iris_profile.png" alt="" onerror="this.remove()" />
+            <span>I</span>
+          </span>
+          <span class="profile-index-copy">
+            <strong>Iris</strong>
+            <small>LOW SIGNAL</small>
+          </span>
+        </button>
 
-            <article class="profile-card profile-card--hazel">
-              <div class="profile-card-img">
-                <video
-                  src="profile_pictures/hazel_450x_auto__.mp4"
-                  autoplay loop muted playsinline
-                  aria-label="Hazel"
-                  class="profile-card-video"
-                ></video>
-                <div class="profile-card-outline"></div>
-              </div>
-              <div class="profile-card-body">
-                <div class="profile-status"><span class="profile-dot profile-dot--away"></span> OBSERVANT</div>
-                <h3 class="profile-name">Hazel.</h3>
-                <p class="profile-bio">Precise and still. She watches more than she shows. Slow to open.</p>
-                <div class="profile-meta">
-                  <span class="profile-stat">Pull active</span>
-                  <button class="btn btn-primary btn-small" type="button" data-nav="inbox" data-contact="hazel">MESSAGE</button>
-                </div>
-              </div>
-            </article>
+        <button class="profile-index-row" type="button" data-room="vale" style="--ch-hue: 186;">
+          <span class="profile-index-avatar avatar-vale-grad">
+            <img src="profile_pictures/vale_profile.png" alt="" onerror="this.remove()" />
+            <span>V</span>
+          </span>
+          <span class="profile-index-copy">
+            <strong>Vale</strong>
+            <small>BRIEF WINDOW</small>
+          </span>
+        </button>
+      </div>
+    </aside>
 
-            <article class="profile-card profile-card--iris">
-              <div class="profile-card-img">
-                <img src="profile_pictures/iris_profile.png" alt="Iris" />
-                <div class="profile-card-outline"></div>
-              </div>
-              <div class="profile-card-body">
-                <div class="profile-status"><span class="profile-dot"></span> LISTENING</div>
-                <h3 class="profile-name">Iris.</h3>
-                <p class="profile-bio">Few words, heavy weight. Only clear in private.</p>
-                <div class="profile-meta">
-                  <span class="profile-stat">Warming</span>
-                  <button class="btn btn-primary btn-small" type="button" data-nav="inbox" data-contact="iris">MESSAGE</button>
-                </div>
-              </div>
-            </article>
-
-            <article class="profile-card profile-card--vale">
-              <div class="profile-card-img">
-                <img src="profile_pictures/vale_profile.png" alt="Vale" />
-                <div class="profile-card-outline"></div>
-              </div>
-              <div class="profile-card-body">
-                <div class="profile-status profile-status--unstable"><span class="profile-dot profile-dot--unstable"></span> UNSTABLE</div>
-                <h3 class="profile-name">Vale.</h3>
-                <p class="profile-bio">Volatile, intense in brief flashes. Open briefly. Then gone.</p>
-                <div class="profile-meta">
-                  <span class="profile-stat">Unstable</span>
-                  <button class="btn btn-primary btn-small" type="button" data-nav="inbox" data-contact="vale">MESSAGE</button>
-                </div>
-              </div>
-            </article>
-
-          </div>
-
-          <!-- Gallery grid -->
-          <div class="profiles-gallery-head">
-            <span class="sys-label">SIGNAL FRAGMENTS</span>
-            <h3 class="profiles-gallery-title">GALLERY</h3>
-          </div>
-
-          <!-- Profiles gallery replaced with local images (Railway-hosted images removed) -->
-          <div class="profiles-gallery" id="profilesGallery">
-            <button type="button" class="profiles-shot" data-src="profile_pictures/nina_profile.png" aria-label="View Nina"><img src="profile_pictures/nina_profile.png" alt="Nina" /></button>
-            <button type="button" class="profiles-shot" data-src="profile_pictures/hazel_large_picture.png" aria-label="View Hazel"><img src="profile_pictures/hazel_large_picture.png" alt="Hazel" /></button>
-            <button type="button" class="profiles-shot" data-src="profile_pictures/iris_profile.png" aria-label="View Iris"><img src="profile_pictures/iris_profile.png" alt="Iris" /></button>
-            <button type="button" class="profiles-shot" data-src="profile_pictures/vale_profile.png" aria-label="View Vale"><img src="profile_pictures/vale_profile.png" alt="Vale" /></button>
-            <button type="button" class="profiles-shot" data-src="profile_pictures/someone.png" aria-label="View Unknown"><img src="profile_pictures/someone.png" alt="Unknown" /></button>
-          </div>
-
+    <section class="profiles-main panel" aria-label="Selected dossier">
+      <header class="profiles-hero">
+        <div class="profiles-hero-portrait">
+          <img src="profile_pictures/hazel.png" alt="Hazel portrait" />
         </div>
 
-        <!-- Lightbox -->
-        <div class="profiles-lightbox" id="profilesLightbox" aria-hidden="true">
-          <button class="profiles-lightbox-close" id="profilesLightboxClose" aria-label="Close">×</button>
-          <img id="profilesLightboxImg" src="" alt="" />
+        <div class="profiles-hero-copy">
+          <div class="sys-label">SELECTED DOSSIER</div>
+          <h1>Hazel</h1>
+          <p class="profiles-whisper">Notices everything. Gives nothing for free.</p>
+          <div class="profiles-subline">
+            <span>OBSERVANT</span>
+            <span aria-hidden="true">·</span>
+            <span>AFTER THE PAUSE</span>
+            <span aria-hidden="true">·</span>
+            <span>PRIVATE CHANNEL</span>
+          </div>
         </div>
 
+        <div class="profiles-hero-actions">
+          <button class="btn btn-primary" type="button" data-nav="inbox">MESSAGE</button>
+          <button class="btn btn-ghost" type="button" data-nav="hub">OPEN HUB</button>
+        </div>
+      </header>
+
+      <div class="profiles-main-grid">
+        <section class="panel profiles-block">
+          <div class="sys-label">BIO</div>
+          <p>Precise, withheld, and difficult to rush. Hazel notices what you avoid before you do, and she only rewards patience.</p>
+        </section>
+
+        <section class="panel profiles-block">
+          <div class="sys-label">RELATIONSHIP METRICS</div>
+          <div class="meter-row">
+            <span>Pull</span>
+            <div class="meter-track"><div class="meter-bar" style="width: 82%;"></div></div>
+            <strong>82%</strong>
+          </div>
+          <div class="meter-row">
+            <span>Memory</span>
+            <div class="meter-track"><div class="meter-bar" style="width: 43%;"></div></div>
+            <strong>43%</strong>
+          </div>
+        </section>
+
+        <section class="panel profiles-block">
+          <div class="sys-label">ANCHORS</div>
+          <div class="anchor-row"><strong>Contradiction</strong><span>Precise observer who reveals nothing.</span></div>
+          <div class="anchor-row"><strong>Weakness</strong><span>Waits for you to stop pretending.</span></div>
+          <div class="anchor-row"><strong>Rule</strong><span>Nothing for free.</span></div>
+        </section>
+
+        <section class="panel profiles-block">
+          <div class="sys-label">TAGS</div>
+          <div class="pill-row">
+            <span class="pill">sharp</span>
+            <span class="pill">watching</span>
+            <span class="pill">pauses matter</span>
+          </div>
+        </section>
+      </div>
+
+      <section class="profiles-gallery panel" aria-label="Character fragments">
+        <div class="sys-label">FRAGMENTS</div>
+        <div class="profiles-gallery-strip">
+          <button class="gallery-fragment is-active" type="button">
+            <img src="profile_pictures/hazel.png" alt="Hazel fragment" />
+          </button>
+          <button class="gallery-fragment" type="button">
+            <img src="profile_pictures/nina_profile.png" alt="Nina fragment" />
+          </button>
+          <button class="gallery-fragment" type="button">
+            <img src="profile_pictures/iris_profile.png" alt="Iris fragment" />
+          </button>
+          <button class="gallery-fragment" type="button">
+            <img src="profile_pictures/vale_profile.png" alt="Vale fragment" />
+          </button>
+        </div>
       </section>
+    </section>
+  </div>
+</section>
 
     </main>
 
