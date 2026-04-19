@@ -440,6 +440,7 @@ async function sendMessage(contactKey, text) {
   renderContactsPage();
   renderInbox();
   syncAvatarRings();
+  if (typeof initHubSalvage === 'function') initHubSalvage();
 }
 
 
