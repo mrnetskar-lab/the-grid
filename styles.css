@@ -3577,7 +3577,7 @@ h3 {
   object-position: center top !important;
 }
 #hub .hub-hero-name {
-  font-size: 2.75rem !important; /* ~44px */
+  font-size: 44px !important;
   line-height: 0.95 !important;
 }
 #hub .hd-portrait-wrap {
