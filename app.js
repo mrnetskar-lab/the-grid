@@ -1,6 +1,16 @@
 // GRID – clean rewrite
 // Relationship-first, contacts-based, invite/opening aware UI
 
+// Dynamic viewport height — fixes 100vh browser chrome issues on mobile
+function syncAppHeight() {
+  const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty('--app-height', `${h}px`);
+}
+window.addEventListener('resize', syncAppHeight);
+window.addEventListener('orientationchange', syncAppHeight);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', syncAppHeight);
+syncAppHeight();
+
 // ---------------------------------------------------------
 // DATA
 // ---------------------------------------------------------
