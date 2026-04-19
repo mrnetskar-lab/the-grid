@@ -1820,7 +1820,7 @@ h3 {
   :root { --topbar-h: 52px; }
   .topbar { padding: 0.35rem 0.6rem; }
   .topbar .topbar-live { display: none; }
-  .hub-world { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .hub-world { grid-template-columns: 1fr !important; grid-template-rows: auto 1fr; }
   .hub-sidebar {
     order: -1;
     flex-direction: row;
