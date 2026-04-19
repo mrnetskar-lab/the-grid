@@ -109,7 +109,6 @@ a { color: inherit; text-decoration: none; }
 .site-shell { position: relative; min-height: 100vh; }
 
 /* Real backdrop — soft radial gradients that match Page.html reference */
-.site-shell:has(#hub.page.active),
 .backdrop {
   position: fixed;
   inset: 0;
@@ -2398,8 +2397,9 @@ h3 {
 
 #hub.page.active {
   background:
-    radial-gradient(ellipse at 18% 8%,  rgba(255, 216, 170, 0.07), transparent 38%),
-    radial-gradient(ellipse at 82% 92%, hsla(var(--channel-hue, 220), 70%, 60%, 0.08), transparent 40%),
+    radial-gradient(ellipse at 18% 8%,  rgba(255, 216, 170, 0.13), transparent 40%),
+    radial-gradient(ellipse at 82% 92%, hsla(var(--channel-hue, 220), 70%, 60%, 0.12), transparent 42%),
+    radial-gradient(ellipse at 50% 110%, rgba(40, 30, 50, 0.55), transparent 60%),
     linear-gradient(180deg, #0f0b11 0%, #141014 60%, #0b080c 100%);
   transition: background 1.2s ease;
 }
