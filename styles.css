@@ -2089,17 +2089,6 @@ h3 {
   transition: background 1.2s ease;
 }
 
-.hub-world {
-  grid-template-columns: 280px 1fr !important;
-  max-width: 100%;
-}
-
-.hub-chat-panel {
-  max-width: none !important;
-  justify-self: stretch !important;
-  width: 100% !important;
-}
-
 .hub-chat-panel {
   background:
     radial-gradient(120% 80% at 50% 115%,
