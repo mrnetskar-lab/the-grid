@@ -38,10 +38,11 @@ const sidebar = document.getElementById("sidebar");
       sidebar.classList.toggle("open");
     });
 
+    // Sidebar close handler: if overlays/modals are added in the future, check for their presence before closing sidebar.
     document.addEventListener("click", (event) => {
       const clickedInsideSidebar = sidebar.contains(event.target);
       const clickedMenu = menuBtn && menuBtn.contains(event.target);
-
+      // TODO: If overlays/modals are present, skip closing sidebar here.
       if (window.innerWidth <= 980 && !clickedInsideSidebar && !clickedMenu) {
         sidebar.classList.remove("open");
       }
