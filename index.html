@@ -936,6 +936,17 @@ const gate=document.getElementById('gate');
 if(localStorage.getItem('v_in')){gate.style.opacity='0';gate.style.pointerEvents='none';setTimeout(()=>gate.classList.add('hidden'),10);}
 document.getElementById('gateEnter').addEventListener('click',()=>{localStorage.setItem('v_in','1');gate.style.transition='opacity .35s';gate.style.opacity='0';setTimeout(()=>gate.classList.add('hidden'),380);});
 
+// Onboarding
+const onboard=document.getElementById('onboard');
+function _dismissOnboard(){if(onboard){onboard.style.transition='opacity .35s';onboard.style.opacity='0';setTimeout(()=>onboard.classList.add('hidden'),380);}localStorage.setItem('v_onboarded','1');}
+function skipOnboard(){_dismissOnboard();}
+function obSelect(el){document.querySelectorAll('.ob-char').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');const btn=document.getElementById('obPickBtn');if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';}const step3title=document.getElementById('obStep3Title');if(step3title){const n=el.querySelector('.ob-char-name');if(n)step3title.textContent=n.textContent+' is waiting.';}}
+function finishOnboard(){const sel=document.querySelector('.ob-char.selected');if(sel){const t=sel.dataset.thread;if(t){const item=document.querySelector(`.drawer-item[data-thread="${t}"]`);if(item)item.click();}}_dismissOnboard();goTo('chat');}
+function obNext(step){document.querySelectorAll('.ob-screen').forEach((s,i)=>s.classList.toggle('active',i===step-1));}
+if(localStorage.getItem('v_onboarded')){_dismissOnboard();}
+// clear stale message limit lock
+localStorage.removeItem('v_free_msgs');
+
 // Nav
 const sidebar=document.getElementById('sidebar'),menuBtn=document.getElementById('menuBtn'),sbg=document.getElementById('sidebarBg');
 const views={home:document.getElementById('view-home'),discover:document.getElementById('view-discover'),chat:document.getElementById('view-chat'),gallery:document.getElementById('view-gallery'),profile:document.getElementById('view-profile')};
