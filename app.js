@@ -1,973 +1,122 @@
-// GRID – clean rewrite
-// Relationship-first, contacts-based, invite/opening aware UI
-
-// Dynamic viewport height — fixes 100vh browser chrome issues on mobile
-function syncAppHeight() {
-  const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  document.documentElement.style.setProperty('--app-height', `${h}px`);
-}
-window.addEventListener('resize', syncAppHeight);
-window.addEventListener('orientationchange', syncAppHeight);
-if (window.visualViewport) window.visualViewport.addEventListener('resize', syncAppHeight);
-syncAppHeight();
-
-// ---------------------------------------------------------
-// DATA
-// ---------------------------------------------------------
-
-const characterDirectory = {
-  nina: {
-    key: "nina",
-    name: "Nina",
-    avatar: "N",
-    hue: 14,
-    route: "THE RETURN",
-    img: "profile_pictures/nina_profile.png",
-    whisper: "Still holding the thread, years later.",
-    status: "ONLINE",
-    preview: "Still holding the thread.",
-    mood: "Warm signal. Pulls you back.",
-    scene: "Nina is closest right now.",
-    sceneCopy: "She is still holding the thread.",
-    tags: ["warm", "private", "holds the thread"],
-    messages: [
-      { side: "incoming", text: "You came back slower this time.", time: "20:38" },
-      { side: "incoming", text: "Still — you came back.", time: "20:39" },
-    ],
-  },
-  hazel: {
-    key: "hazel",
-    name: "Hazel",
-    avatar: "H",
-    hue: 38,
-    route: "AFTER THE PAUSE",
-    img: "profile_pictures/hazel.png",
-    whisper: "Notices everything. Gives nothing for free.",
-    status: "OBSERVANT",
-    preview: "You disappeared too early.",
-    mood: "Precise. Watching.",
-    scene: "Hazel is closest right now.",
-    sceneCopy: "Hazel notices what you avoid before you do.",
-    tags: ["sharp", "watching", "pauses matter"],
-    messages: [
-      { side: "incoming", text: "There you are.", time: "20:21" },
-      { side: "incoming", text: "You always return like you weren't going to.", time: "20:22" },
-    ],
-  },
-  iris: {
-    key: "iris",
-    name: "Iris",
-    avatar: "I",
-    hue: 275,
-    route: "LOW SIGNAL",
-    img: "profile_pictures/iris_profile.png",
-    whisper: "Listens more than she speaks. Hears everything.",
-    status: "LISTENING",
-    preview: "Only clear in private.",
-    mood: "Quiet. Slow. Intimate.",
-    scene: "Iris is warming quietly.",
-    sceneCopy: "Meaning appears only when you stop forcing it.",
-    tags: ["quiet", "low signal", "clear"],
-    messages: [
-      { side: "incoming", text: "You don't have to speak quickly here.", time: "20:31" },
-      { side: "incoming", text: "Let the thought finish forming first.", time: "20:32" },
-    ],
-  },
-  vale: {
-    key: "vale",
-    name: "Vale",
-    avatar: "V",
-    hue: 186,
-    route: "BRIEF WINDOW",
-    img: "profile_pictures/vale_profile.png",
-    whisper: "Brief windows. Intense. Then gone.",
-    status: "UNSTABLE",
-    preview: "Open briefly. Then gone.",
-    mood: "Brief windows. No comfort.",
-    scene: "Vale opens briefly.",
-    sceneCopy: "Access does not hold for long here.",
-    tags: ["brief", "invite only", "unstable"],
-    messages: [
-      { side: "incoming", text: "You're late.", time: "now" },
-      { side: "incoming", text: "Come in or lose it.", time: "now" },
-    ],
-  },
-};
-
-const relationshipState = {
-  nina: {
-    state: "warming",
-    pull: 0.74,
-    memory: 0.58,
-    sharedOpen: false,
-    openExpiresAt: null,
-    note: "She is still holding the thread.",
-  },
-  hazel: {
-    state: "pull-active",
-    pull: 0.82,
-    memory: 0.43,
-    sharedOpen: false,
-    openExpiresAt: null,
-    note: "Hazel notices what you avoid before you do.",
-  },
-  iris: {
-    state: "warming",
-    pull: 0.53,
-    memory: 0.41,
-    sharedOpen: false,
-    openExpiresAt: null,
-    note: "Something is warming quietly.",
-  },
-  vale: {
-    state: "faded",
-    pull: 0.22,
-    memory: 0.17,
-    sharedOpen: false,
-    openExpiresAt: null,
-    note: "A brief window closed.",
-  },
-};
-
-
-// ---------------------------------------------------------
-// APP STATE
-// ---------------------------------------------------------
-
-const appState = {
-  page: "home",
-  activeContact: "hazel",
-  activeThread: "hazel",
-  greeted: new Set(),
-};
-
-// ---------------------------------------------------------
-// DOM
-// ---------------------------------------------------------
-
-const navButtons = document.querySelectorAll("[data-nav]");
-const pages = document.querySelectorAll(".page");
-
-const menuToggle = document.getElementById("menuToggle");
-const nav = document.getElementById("primaryNav");
-
-const dmThread = document.getElementById("dmThread");
-const dmName = document.getElementById("dmName");
-const dmStatus = document.getElementById("dmStatus");
-const dmAvatar = document.getElementById("dmAvatar");
-const dmForm = document.getElementById("dmForm");
-const dmInput = document.getElementById("dmInput");
-
-const stats = {
-  nodes: document.getElementById("statNodes"),
-  rooms: document.getElementById("statRooms"),
-  invites: document.getElementById("statInvites"),
-};
-
-const nodeRailList = document.getElementById("nodeRailList");
-const presenceStack = document.getElementById("presenceStack");
-
-const hubSceneTitle = document.getElementById("hubSceneTitle");
-const hubSceneCopy = document.getElementById("hubSceneCopy");
-const sceneFocusAvatar = document.getElementById("sceneFocusAvatar");
-const sceneFocusName = document.getElementById("sceneFocusName");
-const sceneFocusPreview = document.getElementById("sceneFocusPreview");
-const mainActivityStrip = document.getElementById("mainActivityStrip");
-
-const spotlightAvatar = document.getElementById("spotlightAvatar");
-const spotlightName = document.getElementById("spotlightName");
-const spotlightStatus = document.getElementById("spotlightStatus");
-const spotlightCopy = document.getElementById("spotlightCopy");
-const spotlightTags = document.getElementById("spotlightTags");
-const spotlightOpenBtn = document.getElementById("spotlightOpenBtn");
-
-const quickOpenThreadBtn = document.getElementById("quickOpenThreadBtn");
-const hubEnterFocusedBtn = document.getElementById("hubEnterFocusedBtn");
-
-// ---------------------------------------------------------
-// HELPERS
-// ---------------------------------------------------------
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-// ---------------------------------------------------------
-// CONTOUR SYSTEM
-// ---------------------------------------------------------
-
-// Character identity hues (HSL base)
-const CHAR_HUE = { nina: 264, hazel: 217, iris: 280, vale: 186 };
-
-// Tone modifiers: how each tone bends the hue and shifts lightness
-const TONE_MOD = {
-  soft:     { hShift:  8, lShift:  8, sat: 70 },
-  tender:   { hShift: 14, lShift: 12, sat: 65 },
-  playful:  { hShift:-12, lShift:  6, sat: 85 },
-  guarded:  { hShift: -6, lShift: -8, sat: 50 },
-  cold:     { hShift:-20, lShift:-14, sat: 40 },
-  neutral:  { hShift:  0, lShift:  0, sat: 55 },
-};
-
-
-const characterAnchors = {
-  nina:  { contradiction: "Warm presence who guards the thread carefully.", weakness: "Returns to connection no matter how long the silence.", rule: "Hold the thread." },
-  hazel: { contradiction: "Precise observer who reveals nothing.", weakness: "Waits for you to stop pretending.", rule: "Nothing for free." },
-  iris:  { contradiction: "Says least, understands most.", weakness: "Clarity only appears when pressure lifts.", rule: "Let it finish forming." },
-  vale:  { contradiction: "Opens intensely, vanishes without warning.", weakness: "Every window closes. Timing is everything.", rule: "Come in or lose it." },
-};
-
-function applyContour(el, charKey, toneClass = "neutral", subtextStrength = 0) {
-  const hue = CHAR_HUE[charKey] ?? 260;
-  const mod = TONE_MOD[toneClass] || TONE_MOD.neutral;
-
-  const baseHue = hue + mod.hShift;
-  const sat     = mod.sat;
-  const light   = 62 + mod.lShift;
-  const strength = Math.max(0, Math.min(1, Number(subtextStrength) || 0));
-
-  const borderAlpha      = 0.48 + strength * 0.20;
-  const glowAlpha        = 0.14 + strength * 0.10;
-  const glowStrongAlpha  = 0.20 + strength * 0.12;
-  const fillAlpha        = 0.02 + strength * 0.015;
-
-  el.style.setProperty("--msg-hue-a",            `${baseHue - 22}`);
-  el.style.setProperty("--msg-hue-b",            `${baseHue}`);
-  el.style.setProperty("--msg-hue-c",            `${baseHue + 28}`);
-  el.style.setProperty("--msg-sat",              `${sat}%`);
-  el.style.setProperty("--msg-light",            `${light}%`);
-  el.style.setProperty("--msg-border-alpha",     `${borderAlpha}`);
-  el.style.setProperty("--msg-glow-alpha",       `${glowAlpha}`);
-  el.style.setProperty("--msg-glow-strong-alpha",`${glowStrongAlpha}`);
-  el.style.setProperty("--msg-fill-alpha",       `${fillAlpha}`);
-}
-
-function nowClock() {
-  return new Date().toLocaleTimeString("no-NO", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function getRelationship(contactKey) {
-  return relationshipState[contactKey] || {
-    state: "dormant",
-    pull: 0,
-    memory: 0,
-    sharedOpen: false,
-    openExpiresAt: null,
-    note: "",
-  };
-}
-
-function getStateLabel(state) {
-  switch (state) {
-    case "warming": return "WARMING";
-    case "pull-active": return "PULL ACTIVE";
-    case "opening": return "OPENING";
-    case "open": return "OPEN NOW";
-    case "faded": return "CLOSED";
-    case "dormant":
-    default: return "NO OPENING YET";
-  }
-}
-
-function getContactCTA(state) {
-  switch (state) {
-    case "opening":
-    case "open": return "ENTER SHARED SPACE";
-    case "pull-active": return "FOLLOW SIGNAL";
-    case "warming":
-    case "faded":
-    case "dormant":
-    default: return "CONTINUE IN DMs";
-  }
-}
-
-function canEnterSharedSpace(contactKey) {
-  const rel = getRelationship(contactKey);
-  return rel.state === "opening" || rel.state === "open";
-}
-
-function setActivePage(pageName) {
-  appState.page = pageName;
-
-  pages.forEach((page) => {
-    page.classList.toggle("active", page.dataset.page === pageName);
-  });
-
-  document.querySelectorAll(".nav-link").forEach((button) => {
-    button.classList.toggle("active", button.dataset.nav === pageName);
-  });
-
-  window.location.hash = pageName;
-
-  if (nav?.classList.contains("open")) {
-    nav.classList.remove("open");
-    menuToggle?.setAttribute("aria-expanded", "false");
-  }
-}
-
-function bootFromHash() {
-  const hash = window.location.hash.replace("#", "");
-  const valid = ["home", "hub", "rooms", "inbox", "routes"];
-  setActivePage(valid.includes(hash) ? hash : "home");
-}
-
-function focusContact(contactKey) {
-  if (!characterDirectory[contactKey]) return;
-  appState.activeContact = contactKey;
-  appState.activeThread = contactKey;
-
-  renderPresenceStack();
-  renderContactsPage();
-  renderHub();
-  renderHubChat();
-  renderInbox();
-  syncAvatarRings();
-
-  // Fire an AI greeting when switching to a character in hub with no prior exchange
-  const contact = characterDirectory[contactKey];
-  const hasUserMessages = contact.messages.some((m) => m.side === "outgoing");
-  if (!hasUserMessages && !appState.greeted.has(contactKey) && appState.page === "hub") {
-    appState.greeted.add(contactKey);
-    triggerCharacterGreeting(contactKey);
-  }
-}
-
-async function triggerCharacterGreeting(contactKey) {
-  const contact = characterDirectory[contactKey];
-  if (!contact) return;
-
-  // Show typing indicator
-  contact.messages.push({ side: "incoming", text: "...", time: "", typing: true });
-  renderHubChat();
-
-  let reply = null, toneClass = "neutral", subtextStrength = 0;
-  try {
-    const res = await fetch(`/api/characters/${contactKey}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: "__greeting__" }),
-    });
-    const data = await res.json();
-    if (data?.ok) {
-      reply = data.reply;
-      toneClass = data.meta?.toneClass || "neutral";
-      subtextStrength = data.meta?.subtextStrength || 0;
-    }
-  } catch { /* silent fallback */ }
-
-  contact.messages = contact.messages.filter((m) => !m.typing);
-  if (reply) {
-    contact.messages.push({
-      side: "incoming",
-      text: reply,
-      time: nowClock(),
-      toneClass,
-      subtextStrength,
-      char: contactKey,
-    });
-  }
-  renderHubChat();
-  renderInbox();
-}
-
-async function sendMessage(contactKey, text) {
-  const contact = characterDirectory[contactKey];
-  if (!contact || !text.trim()) return;
-
-  contact.messages.push({
-    side: "outgoing",
-    text: text.trim(),
-    time: nowClock(),
-  });
-
-  // Typing indicator
-  contact.messages.push({ side: "incoming", text: "...", time: "", typing: true });
-  renderInbox();
-
-  let reply, toneClass, subtextStrength;
-  try {
-    const res = await fetch(`/api/characters/${contactKey}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: text.trim() }),
-    });
-    const data = await res.json();
-    reply = data?.ok ? data.reply : null;
-    const meta = data?.meta || {};
-    toneClass = meta?.toneClass || 'neutral';
-    subtextStrength = typeof meta?.subtextStrength === 'number' ? meta.subtextStrength : 0;
-  } catch {
-    reply = null;
-    toneClass = 'neutral';
-    subtextStrength = 0;
-  }
-
-  // Remove typing indicator
-  contact.messages = contact.messages.filter((m) => !m.typing);
-
-  contact.messages.push({
-    side: "incoming",
-    text: reply || "...",
-    time: nowClock(),
-    toneClass,
-    subtextStrength,
-    char: contactKey,
-  });
-
-  const rel = getRelationship(contactKey);
-  rel.memory = Math.min(1, rel.memory + 0.04);
-  rel.pull = Math.min(1, rel.pull + 0.05);
-
-  if (rel.pull > 0.75 && rel.state === "warming") {
-    rel.state = "pull-active";
-  }
-
-  if (rel.pull > 0.9 && rel.state === "pull-active") {
-    rel.state = "opening";
-  }
-
-  saveRelationshipState();
-  renderHub();
-  renderHubChat();
-  renderContactsPage();
-  renderInbox();
-  syncAvatarRings();
-  if (typeof initHubSalvage === 'function') initHubSalvage();
-}
-
-
-// ---------------------------------------------------------
-// PERSISTENCE — localStorage for relationship state
-// ---------------------------------------------------------
-
-const LS_KEY = 'grid_relationship_state';
-
-function saveRelationshipState() {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(relationshipState));
-  } catch {}
-}
-
-function loadRelationshipState() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return;
-    const saved = JSON.parse(raw);
-    Object.keys(saved).forEach((key) => {
-      if (relationshipState[key]) {
-        Object.assign(relationshipState[key], saved[key]);
-      }
-    });
-  } catch {}
-}
-
-// ---------------------------------------------------------
-// RINGS
-// ---------------------------------------------------------
-
-const ringStateMap = {
-  dormant: "locked",
-  warming: "warming",
-  "pull-active": "invited",
-  opening: "invited",
-  open: "open",
-  faded: "expired",
-};
-
-function syncAvatarRings() {
-  Object.keys(characterDirectory).forEach((contactKey) => {
-    const rel = getRelationship(contactKey);
-    const ringState = ringStateMap[rel.state] || "locked";
-
-    document
-      .querySelectorAll(`.avatar-ring[data-char="${contactKey}"]`)
-      .forEach((ring) => {
-        ring.dataset.ringState = ringState;
-      });
-  });
-}
-
-// ---------------------------------------------------------
-// RENDER: HOME STATS
-// ---------------------------------------------------------
-
-function renderStats() {
-  if (stats.nodes) stats.nodes.textContent = "12";
-  if (stats.rooms) stats.rooms.textContent = String(Object.keys(characterDirectory).length);
-  if (stats.invites) {
-    const invites = Object.values(relationshipState).filter(
-      (x) => x.state === "opening" || x.state === "open"
-    ).length;
-    stats.invites.textContent = String(invites);
-  }
-}
-
-// ---------------------------------------------------------
-// RENDER: HUB
-// ---------------------------------------------------------
-
-function renderPresenceStack() {
-  if (!presenceStack) return;
-
-  const buttons = presenceStack.querySelectorAll("[data-room]");
-  buttons.forEach((button) => {
-    const room = button.dataset.room;
-    button.classList.toggle("active", room === appState.activeContact);
-  });
-}
-
-function renderHub() {
-  const contactKey = appState.activeContact;
-  const contact = characterDirectory[contactKey];
-  const rel = getRelationship(contactKey);
-
-  if (!contact) return;
-
-  if (hubSceneTitle) hubSceneTitle.textContent = contact.scene;
-  if (hubSceneCopy) hubSceneCopy.textContent = contact.sceneCopy;
-
-  if (sceneFocusAvatar) {
-    sceneFocusAvatar.textContent = contact.avatar;
-    sceneFocusAvatar.className = `avatar avatar-${contact.key}`;
-  }
-
-  if (sceneFocusName) sceneFocusName.textContent = contact.name;
-  if (sceneFocusPreview) sceneFocusPreview.textContent = contact.preview;
-
-  if (spotlightAvatar) {
-    spotlightAvatar.textContent = contact.avatar;
-    spotlightAvatar.className = `avatar avatar-${contact.key}`;
-  }
-
-  if (spotlightName) spotlightName.textContent = contact.name;
-  if (spotlightStatus) spotlightStatus.textContent = getStateLabel(rel.state);
-  if (spotlightCopy) spotlightCopy.textContent = rel.note || contact.mood;
-
-  if (spotlightTags) {
-    spotlightTags.innerHTML = "";
-    contact.tags.forEach((tag) => {
-      const span = document.createElement("span");
-      span.className = "activity-chip";
-      span.textContent = tag;
-      spotlightTags.appendChild(span);
-    });
-  }
-
-  if (spotlightOpenBtn) {
-    spotlightOpenBtn.textContent = getContactCTA(rel.state);
-  }
-
-  if (mainActivityStrip) {
-    mainActivityStrip.innerHTML = "";
-
-    const chips = [
-      `${getStateLabel(rel.state)}`,
-      `PULL ${(rel.pull * 100).toFixed(0)}%`,
-      `MEMORY ${(rel.memory * 100).toFixed(0)}%`,
-      `${contact.name.toUpperCase()} SELECTED`,
-    ];
-
-    chips.forEach((chipText) => {
-      const chip = document.createElement("span");
-      chip.className = "activity-chip";
-      chip.textContent = chipText;
-      mainActivityStrip.appendChild(chip);
-    });
-  }
-}
-
-// ---------------------------------------------------------
-// RENDER: CONTACTS PAGE
-// ---------------------------------------------------------
-
-function renderContactsPage() {
-  const cards = document.querySelectorAll(".room-card");
-
-  cards.forEach((card) => {
-    const contactKey = card.dataset.room;
-    const contact = characterDirectory[contactKey];
-    const rel = getRelationship(contactKey);
-    const cta = card.querySelector(".room-cta");
-    const stateText = card.querySelector(".room-access-state");
-    const moodText = card.querySelector(".room-mood");
-
-    if (!contact || !cta || !stateText || !moodText) return;
-
-    card.dataset.state = rel.state;
-    stateText.textContent = getStateLabel(rel.state);
-    moodText.textContent = rel.note || contact.preview;
-    cta.textContent = getContactCTA(rel.state);
-
-    cta.onclick = (event) => {
-      event.preventDefault();
-
-      focusContact(contactKey);
-
-      if (canEnterSharedSpace(contactKey)) {
-        setActivePage("hub");
-      } else {
-        setActivePage("inbox");
-      }
+const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const navButtons = document.querySelectorAll("[data-view-target]");
+    const jumpButtons = document.querySelectorAll("[data-view-jump]");
+    const views = {
+      home: document.getElementById("view-home"),
+      discover: document.getElementById("view-discover"),
+      chat: document.getElementById("view-chat"),
+      gallery: document.getElementById("view-gallery")
     };
-  });
-}
 
-// ---------------------------------------------------------
-// RENDER: THREAD RAIL
-// ---------------------------------------------------------
+    function setActiveView(name) {
+      Object.entries(views).forEach(([key, view]) => {
+        view.classList.toggle("active", key === name);
+      });
 
-function renderThreadRail() {
-  if (!nodeRailList) return;
+      document.querySelectorAll("[data-view-target]").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.viewTarget === name);
+      });
 
-  nodeRailList.innerHTML = "";
+      sidebar.classList.remove("open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-  Object.keys(characterDirectory).forEach((contactKey, index) => {
-    const contact = characterDirectory[contactKey];
-    const rel = getRelationship(contactKey);
-    const latest = contact.messages[contact.messages.length - 1];
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.dataset.thread = contactKey;
-    button.dataset.index = String(index + 1);
-    button.className = "node-strip";
-    button.classList.toggle("active", appState.activeThread === contactKey);
-
-    button.innerHTML = `
-      <div class="avatar-ring" data-char="${escapeHtml(contactKey)}" data-ring-state="${escapeHtml(ringStateMap[rel.state] || "locked")}">
-        <div class="avatar avatar-${escapeHtml(contactKey)} ns-avatar">${escapeHtml(contact.avatar)}</div>
-      </div>
-      <div class="ns-body">
-        <div class="ns-name-row">
-          <strong class="ns-name">${escapeHtml(contact.name)}</strong>
-          <span class="ns-time">${escapeHtml(latest?.time || "now")}</span>
-        </div>
-        <p class="ns-preview">${escapeHtml(latest?.text || contact.preview)}</p>
-        <span class="ns-state-tag">${escapeHtml(getStateLabel(rel.state))}</span>
-      </div>
-    `;
-
-    button.addEventListener("click", () => {
-      focusContact(contactKey);
-      setActivePage("inbox");
+    navButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        setActiveView(btn.dataset.viewTarget);
+      });
     });
 
-    nodeRailList.appendChild(button);
-  });
-}
+    jumpButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        setActiveView(btn.dataset.viewJump);
+      });
+    });
 
-// ---------------------------------------------------------
-// RENDER: INBOX
-// ---------------------------------------------------------
+    menuBtn?.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
 
-function renderInbox() {
-  const contactKey = appState.activeThread;
-  const contact = characterDirectory[contactKey];
-  const rel = getRelationship(contactKey);
+    document.addEventListener("click", (event) => {
+      const clickedInsideSidebar = sidebar.contains(event.target);
+      const clickedMenu = menuBtn && menuBtn.contains(event.target);
 
-  if (!contact || !dmThread) return;
-
-  renderThreadRail();
-
-  if (dmName) dmName.textContent = `${contact.name}`;
-  if (dmStatus) dmStatus.textContent = getStateLabel(rel.state);
-
-  if (dmAvatar) {
-    dmAvatar.textContent = contact.avatar;
-    dmAvatar.className = `avatar avatar-${contact.key}`;
-  }
-
-  dmThread.innerHTML = "";
-
-  contact.messages.forEach((message, index) => {
-    const bubble = document.createElement("div");
-    const latest = index === contact.messages.length - 1;
-
-    bubble.className = [
-      "chat-bubble",
-      message.side,
-      latest ? "is-latest" : "",
-      message.typing ? "typing" : "",
-    ].filter(Boolean).join(" ");
-
-    if (message.side === "incoming") {
-      bubble.dataset.char    = contactKey;
-      bubble.dataset.tone    = message.toneClass || "neutral";
-      bubble.dataset.subtext = String(message.subtextStrength ?? 0);
-      bubble.style.setProperty('--subtext', String(message.subtextStrength ?? 0));
-      applyContour(bubble, contactKey, message.toneClass || "neutral", message.subtextStrength ?? 0);
-    }
-
-    bubble.innerHTML = `
-      <p>${escapeHtml(message.text)}</p>
-      ${message.typing ? "" : `<time>${escapeHtml(message.time)}</time>`}
-    `;
-    dmThread.appendChild(bubble);
-  });
-
-  dmThread.scrollTop = dmThread.scrollHeight;
-}
-
-// ---------------------------------------------------------
-// EVENTS
-// ---------------------------------------------------------
-
-navButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const target = button.dataset.nav;
-    if (!target) return;
-    setActivePage(target);
-  });
-});
-
-menuToggle?.addEventListener("click", () => {
-  const expanded = menuToggle.getAttribute("aria-expanded") === "true";
-  menuToggle.setAttribute("aria-expanded", String(!expanded));
-  nav?.classList.toggle("open");
-});
-
-presenceStack?.querySelectorAll("[data-room]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const contactKey = button.dataset.room;
-    if (!contactKey) return;
-    focusContact(contactKey);
-  });
-});
-
-quickOpenThreadBtn?.addEventListener("click", () => {
-  setActivePage("inbox");
-});
-
-hubEnterFocusedBtn?.addEventListener("click", () => {
-  setActivePage("inbox");
-});
-
-spotlightOpenBtn?.addEventListener("click", () => {
-  const active = appState.activeContact;
-  if (canEnterSharedSpace(active)) {
-    setActivePage("hub");
-    return;
-  }
-  setActivePage("inbox");
-});
-
-dmForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  if (!dmInput) return;
-
-  const text = dmInput.value.trim();
-  if (!text) return;
-
-  sendMessage(appState.activeThread, text);
-  dmInput.value = "";
-});
-
-
-// ---------------------------------------------------------
-// RENDER: HUB DOSSIER
-// ---------------------------------------------------------
-
-function renderHubDossier() {
-  const contactKey = appState.activeContact;
-  const contact    = characterDirectory[contactKey];
-  const rel        = getRelationship(contactKey);
-  if (!contact) return;
-
-  const dossier = document.getElementById("hubDossier");
-  if (!dossier) return;
-
-  if (contact.hue != null) dossier.style.setProperty("--channel-hue", String(contact.hue));
-
-  const portrait = document.getElementById("hdPortrait");
-  if (portrait && contact.img) portrait.src = contact.img;
-
-  const eyebrow = document.getElementById("hdEyebrow");
-  if (eyebrow) eyebrow.textContent = contact.route || "";
-
-  const nameEl = document.getElementById("hdName");
-  if (nameEl) nameEl.textContent = contact.name;
-
-  const bioEl = document.getElementById("hdBio");
-  if (bioEl) bioEl.textContent = contact.whisper || "";
-
-  const pullBar = document.getElementById("hdPullBar");
-  const pullVal = document.getElementById("hdPullVal");
-  if (pullBar) pullBar.style.setProperty("--v", String(rel.pull));
-  if (pullVal) pullVal.textContent = String(Math.round(rel.pull * 100));
-
-  const memBar = document.getElementById("hdMemoryBar");
-  const memVal = document.getElementById("hdMemoryVal");
-  if (memBar) memBar.style.setProperty("--v", String(rel.memory));
-  if (memVal) memVal.textContent = String(Math.round(rel.memory * 100));
-
-  const anchors = characterAnchors[contactKey] || {};
-  const contEl  = document.getElementById("hdContradiction");
-  const weakEl  = document.getElementById("hdWeakness");
-  const ruleEl  = document.getElementById("hdRule");
-  if (contEl) contEl.textContent = anchors.contradiction || "";
-  if (weakEl) weakEl.textContent = anchors.weakness || "";
-  if (ruleEl) ruleEl.textContent = anchors.rule || "";
-}
-
-// ---------------------------------------------------------
-// HUB CHAT
-// ---------------------------------------------------------
-
-const hubChatThread = document.getElementById("hubChatThread");
-const hubChatForm   = document.getElementById("hubChatForm");
-const hubChatInput  = document.getElementById("hubChatInput");
-const hubFocusRing  = document.getElementById("hubFocusRing");
-
-function renderHubChat() {
-  const contactKey = appState.activeContact;
-  const contact    = characterDirectory[contactKey];
-  if (!contact || !hubChatThread) return;
-
-  const rel = getRelationship(contactKey);
-
-  // Update header
-  const nameEl   = document.getElementById("sceneFocusName");
-  const statusEl = document.getElementById("hubSceneTitle");
-  if (nameEl)   nameEl.textContent = contact.name;
-  if (statusEl) statusEl.textContent = getStateLabel(rel.state);
-
-  // — NIGHT STUDIO HERO —
-  const head       = document.getElementById("hubChatHead");
-  const routeEl    = document.getElementById("hubFocusRoute");
-  const whisperEl  = document.getElementById("hubFocusWhisper");
-  const imgEl      = document.getElementById("hubFocusImg");
-  const typingEl   = document.getElementById("hubFocusTyping");
-  const idleEl     = document.getElementById("hubFocusIdle");
-  const toneEl     = document.getElementById("hubFocusTone");
-
-  if (head && contact.hue != null) {
-    head.style.setProperty("--channel-hue", String(contact.hue));
-    const panel = head.closest(".hub-chat-panel");
-    if (panel) panel.style.setProperty("--channel-hue", String(contact.hue));
-  }
-  if (routeEl)   routeEl.textContent   = contact.route || "";
-  if (whisperEl) whisperEl.textContent = contact.whisper || "";
-  if (imgEl && contact.img) {
-    if (!imgEl.getAttribute("src") || !imgEl.getAttribute("src").endsWith(contact.img)) {
-      imgEl.src = contact.img;
-    }
-    imgEl.alt = contact.name;
-  }
-
-  const isTyping = contact.messages.some((m) => m.typing);
-  if (typingEl) typingEl.style.display = isTyping ? "inline-flex" : "none";
-  if (idleEl)   idleEl.style.display   = isTyping ? "none" : "inline";
-  const lastIncoming = [...contact.messages].reverse().find((m) => m.side === "incoming" && !m.typing);
-  if (toneEl) toneEl.textContent = (lastIncoming?.toneClass || "soft").toUpperCase();
-
-  if (hubFocusRing) {
-    hubFocusRing.dataset.char      = contactKey;
-    hubFocusRing.dataset.ringState = ringStateMap[rel.state] || "locked";
-    const avatarEl = hubFocusRing.querySelector(".avatar");
-    if (avatarEl) {
-      avatarEl.className = `avatar avatar-${contactKey} hub-hidden`;
-      avatarEl.textContent = contact.avatar;
-    }
-  }
-
-  // Render last 8 messages
-  hubChatThread.innerHTML = "";
-  const msgs = contact.messages.slice(-8);
-  msgs.forEach((message, i) => {
-    const bubble = document.createElement("div");
-    const latest = i === msgs.length - 1;
-    bubble.className = [
-      "chat-bubble",
-      message.side,
-      latest ? "is-latest" : "",
-      message.typing ? "typing" : "",
-    ].filter(Boolean).join(" ");
-
-    if (message.side === "incoming") {
-      applyContour(bubble, contactKey, message.toneClass || "neutral", message.subtextStrength ?? 0);
-    }
-
-    bubble.innerHTML = `<p>${escapeHtml(message.text)}</p>${message.typing ? "" : `<time>${escapeHtml(message.time)}</time>`}`;
-    hubChatThread.appendChild(bubble);
-  });
-
-  hubChatThread.scrollTop = hubChatThread.scrollHeight;
-  renderHubDossier();
-}
-
-hubChatForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const text = hubChatInput?.value.trim();
-  if (!text) return;
-  hubChatInput.value = "";
-  await sendMessage(appState.activeContact, text);
-  renderHubChat();
-});
-
-// ---------------------------------------------------------
-// INIT
-// ---------------------------------------------------------
-
-function init() {
-  loadRelationshipState();
-  bootFromHash();
-  renderStats();
-  renderPresenceStack();
-  renderContactsPage();
-  renderHub();
-  renderHubChat();
-  renderHubDossier();
-  renderInbox();
-  syncAvatarRings();
-}
-
-window.addEventListener("hashchange", bootFromHash);
-window.addEventListener("DOMContentLoaded", init);
-
-// ---------------------------------------------------------
-// PROFILES LIGHTBOX
-// ---------------------------------------------------------
-
-(function () {
-  const lb    = document.getElementById("profilesLightbox");
-  const lbImg = document.getElementById("profilesLightboxImg");
-  const lbClose = document.getElementById("profilesLightboxClose");
-  if (!lb || !lbImg || !lbClose) return;
-
-  function openLb(src) {
-    lbImg.src = src;
-    lb.setAttribute("aria-hidden", "false");
-  }
-  function closeLb() {
-    lb.setAttribute("aria-hidden", "true");
-    lbImg.src = "";
-  }
-
-  document.getElementById("profilesGallery")?.addEventListener("click", (e) => {
-    const btn = e.target.closest(".profiles-shot");
-    if (btn) openLb(btn.dataset.src);
-  });
-
-  lbClose.addEventListener("click", closeLb);
-  lb.addEventListener("click", (e) => { if (e.target === lb) closeLb(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && lb.getAttribute("aria-hidden") === "false") closeLb(); });
-
-  // MESSAGE buttons on profile cards — navigate to inbox with correct contact
-  document.querySelectorAll(".profile-card .btn[data-contact]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const contact = btn.dataset.contact;
-      if (contact) {
-        focusContact(contact);
-        setActivePage("inbox");
+      if (window.innerWidth <= 980 && !clickedInsideSidebar && !clickedMenu) {
+        sidebar.classList.remove("open");
       }
     });
-  });
-})();
+
+    const filterPills = document.querySelectorAll(".filter-pill");
+    filterPills.forEach((pill) => {
+      pill.addEventListener("click", () => {
+        filterPills.forEach((item) => item.classList.remove("active"));
+        pill.classList.add("active");
+      });
+    });
+
+    const chatForm = document.getElementById("chatForm");
+    const chatInput = document.getElementById("chatInput");
+    const chatBody = document.getElementById("chatBody");
+
+    function appendMessage(text) {
+      const row = document.createElement("div");
+      row.className = "msg-row me";
+
+      const wrapper = document.createElement("div");
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble me";
+      bubble.textContent = text;
+
+      const time = document.createElement("div");
+      time.className = "msg-time";
+
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      time.textContent = `${hours}:${minutes}`;
+
+      wrapper.appendChild(bubble);
+      wrapper.appendChild(time);
+      row.appendChild(wrapper);
+      chatBody.appendChild(row);
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      setTimeout(() => {
+        const replyRow = document.createElement("div");
+        replyRow.className = "msg-row";
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.style.width = "34px";
+        avatar.style.height = "34px";
+
+        const replyWrap = document.createElement("div");
+        const replyBubble = document.createElement("div");
+        replyBubble.className = "bubble them";
+        replyBubble.textContent =
+          "That message flow works well for the mockup — clean, intimate, and premium.";
+
+        const replyTime = document.createElement("div");
+        replyTime.className = "msg-time";
+        replyTime.textContent = `${hours}:${minutes}`;
+
+        replyWrap.appendChild(replyBubble);
+        replyWrap.appendChild(replyTime);
+        replyRow.appendChild(avatar);
+        replyRow.appendChild(replyWrap);
+
+        chatBody.appendChild(replyRow);
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 600);
+    }
+
+    chatForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      appendMessage(text);
+      chatInput.value = "";
+      chatInput.focus();
+    });

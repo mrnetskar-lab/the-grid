@@ -1,721 +1,769 @@
-<!doctype html>
-<html lang="no">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GRID</title>
-  <meta name="description" content="GRID — private signal network. Live nodes, intimate channels, unstable routes." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Velora — Mockup</title>
+  <meta
+    name="description"
+    content="Luxury adult companion platform mockup — non-explicit, modern, premium UI."
+  />
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="backdrop" aria-hidden="true"></div>
-  <div class="site-shell">
-    <!-- Ambient overlays -->
-    <div class="scanlines" aria-hidden="true"></div>
-    <div class="ambient-grid" aria-hidden="true"></div>
-    <div class="ambient-glow ambient-glow-a" aria-hidden="true"></div>
-    <div class="ambient-glow ambient-glow-b" aria-hidden="true"></div>
-    <div class="ambient-glow ambient-glow-c" aria-hidden="true"></div>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="brand-title">Velora<span>.ai</span></div>
+      </div>
 
-    <header class="topbar glass">
-      <a href="#home" class="brand" data-nav="home" aria-label="GRID home">
-        <span class="brand-mark"></span>
-        <span class="brand-text">GRID</span>
-      </a>
-      <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Toggle navigation menu" title="Toggle navigation">
-        <span></span><span></span>
-      </button>
-      <nav id="primaryNav" class="nav" aria-label="Primary navigation">
-        <button class="nav-link active" data-nav="home">HOME</button>
-        <button class="nav-link" data-nav="hub">HUB</button>
-        <button class="nav-link" data-nav="inbox">INBOX</button>
-        <button class="nav-link" data-nav="routes">PROFILES</button>
+      <nav class="nav-group" aria-label="Primary navigation">
+        <button class="nav-btn active" data-view-target="home">
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-btn" data-view-target="discover">
+          <span class="nav-icon">◈</span>
+          <span class="nav-label">Discover</span>
+        </button>
+        <button class="nav-btn" data-view-target="chat">
+          <span class="nav-icon">◔</span>
+          <span class="nav-label">Chat</span>
+        </button>
+        <button class="nav-btn" data-view-target="gallery">
+          <span class="nav-icon">▣</span>
+          <span class="nav-label">Gallery</span>
+        </button>
       </nav>
-      <div class="topbar-live">
-        <span class="live-dot"></span>
-        <span id="topbarNodes">12</span> nodes
-      </div>
-    </header>
 
-    <main class="page-stack">
-
-      <!-- HOME -->
-      <section id="home" class="page active" data-page="home">
-  <div class="home-shell page-shell">
-    <aside class="home-rail" aria-label="Signal index">
-      <div class="rail-head">
-        <span class="rail-eyebrow">SIGNALS</span>
-        <span class="rail-count">4</span>
+      <div class="upgrade-card">
+        <h3>Premium Preview</h3>
+        <p>
+          A tasteful 18+ experience with private conversations, curated galleries,
+          mood-based discovery, and a luxury nightlife aesthetic.
+        </p>
+        <button class="upgrade-btn">Upgrade Mockup</button>
       </div>
 
-      <div class="home-rail-list">
-        <button class="home-node-row active" type="button" data-room="hazel" style="--ch-hue: 38;">
-          <span class="home-node-avatar avatar-hazel-grad">
-            <img src="profile_pictures/hazel.png" alt="" onerror="this.remove()" />
-            <span>H</span>
-          </span>
-          <span class="home-node-copy">
-            <strong>Hazel</strong>
-            <small>You disappeared too early.</small>
-          </span>
-          <span class="home-node-state">AWAY</span>
-        </button>
+      <div class="sidebar-spacer"></div>
 
-        <button class="home-node-row" type="button" data-room="nina" style="--ch-hue: 14;">
-          <span class="home-node-avatar avatar-nina-grad">
-            <img src="profile_pictures/nina_profile.png" alt="" onerror="this.remove()" />
-            <span>N</span>
-          </span>
-          <span class="home-node-copy">
-            <strong>Nina</strong>
-            <small>Still holding the thread.</small>
-          </span>
-          <span class="home-node-state">ONLINE</span>
+      <div class="sidebar-footer">
+        <button class="footer-btn">
+          <span class="footer-icon">☺</span>
+          <span class="footer-label">Profile</span>
         </button>
+        <button class="footer-btn">
+          <span class="footer-icon">?</span>
+          <span class="footer-label">Support</span>
+        </button>
+        <button class="footer-btn">
+          <span class="footer-icon">⋯</span>
+          <span class="footer-label">More</span>
+        </button>
+      </div>
 
-        <button class="home-node-row" type="button" data-room="iris" style="--ch-hue: 275;">
-          <span class="home-node-avatar avatar-iris-grad">
-            <img src="profile_pictures/iris_profile.png" alt="" onerror="this.remove()" />
-            <span>I</span>
-          </span>
-          <span class="home-node-copy">
-            <strong>Iris</strong>
-            <small>Only clear in private.</small>
-          </span>
-          <span class="home-node-state">LIVE</span>
-        </button>
-
-        <button class="home-node-row" type="button" data-room="vale" style="--ch-hue: 186;">
-          <span class="home-node-avatar avatar-vale-grad">
-            <img src="profile_pictures/vale_profile.png" alt="" onerror="this.remove()" />
-            <span>V</span>
-          </span>
-          <span class="home-node-copy">
-            <strong>Vale</strong>
-            <small>Open briefly. Then gone.</small>
-          </span>
-          <span class="home-node-state">UNSTABLE</span>
-        </button>
+      <div class="sidebar-meta">
+        TERMS & PRIVACY<br />
+        2026 VELORA.AI<br />
+        ALL RIGHTS RESERVED
       </div>
     </aside>
 
-    <section class="home-main" aria-label="Overview">
-      <header class="home-hero panel panel-hero" style="--ch-hue: 38;">
-        <div class="home-hero-portrait">
-          <img src="profile_pictures/hazel.png" alt="Hazel portrait" />
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+
+          <label class="search" aria-label="Search personas">
+            <span>⌕</span>
+            <input type="text" placeholder="Search personas, moods, collections..." />
+          </label>
         </div>
 
-        <div class="home-hero-copy">
-          <div class="home-hero-eyebrow">ACTIVE SIGNAL</div>
-          <h1 class="home-hero-name">Hazel</h1>
-          <p class="home-hero-whisper">Notices everything. Gives nothing for free.</p>
-          <div class="home-hero-sub">
-            <span>OBSERVANT</span>
-            <span aria-hidden="true">·</span>
-            <span>PULL ACTIVE</span>
-            <span aria-hidden="true">·</span>
-            <span>TYPING WINDOW OPEN</span>
-          </div>
-        </div>
-
-        <div class="home-hero-actions">
-          <button class="btn btn-primary" data-nav="inbox">OPEN INBOX</button>
-          <button class="btn btn-ghost" data-nav="hub">OPEN HUB</button>
+        <div class="topbar-right">
+          <button class="pill-btn">
+            <span class="token-dot"></span>
+            <span>Credits 48</span>
+          </button>
+          <button class="ghost-btn">Create Persona</button>
+          <button class="solid-btn">
+            <span class="avatar-mini" aria-hidden="true"></span>
+            <span>My Profile</span>
+          </button>
         </div>
       </header>
 
-      <div class="home-overview-grid">
-        <article class="home-card panel">
-          <span class="sys-label">NETWORK</span>
-          <strong class="home-card-value" id="statNodes">12</strong>
-          <p class="home-card-copy">Nodes currently visible in the grid.</p>
-        </article>
+      <main class="views">
+        <!-- HOME -->
+        <section class="view active" id="view-home">
+          <div class="hero">
+            <article class="hero-card hero-copy">
+              <div>
+                <div class="eyebrow">
+                  <span>●</span>
+                  <span>Luxury 18+ companion platform mockup</span>
+                </div>
+                <h1>After dark, but still elegant.</h1>
+                <p>
+                  Inspired by your reference layouts, this concept blends a dark premium
+                  dashboard with softer editorial styling. The direction is intimate and
+                  flirt-forward without going explicit — more private club than adult tube site.
+                </p>
 
-        <article class="home-card panel">
-          <span class="sys-label">CONTACTS</span>
-          <strong class="home-card-value" id="statRooms">4</strong>
-          <p class="home-card-copy">Private channels available right now.</p>
-        </article>
-
-        <article class="home-card panel">
-          <span class="sys-label">LIVE INVITES</span>
-          <strong class="home-card-value" id="statInvites">1</strong>
-          <p class="home-card-copy">Brief openings that can collapse without warning.</p>
-        </article>
-
-        <article class="home-card panel">
-          <span class="sys-label">FOCUS</span>
-          <strong class="home-card-value">Hazel</strong>
-          <p class="home-card-copy">Hazel is closest right now. Precision over comfort.</p>
-        </article>
-      </div>
-
-      <section class="home-signal-feed panel" aria-label="Recent signal shifts">
-        <div class="panel-head">
-          <div>
-            <span class="sys-label">RECENT SHIFTS</span>
-            <h2>What changed in the network</h2>
-          </div>
-        </div>
-
-        <div class="home-feed-list">
-          <article class="home-feed-item">
-            <span class="feed-dot is-hazel"></span>
-            <div>
-              <strong>Hazel</strong>
-              <p>Pull increased after the last return. Window feels narrower, but warmer.</p>
-            </div>
-            <time>now</time>
-          </article>
-
-          <article class="home-feed-item">
-            <span class="feed-dot is-nina"></span>
-            <div>
-              <strong>Nina</strong>
-              <p>Memory thread remains stable. Private continuity is intact.</p>
-            </div>
-            <time>20:39</time>
-          </article>
-
-          <article class="home-feed-item">
-            <span class="feed-dot is-iris"></span>
-            <div>
-              <strong>Iris</strong>
-              <p>Signal stays low, but clarity is improving in one-to-one contact.</p>
-            </div>
-            <time>20:32</time>
-          </article>
-        </div>
-      </section>
-    </section>
-
-    <aside class="home-side" aria-label="Diagnostics">
-      <section class="panel home-side-card">
-        <span class="sys-label">RELATIONSHIP STATE</span>
-        <h3>Hazel</h3>
-
-        <div class="meter-row">
-          <span>Pull</span>
-          <div class="meter-track"><div class="meter-bar" style="width: 82%;"></div></div>
-          <strong>82%</strong>
-        </div>
-
-        <div class="meter-row">
-          <span>Memory</span>
-          <div class="meter-track"><div class="meter-bar" style="width: 43%;"></div></div>
-          <strong>43%</strong>
-        </div>
-      </section>
-
-      <section class="panel home-side-card">
-        <span class="sys-label">QUICK ROUTES</span>
-        <div class="stack-actions">
-          <button class="btn btn-secondary" data-nav="inbox">Continue private chat</button>
-          <button class="btn btn-secondary" data-nav="routes">Open profiles</button>
-          <button class="btn btn-secondary" data-nav="hub">Return to hub</button>
-        </div>
-      </section>
-    </aside>
-  </div>
-</section>
-
-      <!-- HUB -->
-      <section id="hub" class="page" data-page="hub">
-        <div class="hub-v2">
-          <div class="hub-world">
-
-            <aside class="hub-sidebar" aria-label="Channels">
-              <div class="hub-sidebar-head">
-                <h2 class="hub-sidebar-title">CHANNELS</h2>
-                <span id="hubNodeCount" class="hub-node-count">4</span>
+                <div class="hero-actions">
+                  <button class="solid-btn" data-view-jump="discover">Explore Personas</button>
+                  <button class="ghost-btn" data-view-jump="chat">Open Chat Mockup</button>
+                </div>
               </div>
 
-              <label class="hub-search" for="hubSearchInput">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7"></circle>
-                  <path d="M20 20l-3.5-3.5"></path>
-                </svg>
-                <input id="hubSearchInput" type="text" placeholder="Search signals…" autocomplete="off" />
-              </label>
+              <div class="hero-stats">
+                <div class="stat">
+                  <div class="stat-value">4 core views</div>
+                  <div class="stat-label">Home, Discover, Chat, Gallery</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-value">Luxury dark UI</div>
+                  <div class="stat-label">Pink, gold, plum accents</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-value">Non-explicit</div>
+                  <div class="stat-label">Adult but polished and tasteful</div>
+                </div>
+              </div>
+            </article>
 
-              <div class="hub-contact-list" id="presenceStack">
-                <button type="button" class="hub-contact-row active" data-room="hazel" data-active="true" style="--ch-hue: 38;">
-                  <span class="hub-contact-avatar avatar-hazel-grad">
-                    <img src="profile_pictures/hazel.png" alt="" onerror="this.remove()" />
-                    <span class="hub-contact-initial">H</span>
-                  </span>
-                  <div class="hub-contact-info">
-                    <span class="hub-contact-name">Hazel</span>
-                    <span class="hub-contact-preview" data-contact-preview="hazel">You disappeared too early.</span>
-                  </div>
-                  <span class="hub-contact-time">AWAY</span>
-                  <span class="hub-contact-divider"></span>
-                </button>
+            <article class="hero-card hero-visual">
+              <div class="visual-main">
+                <div class="portrait" aria-hidden="true">
+                  <div class="glow"></div>
+                  <div class="body"></div>
+                </div>
+                <div class="visual-caption">
+                  <h3>Featured Companion</h3>
+                  <p>
+                    Private messages, playful moods, voice notes, and curated collections —
+                    framed with a cinematic premium look.
+                  </p>
+                </div>
+              </div>
 
-                <button type="button" class="hub-contact-row" data-room="nina" style="--ch-hue: 14;">
-                  <span class="hub-contact-avatar avatar-nina-grad">
-                    <img src="profile_pictures/nina_profile.png" alt="" onerror="this.remove()" />
-                    <span class="hub-contact-initial">N</span>
-                  </span>
-                  <div class="hub-contact-info">
-                    <span class="hub-contact-name">Nina</span>
-                    <span class="hub-contact-preview" data-contact-preview="nina">Still holding the thread.</span>
-                  </div>
-                  <span class="hub-contact-time">ONLINE</span>
-                  <span class="hub-contact-divider"></span>
-                </button>
+              <div class="visual-grid">
+                <div class="mini-tile">
+                  <div class="mini-title">Private Rooms</div>
+                  <div class="mini-sub">1:1 spaces for intimate conversations</div>
+                </div>
+                <div class="mini-tile">
+                  <div class="mini-title">Curated Galleries</div>
+                  <div class="mini-sub">Tasteful locked collections and previews</div>
+                </div>
+                <div class="mini-tile">
+                  <div class="mini-title">Mood Discovery</div>
+                  <div class="mini-sub">Romance, mystery, playful, late-night</div>
+                </div>
+              </div>
+            </article>
+          </div>
 
-                <button type="button" class="hub-contact-row" data-room="iris" style="--ch-hue: 275;">
-                  <span class="hub-contact-avatar avatar-iris-grad">
-                    <img src="profile_pictures/iris_profile.png" alt="" onerror="this.remove()" />
-                    <span class="hub-contact-initial">I</span>
-                  </span>
-                  <div class="hub-contact-info">
-                    <span class="hub-contact-name">Iris</span>
-                    <span class="hub-contact-preview" data-contact-preview="iris">Only clear in private.</span>
-                  </div>
-                  <span class="hub-contact-time">LIVE</span>
-                  <span class="hub-contact-divider"></span>
-                </button>
+          <section class="section">
+            <div class="section-head">
+              <div>
+                <h2>Tonight’s highlights</h2>
+                <p>Shortlist personas and moods, inspired by the round profile rail in your references.</p>
+              </div>
+              <button class="ghost-btn" data-view-jump="discover">See all</button>
+            </div>
 
-                <button type="button" class="hub-contact-row" data-room="vale" style="--ch-hue: 186;">
-                  <span class="hub-contact-avatar avatar-vale-grad">
-                    <img src="profile_pictures/vale_profile.png" alt="" onerror="this.remove()" />
-                    <span class="hub-contact-initial">V</span>
-                  </span>
-                  <div class="hub-contact-info">
-                    <span class="hub-contact-name">Vale</span>
-                    <span class="hub-contact-preview" data-contact-preview="vale">Open briefly. Then gone.</span>
+            <div class="stories">
+              <div class="story">
+                <div class="story-top">
+                  <div class="avatar"></div>
+                  <div>
+                    <div class="story-name">Luna</div>
+                    <div class="story-mood">Romantic</div>
                   </div>
-                  <span class="hub-contact-time">UNSTABLE</span>
-                  <span class="hub-contact-divider"></span>
-                </button>
+                  <div class="pulse"></div>
+                </div>
+                <div class="muted-line">Soft voice notes and late-night check-ins.</div>
+              </div>
+
+              <div class="story">
+                <div class="story-top">
+                  <div class="avatar a2"></div>
+                  <div>
+                    <div class="story-name">Nora</div>
+                    <div class="story-mood">Confident</div>
+                  </div>
+                  <div class="pulse"></div>
+                </div>
+                <div class="muted-line">High-energy teasing, playful banter.</div>
+              </div>
+
+              <div class="story">
+                <div class="story-top">
+                  <div class="avatar a3"></div>
+                  <div>
+                    <div class="story-name">Violet</div>
+                    <div class="story-mood">Mystery</div>
+                  </div>
+                  <div class="pulse"></div>
+                </div>
+                <div class="muted-line">Slow-burn chemistry and midnight moods.</div>
+              </div>
+
+              <div class="story">
+                <div class="story-top">
+                  <div class="avatar a4"></div>
+                  <div>
+                    <div class="story-name">Siena</div>
+                    <div class="story-mood">Elegant</div>
+                  </div>
+                  <div class="pulse"></div>
+                </div>
+                <div class="muted-line">Upscale hostess energy, calm and warm.</div>
+              </div>
+
+              <div class="story">
+                <div class="story-top">
+                  <div class="avatar a5"></div>
+                  <div>
+                    <div class="story-name">Mina</div>
+                    <div class="story-mood">Creative</div>
+                  </div>
+                  <div class="pulse"></div>
+                </div>
+                <div class="muted-line">Dreamy chats, art prompts, poetic replies.</div>
+              </div>
+
+              <div class="story">
+                <div class="story-top">
+                  <div class="avatar a6"></div>
+                  <div>
+                    <div class="story-name">Rose</div>
+                    <div class="story-mood">Playful</div>
+                  </div>
+                  <div class="pulse"></div>
+                </div>
+                <div class="muted-line">Flirty energy without crossing into explicit.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <div>
+                <h2>Featured personas</h2>
+                <p>Card-heavy layout inspired by the darker dashboard references.</p>
+              </div>
+            </div>
+
+            <div class="cards-4">
+              <article class="persona-card" data-tone="rose">
+                <div class="persona-bg"></div>
+                <div class="persona-figure"></div>
+                <div class="badge-row">
+                  <span class="badge">Romance</span>
+                  <span class="badge age-badge">24</span>
+                </div>
+                <div class="persona-content">
+                  <h3 class="persona-name">Elara</h3>
+                  <div class="persona-sub">
+                    Soft-spoken, affectionate, and ideal for long-form nighttime chats.
+                  </div>
+                  <div class="persona-actions">
+                    <button class="solid-btn" data-view-jump="chat">Chat now</button>
+                    <button class="ghost-btn">Preview</button>
+                  </div>
+                </div>
+              </article>
+
+              <article class="persona-card" data-tone="gold">
+                <div class="persona-bg"></div>
+                <div class="persona-figure"></div>
+                <div class="badge-row">
+                  <span class="badge">Hostess</span>
+                  <span class="badge age-badge">27</span>
+                </div>
+                <div class="persona-content">
+                  <h3 class="persona-name">Mara</h3>
+                  <div class="persona-sub">
+                    Luxe lounge energy, polished conversation, and premium gallery drops.
+                  </div>
+                  <div class="persona-actions">
+                    <button class="solid-btn" data-view-jump="chat">Open room</button>
+                    <button class="ghost-btn">Preview</button>
+                  </div>
+                </div>
+              </article>
+
+              <article class="persona-card" data-tone="violet">
+                <div class="persona-bg"></div>
+                <div class="persona-figure"></div>
+                <div class="badge-row">
+                  <span class="badge">Mystery</span>
+                  <span class="badge age-badge">25</span>
+                </div>
+                <div class="persona-content">
+                  <h3 class="persona-name">Nyra</h3>
+                  <div class="persona-sub">
+                    Reserved and magnetic, built for slower, deeper character-driven chat.
+                  </div>
+                  <div class="persona-actions">
+                    <button class="solid-btn" data-view-jump="chat">Chat now</button>
+                    <button class="ghost-btn">Preview</button>
+                  </div>
+                </div>
+              </article>
+
+              <article class="persona-card" data-tone="rose">
+                <div class="persona-bg"></div>
+                <div class="persona-figure"></div>
+                <div class="badge-row">
+                  <span class="badge">Playful</span>
+                  <span class="badge age-badge">23</span>
+                </div>
+                <div class="persona-content">
+                  <h3 class="persona-name">Celine</h3>
+                  <div class="persona-sub">
+                    Bright energy, teasing humor, and warm check-ins that feel alive.
+                  </div>
+                  <div class="persona-actions">
+                    <button class="solid-btn" data-view-jump="chat">Say hi</button>
+                    <button class="ghost-btn">Preview</button>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <div class="lower-grid">
+              <article class="panel-card inbox-preview">
+                <div class="section-head">
+                  <div>
+                    <h2>Inbox preview</h2>
+                    <p>A cleaner version of the chat listing pattern from your examples.</p>
+                  </div>
+                </div>
+
+                <div class="thread-row">
+                  <div class="avatar"></div>
+                  <div>
+                    <div class="thread-title">Elara</div>
+                    <div class="thread-snippet">I saved a quieter room for us tonight. Want in?</div>
+                  </div>
+                  <div class="thread-meta">2m ago</div>
+                </div>
+
+                <div class="thread-row">
+                  <div class="avatar a4"></div>
+                  <div>
+                    <div class="thread-title">Mara</div>
+                    <div class="thread-snippet">I’ve got a new private collection with a gold-hour mood.</div>
+                  </div>
+                  <div class="thread-meta">9m ago</div>
+                </div>
+
+                <div class="thread-row">
+                  <div class="avatar a3"></div>
+                  <div>
+                    <div class="thread-title">Nyra</div>
+                    <div class="thread-snippet">Some stories are better told after midnight.</div>
+                  </div>
+                  <div class="thread-meta">18m ago</div>
+                </div>
+
+                <div class="thread-row">
+                  <div class="avatar a6"></div>
+                  <div>
+                    <div class="thread-title">Rose</div>
+                    <div class="thread-snippet">I’m in a playful mood — ask me anything.</div>
+                  </div>
+                  <div class="thread-meta">1h ago</div>
+                </div>
+              </article>
+
+              <article class="panel-card compliance-card">
+                <div>
+                  <h3>Brand direction</h3>
+                  <p>
+                    This concept avoids porn-style clutter and leans into a boutique nightlife feel:
+                    softer typography, more negative space, premium gradients, and intimate copy.
+                  </p>
+
+                  <div class="feature-list">
+                    <div class="feature-item">
+                      <div class="feature-dot">✓</div>
+                      <div>
+                        <strong>Adult, not explicit</strong><br />
+                        Designed around flirtation, companionship, and exclusivity.
+                      </div>
+                    </div>
+                    <div class="feature-item">
+                      <div class="feature-dot">✓</div>
+                      <div>
+                        <strong>Stronger hierarchy</strong><br />
+                        Clear discover → chat → gallery user journey.
+                      </div>
+                    </div>
+                    <div class="feature-item">
+                      <div class="feature-dot">✓</div>
+                      <div>
+                        <strong>Mobile-ready shell</strong><br />
+                        Includes sidebar + bottom nav pattern for later expansion.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="solid-btn" data-view-jump="gallery">Open Gallery Mockup</button>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <!-- DISCOVER -->
+        <section class="view" id="view-discover">
+          <div class="section-head">
+            <div>
+              <h2>Discover</h2>
+              <p>Persona browsing with filters, large editorial cards, and a premium dark palette.</p>
+            </div>
+          </div>
+
+          <div class="discover-toolbar">
+            <button class="filter-pill active">All</button>
+            <button class="filter-pill">Romantic</button>
+            <button class="filter-pill">Playful</button>
+            <button class="filter-pill">Mystery</button>
+            <button class="filter-pill">Elegant</button>
+            <button class="filter-pill">Late night</button>
+            <button class="filter-pill">Voice notes</button>
+          </div>
+
+          <div class="discover-grid">
+            <article class="discover-card">
+              <span class="badge discover-tag">Trending</span>
+              <div class="discover-footer">
+                <h3>Elara</h3>
+                <p>Warm, attentive, and ideal for slow-burn chemistry.</p>
+                <div class="persona-actions">
+                  <button class="solid-btn" data-view-jump="chat">Chat</button>
+                  <button class="ghost-btn">Collection</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="discover-card tone-gold">
+              <span class="badge discover-tag">Premium</span>
+              <div class="discover-footer">
+                <h3>Mara</h3>
+                <p>Upscale lounge persona with exclusive moodboards and elegant replies.</p>
+                <div class="persona-actions">
+                  <button class="solid-btn" data-view-jump="chat">Chat</button>
+                  <button class="ghost-btn">Collection</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="discover-card tone-violet">
+              <span class="badge discover-tag">New</span>
+              <div class="discover-footer">
+                <h3>Nyra</h3>
+                <p>Mysterious tone, poetry-laced messages, and private-room pacing.</p>
+                <div class="persona-actions">
+                  <button class="solid-btn" data-view-jump="chat">Chat</button>
+                  <button class="ghost-btn">Collection</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="discover-card tone-blush">
+              <span class="badge discover-tag">Popular</span>
+              <div class="discover-footer">
+                <h3>Rose</h3>
+                <p>Playful energy and casual flirting with a lighter, brighter tone.</p>
+                <div class="persona-actions">
+                  <button class="solid-btn" data-view-jump="chat">Chat</button>
+                  <button class="ghost-btn">Collection</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="discover-card tone-gold">
+              <span class="badge discover-tag">Curated</span>
+              <div class="discover-footer">
+                <h3>Siena</h3>
+                <p>Calm, polished, hostess-like presence with premium image drops.</p>
+                <div class="persona-actions">
+                  <button class="solid-btn" data-view-jump="chat">Chat</button>
+                  <button class="ghost-btn">Collection</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="discover-card tone-violet">
+              <span class="badge discover-tag">Creators’ pick</span>
+              <div class="discover-footer">
+                <h3>Mina</h3>
+                <p>Creative moodboard type, artistic language, and soft atmosphere.</p>
+                <div class="persona-actions">
+                  <button class="solid-btn" data-view-jump="chat">Chat</button>
+                  <button class="ghost-btn">Collection</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- CHAT -->
+        <section class="view" id="view-chat">
+          <div class="chat-layout">
+            <aside class="thread-list-panel">
+              <div class="thread-list-header">
+                <h2>Chats</h2>
+                <button class="ghost-btn">New</button>
+              </div>
+
+              <div class="thread-card active">
+                <div class="avatar"></div>
+                <div class="thread-copy">
+                  <div class="name">Elara</div>
+                  <div class="preview">I kept the lights low in here tonight.</div>
+                </div>
+                <div class="thread-meta">now</div>
+              </div>
+
+              <div class="thread-card">
+                <div class="avatar a4"></div>
+                <div class="thread-copy">
+                  <div class="name">Mara</div>
+                  <div class="preview">Would you like the gold lounge or the quieter suite?</div>
+                </div>
+                <div class="thread-meta">7m</div>
+              </div>
+
+              <div class="thread-card">
+                <div class="avatar a3"></div>
+                <div class="thread-copy">
+                  <div class="name">Nyra</div>
+                  <div class="preview">There’s always more to say after midnight.</div>
+                </div>
+                <div class="thread-meta">15m</div>
+              </div>
+
+              <div class="thread-card">
+                <div class="avatar a6"></div>
+                <div class="thread-copy">
+                  <div class="name">Rose</div>
+                  <div class="preview">Tell me your mood and I’ll match it.</div>
+                </div>
+                <div class="thread-meta">1h</div>
+              </div>
+
+              <div class="thread-card">
+                <div class="avatar a5"></div>
+                <div class="thread-copy">
+                  <div class="name">Mina</div>
+                  <div class="preview">I made a tiny gallery inspired by your last message.</div>
+                </div>
+                <div class="thread-meta">2h</div>
               </div>
             </aside>
 
-            <section class="hub-chat-panel" aria-label="Active thread">
-              <header class="hub-chat-head hub-hero" id="hubChatHead">
-                <div class="hub-hero-portrait" id="hubFocusRing" data-char="hazel" data-ring-state="invited" data-ring="pull" style="--ch-hue: var(--channel-hue);">
-                  <img id="hubFocusImg" src="profile_pictures/hazel.png" alt="" />
-                </div>
-
-                <div class="hub-hero-meta">
-                  <p class="hub-hero-eyebrow" id="hubFocusRoute">AFTER THE PAUSE</p>
-                  <h1 class="hub-hero-name" id="sceneFocusName">Hazel</h1>
-                  <p class="hub-hero-whisper" id="hubFocusWhisper">Notices everything. Gives nothing for free.</p>
-
-                  <div class="hub-hero-sub">
-                    <span class="hub-hero-state" id="hubSceneTitle">PULL ACTIVE</span>
-                    <span class="hub-hero-sep">·</span>
-                    <span id="hubFocusTone">SOFT</span>
-                    <span class="hub-hero-sep">·</span>
-                    <span class="hub-hero-typing" id="hubFocusTyping" style="display:none;">
-                      typing<span class="hub-typing-dots"><span></span><span></span><span></span></span>
-                    </span>
-                    <span class="hub-hero-idle" id="hubFocusIdle">signal stable</span>
+            <section class="chat-panel">
+              <div class="chat-header">
+                <div class="chat-user">
+                  <div class="avatar"></div>
+                  <div>
+                    <h3>Elara</h3>
+                    <p><span class="status-dot"></span><span class="dot"></span>Online now</p>
                   </div>
                 </div>
 
-                <div class="hub-chat-actions">
-                  <button type="button" class="btn btn-ghost btn-small" data-nav="routes">ROUTE</button>
-                  <button type="button" class="btn btn-secondary btn-small" id="hubEnterFocusedBtn">FULL THREAD</button>
+                <div class="chat-tools">
+                  <button class="icon-btn" aria-label="Pin chat">☆</button>
+                  <button class="icon-btn" aria-label="Open gallery">▣</button>
+                  <button class="icon-btn" aria-label="More">⋯</button>
                 </div>
-              </header>
+              </div>
 
-              <div class="hub-chat-thread" id="hubChatThread" aria-live="polite"></div>
-
-              <form class="hub-chat-compose" id="hubChatForm" autocomplete="off">
-                <div class="hub-compose-input-wrap">
-                  <input id="hubChatInput" class="hub-chat-input" type="text" placeholder="Transmit…" maxlength="900" />
+              <div class="chat-body" id="chatBody">
+                <div class="msg-row">
+                  <div class="avatar" style="width:34px;height:34px;"></div>
+                  <div>
+                    <div class="bubble them">
+                      I kept this room quieter than the others. It feels better for slower conversations.
+                    </div>
+                    <div class="msg-time">4:18 AM</div>
+                  </div>
                 </div>
-                <button type="submit" class="hub-chat-send" aria-label="Send">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                </button>
+
+                <div class="msg-row me">
+                  <div>
+                    <div class="bubble me">
+                      That’s the direction I want for the brand too — intimate, premium, not chaotic.
+                    </div>
+                    <div class="msg-time">4:19 AM</div>
+                  </div>
+                </div>
+
+                <div class="msg-row">
+                  <div class="avatar" style="width:34px;height:34px;"></div>
+                  <div>
+                    <div class="bubble them">
+                      Then keep the palette dark, the copy restrained, and let the layouts breathe.
+                    </div>
+                    <div class="msg-time">4:19 AM</div>
+                  </div>
+                </div>
+
+                <div class="msg-row">
+                  <div class="avatar" style="width:34px;height:34px;"></div>
+                  <div>
+                    <div class="bubble them">
+                      The gallery can feel exclusive, the chat can feel personal, and the homepage can sell the fantasy without being explicit.
+                    </div>
+                    <div class="msg-time">4:20 AM</div>
+                  </div>
+                </div>
+              </div>
+
+              <form class="chat-input" id="chatForm">
+                <button class="icon-btn" type="button" aria-label="Attach">＋</button>
+
+                <label class="input-wrap">
+                  <span>✎</span>
+                  <input
+                    id="chatInput"
+                    type="text"
+                    placeholder="Write a message..."
+                    autocomplete="off"
+                  />
+                </label>
+
+                <button class="solid-btn" type="submit">Send</button>
               </form>
+            </section>
+          </div>
+        </section>
 
-              <div class="hub-hidden" aria-hidden="true">
-                <div id="hubSceneCopy"></div>
-                <div id="sceneFocusAvatar"></div>
-                <div id="sceneFocusPreview"></div>
-                <div id="mainActivityStrip"></div>
-                <div id="spotlightAvatar"></div>
-                <div id="spotlightName"></div>
-                <div id="spotlightStatus"></div>
-                <div id="spotlightCopy"></div>
-                <div id="spotlightTags"></div>
-                <button type="button" id="spotlightOpenBtn"></button>
-                <button type="button" id="quickOpenThreadBtn"></button>
+        <!-- GALLERY -->
+        <section class="view" id="view-gallery">
+          <div class="gallery-layout">
+            <section class="gallery-main">
+              <div class="section-head">
+                <div>
+                  <h2>Gallery</h2>
+                  <p>Locked collections, mood boards, and preview tiles for a premium members-only feel.</p>
+                </div>
+              </div>
+
+              <div class="gallery-grid">
+                <article class="gallery-tile tall">
+                  <div class="lock">Locked</div>
+                  <div class="caption">
+                    <h3>Gold Hour Set</h3>
+                    <p>Warm lighting, soft styling, and an elegant evening mood.</p>
+                  </div>
+                </article>
+
+                <article class="gallery-tile alt">
+                  <div class="lock">Members</div>
+                  <div class="caption">
+                    <h3>Velvet Lounge</h3>
+                    <p>Private-club atmosphere with softer contrast and richer tones.</p>
+                  </div>
+                </article>
+
+                <article class="gallery-tile violet">
+                  <div class="lock">Preview</div>
+                  <div class="caption">
+                    <h3>Midnight Notes</h3>
+                    <p>Moody, story-driven visuals that support chat narratives.</p>
+                  </div>
+                </article>
+
+                <article class="gallery-tile alt tall">
+                  <div class="lock">Locked</div>
+                  <div class="caption">
+                    <h3>Room Service</h3>
+                    <p>Tasteful, upscale, and cinematic rather than explicit.</p>
+                  </div>
+                </article>
+
+                <article class="gallery-tile violet">
+                  <div class="lock">New</div>
+                  <div class="caption">
+                    <h3>After Hours</h3>
+                    <p>Deep plum tones, late-night ambience, exclusive feel.</p>
+                  </div>
+                </article>
+
+                <article class="gallery-tile">
+                  <div class="lock">Preview</div>
+                  <div class="caption">
+                    <h3>Soft Focus</h3>
+                    <p>A subtle editorial look for premium persona pages.</p>
+                  </div>
+                </article>
               </div>
             </section>
 
-            <aside class="hub-dossier" id="hubDossier" aria-label="Character dossier">
-              <div class="hd-portrait-wrap">
-                <img class="hd-portrait" id="hdPortrait" src="profile_pictures/hazel.png" alt="" />
-                <div class="hd-portrait-shade"></div>
+            <aside class="gallery-side">
+              <div class="price-card">
+                <h3>Premium Access</h3>
+                <p>Example side panel for locked content, bundles, and gallery upgrades.</p>
+                <div class="price">$24 <span>/ month</span></div>
+
+                <div class="check-list">
+                  <div class="check"><i>✓</i><span>Unlimited private messaging</span></div>
+                  <div class="check"><i>✓</i><span>Exclusive gallery drops</span></div>
+                  <div class="check"><i>✓</i><span>Priority personas and moods</span></div>
+                  <div class="check"><i>✓</i><span>Members-only collections</span></div>
+                </div>
+
+                <button class="solid-btn" style="width:100%;">Unlock Premium</button>
               </div>
 
-              <div class="hd-identity">
-                <p class="hd-eyebrow" id="hdEyebrow">AFTER THE PAUSE</p>
-                <h3 class="hd-name" id="hdName">Hazel</h3>
-                <p class="hd-bio" id="hdBio">Precise observer who reveals little. Waits for you to stop pretending.</p>
-              </div>
-
-              <div class="hd-meters">
-                <div class="hd-meter-row">
-                  <span class="hd-meter-label">PULL</span>
-                  <div class="hd-meter-track"><div class="hd-meter-bar" id="hdPullBar" style="--v: 0.82;"></div></div>
-                  <span class="hd-meter-val" id="hdPullVal">82</span>
+              <div class="note-card">
+                <h3>Design notes</h3>
+                <p>
+                  This page shifts the “content unlock” idea away from aggressive adult-site tactics
+                  and into a more upscale members-club model.
+                </p>
+                <div class="subtle">
+                  Stronger brand fit for: AI companions, premium chat, romantic fantasy, curated content,
+                  and private memberships.
                 </div>
-                <div class="hd-meter-row">
-                  <span class="hd-meter-label">MEMORY</span>
-                  <div class="hd-meter-track"><div class="hd-meter-bar" id="hdMemoryBar" style="--v: 0.43;"></div></div>
-                  <span class="hd-meter-val" id="hdMemoryVal">43</span>
-                </div>
-              </div>
-
-              <div class="hd-anchors">
-                <div class="hd-anchor-row">
-                  <span class="hd-anchor-key">Contradiction</span>
-                  <span class="hd-anchor-val" id="hdContradiction">Precise observer who reveals nothing.</span>
-                </div>
-                <div class="hd-anchor-row">
-                  <span class="hd-anchor-key">Weakness</span>
-                  <span class="hd-anchor-val" id="hdWeakness">Waits for you to stop pretending.</span>
-                </div>
-                <div class="hd-anchor-row">
-                  <span class="hd-anchor-key">Rule</span>
-                  <span class="hd-anchor-val" id="hdRule">Nothing for free.</span>
-                </div>
-              </div>
-
-              <div class="hd-ring-legend">
-                <div class="hd-legend-title">Ring · state</div>
-                <div class="hd-legend-row"><span class="hd-ring hd-ring--warming"></span><span>Warming</span></div>
-                <div class="hd-legend-row"><span class="hd-ring hd-ring--invited"></span><span>Pull active</span></div>
-                <div class="hd-legend-row"><span class="hd-ring hd-ring--open"></span><span>Open</span></div>
-                <div class="hd-legend-row"><span class="hd-ring hd-ring--faded"></span><span>Faded</span></div>
               </div>
             </aside>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- ROOMS -->
-      <section id="rooms" class="page" data-page="rooms">
-        <div class="container section-space">
-          <div class="page-title-row">
-            <div>
-              <span class="sys-label">CONTACTS</span>
-              <h2 class="rooms-title">CONTACTS</h2>
-              <p class="subtle">People are stable. A private space forms between you — if something builds.</p>
-            </div>
-          </div>
-          <div class="rooms-grid">
-            <article class="room-card glass" data-room="nina" data-state="locked">
-              <div class="room-card-accent" style="--ra-color: rgba(159,103,255,0.18)"></div>
-              <div class="card-top">
-                <div class="avatar avatar-nina">N</div>
-                <span class="node-sig sig-online">ONLINE</span>
-              </div>
-              <h3 class="room-name">Nina</h3>
-              <p class="room-access-state">No opening yet.</p>
-              <p class="room-mood">Still holding the thread from last time.</p>
-              <button class="btn btn-secondary btn-full room-cta">CONTINUE IN DMs</button>
-            </article>
-            <article class="room-card glass" data-room="hazel" data-state="warming">
-              <div class="room-card-accent" style="--ra-color: rgba(59,130,246,0.16)"></div>
-              <div class="card-top">
-                <div class="avatar avatar-hazel">H</div>
-                <span class="node-sig sig-away">OBSERVANT</span>
-              </div>
-              <h3 class="room-name">Hazel</h3>
-              <p class="room-access-state">Something is warming.</p>
-              <p class="room-mood">You disappeared too early last time.</p>
-              <button class="btn btn-secondary btn-full room-cta">CONTINUE IN DMs</button>
-            </article>
-            <article class="room-card glass" data-room="iris" data-state="invited">
-              <div class="room-card-accent" style="--ra-color: rgba(168,85,247,0.18)"></div>
-              <div class="card-top">
-                <div class="avatar avatar-iris">I</div>
-                <span class="node-sig sig-online">LISTENING</span>
-              </div>
-              <h3 class="room-name">Iris</h3>
-              <p class="room-access-state">A shared space formed.</p>
-              <p class="room-mood">There's something she only says in private.</p>
-              <button class="btn btn-primary btn-full room-cta">ENTER PRIVATE SPACE</button>
-            </article>
-            <article class="room-card glass" data-room="vale" data-state="expired">
-              <div class="room-card-accent" style="--ra-color: rgba(34,211,238,0.14)"></div>
-              <div class="card-top">
-                <div class="avatar avatar-vale">V</div>
-                <span class="node-sig sig-unstable">BRIEF</span>
-              </div>
-              <h3 class="room-name">Vale</h3>
-              <p class="room-access-state">The opening closed.</p>
-              <p class="room-mood">Not open to everyone tonight.</p>
-              <button class="btn btn-danger btn-full room-cta" disabled>FADED</button>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <!-- INBOX -->
-      <section id="inbox" class="page" data-page="inbox">
-  <div class="inbox-shell page-shell">
-    <aside class="inbox-rail" aria-label="Private threads">
-      <div class="rail-head">
-        <span class="rail-eyebrow">INBOX</span>
-        <span class="rail-count">4</span>
-      </div>
-
-      <label class="rail-search" for="inboxSearchInput">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="7"></circle>
-          <path d="M20 20l-3.5-3.5"></path>
-        </svg>
-        <input id="inboxSearchInput" type="text" placeholder="Search private threads…" autocomplete="off" />
-      </label>
-
-      <div id="nodeRailList" class="inbox-thread-list">
-        <!-- app.js can render thread rows here -->
-      </div>
-    </aside>
-
-    <section class="inbox-thread-panel panel" aria-label="Conversation">
-      <header class="inbox-thread-head">
-        <div id="dmAvatar" class="inbox-thread-avatar avatar-hazel">H</div>
-
-        <div class="inbox-thread-meta">
-          <div class="sys-label">ACTIVE THREAD</div>
-          <h1 id="dmName">Hazel</h1>
-          <p id="dmStatus">OBSERVANT · precise · watching</p>
-        </div>
-
-        <div class="inbox-thread-actions">
-          <button class="btn btn-secondary btn-small" type="button" data-nav="hub">HUB</button>
-          <button class="btn btn-ghost btn-small" type="button" data-nav="routes">PROFILE</button>
-        </div>
-      </header>
-
-      <div id="dmThread" class="inbox-thread-body" aria-live="polite">
-        <!-- app.js renders messages here -->
-      </div>
-
-      <form id="dmForm" class="inbox-composer" autocomplete="off">
-        <label class="sr-only" for="dmInput">Send a private message</label>
-        <input
-          id="dmInput"
-          name="message"
-          type="text"
-          placeholder="Type carefully. Meaning builds here."
-          maxlength="900"
-        />
-        <button type="submit" class="btn btn-primary">SEND</button>
-      </form>
-    </section>
-
-    <aside class="inbox-side" aria-label="Thread dossier">
-      <section class="panel inbox-side-card">
-        <div class="sys-label">DOSSIER</div>
-        <div class="inbox-side-portrait">
-          <img src="profile_pictures/hazel.png" alt="Hazel portrait" />
-        </div>
-        <h3>Hazel</h3>
-        <p>Precise observer who reveals little. Waits for you to stop pretending.</p>
-      </section>
-
-      <section class="panel inbox-side-card">
-        <div class="sys-label">DIAGNOSTICS</div>
-
-        <div class="meter-row">
-          <span>Pull</span>
-          <div class="meter-track"><div class="meter-bar" style="width: 82%;"></div></div>
-          <strong>82%</strong>
-        </div>
-
-        <div class="meter-row">
-          <span>Memory</span>
-          <div class="meter-track"><div class="meter-bar" style="width: 43%;"></div></div>
-          <strong>43%</strong>
-        </div>
-
-        <div class="pill-row">
-          <span class="pill">AFTER THE PAUSE</span>
-          <span class="pill">OBSERVANT</span>
-          <span class="pill">PRIVATE</span>
-        </div>
-      </section>
-    </aside>
-  </div>
-</section>
-
-      <!-- PROFILES -->
-      <section id="routes" class="page" data-page="routes">
-  <div class="profiles-shell page-shell">
-    <aside class="profiles-index" aria-label="Profile index">
-      <div class="rail-head">
-        <span class="rail-eyebrow">PROFILES</span>
-        <span class="rail-count">4</span>
-      </div>
-
-      <div class="profiles-index-list">
-        <button class="profile-index-row active" type="button" data-room="hazel" style="--ch-hue: 38;">
-          <span class="profile-index-avatar avatar-hazel-grad">
-            <img src="profile_pictures/hazel.png" alt="" onerror="this.remove()" />
-            <span>H</span>
-          </span>
-          <span class="profile-index-copy">
-            <strong>Hazel</strong>
-            <small>AFTER THE PAUSE</small>
-          </span>
-        </button>
-
-        <button class="profile-index-row" type="button" data-room="nina" style="--ch-hue: 14;">
-          <span class="profile-index-avatar avatar-nina-grad">
-            <img src="profile_pictures/nina_profile.png" alt="" onerror="this.remove()" />
-            <span>N</span>
-          </span>
-          <span class="profile-index-copy">
-            <strong>Nina</strong>
-            <small>THE RETURN</small>
-          </span>
-        </button>
-
-        <button class="profile-index-row" type="button" data-room="iris" style="--ch-hue: 275;">
-          <span class="profile-index-avatar avatar-iris-grad">
-            <img src="profile_pictures/iris_profile.png" alt="" onerror="this.remove()" />
-            <span>I</span>
-          </span>
-          <span class="profile-index-copy">
-            <strong>Iris</strong>
-            <small>LOW SIGNAL</small>
-          </span>
-        </button>
-
-        <button class="profile-index-row" type="button" data-room="vale" style="--ch-hue: 186;">
-          <span class="profile-index-avatar avatar-vale-grad">
-            <img src="profile_pictures/vale_profile.png" alt="" onerror="this.remove()" />
-            <span>V</span>
-          </span>
-          <span class="profile-index-copy">
-            <strong>Vale</strong>
-            <small>BRIEF WINDOW</small>
-          </span>
-        </button>
-      </div>
-    </aside>
-
-    <section class="profiles-main panel" aria-label="Selected dossier">
-      <header class="profiles-hero">
-        <div class="profiles-hero-portrait">
-          <img src="profile_pictures/hazel.png" alt="Hazel portrait" />
-        </div>
-
-        <div class="profiles-hero-copy">
-          <div class="sys-label">SELECTED DOSSIER</div>
-          <h1>Hazel</h1>
-          <p class="profiles-whisper">Notices everything. Gives nothing for free.</p>
-          <div class="profiles-subline">
-            <span>OBSERVANT</span>
-            <span aria-hidden="true">·</span>
-            <span>AFTER THE PAUSE</span>
-            <span aria-hidden="true">·</span>
-            <span>PRIVATE CHANNEL</span>
-          </div>
-        </div>
-
-        <div class="profiles-hero-actions">
-          <button class="btn btn-primary" type="button" data-nav="inbox">MESSAGE</button>
-          <button class="btn btn-ghost" type="button" data-nav="hub">OPEN HUB</button>
-        </div>
-      </header>
-
-      <div class="profiles-main-grid">
-        <section class="panel profiles-block">
-          <div class="sys-label">BIO</div>
-          <p>Precise, withheld, and difficult to rush. Hazel notices what you avoid before you do, and she only rewards patience.</p>
-        </section>
-
-        <section class="panel profiles-block">
-          <div class="sys-label">RELATIONSHIP METRICS</div>
-          <div class="meter-row">
-            <span>Pull</span>
-            <div class="meter-track"><div class="meter-bar" style="width: 82%;"></div></div>
-            <strong>82%</strong>
-          </div>
-          <div class="meter-row">
-            <span>Memory</span>
-            <div class="meter-track"><div class="meter-bar" style="width: 43%;"></div></div>
-            <strong>43%</strong>
           </div>
         </section>
-
-        <section class="panel profiles-block">
-          <div class="sys-label">ANCHORS</div>
-          <div class="anchor-row"><strong>Contradiction</strong><span>Precise observer who reveals nothing.</span></div>
-          <div class="anchor-row"><strong>Weakness</strong><span>Waits for you to stop pretending.</span></div>
-          <div class="anchor-row"><strong>Rule</strong><span>Nothing for free.</span></div>
-        </section>
-
-        <section class="panel profiles-block">
-          <div class="sys-label">TAGS</div>
-          <div class="pill-row">
-            <span class="pill">sharp</span>
-            <span class="pill">watching</span>
-            <span class="pill">pauses matter</span>
-          </div>
-        </section>
-      </div>
-
-      <section class="profiles-gallery panel" aria-label="Character fragments">
-        <div class="sys-label">FRAGMENTS</div>
-        <div class="profiles-gallery-strip">
-          <button class="gallery-fragment is-active" type="button">
-            <img src="profile_pictures/hazel.png" alt="Hazel fragment" />
-          </button>
-          <button class="gallery-fragment" type="button">
-            <img src="profile_pictures/nina_profile.png" alt="Nina fragment" />
-          </button>
-          <button class="gallery-fragment" type="button">
-            <img src="profile_pictures/iris_profile.png" alt="Iris fragment" />
-          </button>
-          <button class="gallery-fragment" type="button">
-            <img src="profile_pictures/vale_profile.png" alt="Vale fragment" />
-          </button>
-        </div>
-      </section>
-    </section>
-  </div>
-</section>
-
-    </main>
-
-    <footer class="footer glass">
-      <span class="footer-brand">GRID</span>
-      <span class="subtle">PRIVATE ACCESS ONLY — <span id="footerNodes">12</span> NODES LIVE</span>
-    </footer>
+      </main>
+    </div>
   </div>
 
-  <nav class="bottom-dock" id="bottomDock" aria-label="Mobile navigation">
-    <button class="dock-btn nav-link" data-nav="home">HOME</button>
-    <button class="dock-btn nav-link" data-nav="hub">HUB</button>
-    <button class="dock-btn nav-link" data-nav="rooms">CONTACTS</button>
-    <button class="dock-btn nav-link" data-nav="inbox">INBOX</button>
-    <button class="dock-btn nav-link" data-nav="routes">MAP</button>
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="mobile-tab active" data-view-target="home">
+      <span>⌂</span>
+      <span>Home</span>
+    </button>
+    <button class="mobile-tab" data-view-target="discover">
+      <span>◈</span>
+      <span>Discover</span>
+    </button>
+    <button class="mobile-tab" data-view-target="chat">
+      <span>◔</span>
+      <span>Chat</span>
+    </button>
+    <button class="mobile-tab" data-view-target="gallery">
+      <span>▣</span>
+      <span>Gallery</span>
+    </button>
   </nav>
 
-  <div class="invite-toast-stack" id="inviteToastStack" aria-live="polite"></div>
-  <div class="invite-panel-backdrop hidden" id="inviteBackdrop"></div>
-
-  <script src="app.js"></script>
-  <script src="hub_salvage.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
-
