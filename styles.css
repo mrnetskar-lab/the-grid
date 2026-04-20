@@ -487,6 +487,10 @@
       display: block;
     }
 
+    #view-chat.active {
+      display: block;
+    }
+
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -1490,7 +1494,7 @@
       justify-content: center;
     }
 
-    #view-home {
+    #view-home.active {
       display: grid;
       gap: 18px;
       align-content: start;
