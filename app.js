@@ -12,6 +12,15 @@ const views = {
 
 const mobileMq = window.matchMedia("(max-width: 980px)");
 
+const chatView = document.getElementById("view-chat");
+const threadCards = document.querySelectorAll(".thread-card");
+const chatBackBtn = document.getElementById("chatBackBtn");
+const chatHeaderName = document.getElementById("chatHeaderName");
+const chatHeaderStatus = document.getElementById("chatHeaderStatus");
+const chatHeaderAvatar = document.getElementById("chatHeaderAvatar");
+
+let selectedThreadId = document.querySelector(".thread-card.active")?.dataset.thread || null;
+
 function closeSidebar() {
   sidebar?.classList.remove("open");
   document.body.classList.remove("sidebar-open");
@@ -33,6 +42,21 @@ function toggleSidebar() {
   }
 }
 
+function setChatMobileSubview(view) {
+  if (!chatView) return;
+  chatView.dataset.chatMobileView = view;
+}
+
+function syncChatMobileDefault() {
+  if (!chatView) return;
+
+  if (mobileMq.matches) {
+    setChatMobileSubview("list");
+  } else {
+    setChatMobileSubview("room");
+  }
+}
+
 function setActiveView(name) {
   Object.entries(views).forEach(([key, view]) => {
     view.classList.toggle("active", key === name);
@@ -42,6 +66,7 @@ function setActiveView(name) {
     btn.classList.toggle("active", btn.dataset.viewTarget === name);
   });
 
+<<<<<<< HEAD
 // Sidebar close handler: if overlays/modals are added in the future, check for their presence before closing sidebar.
 document.addEventListener("click", (event) => {
   const clickedInsideSidebar = sidebar.contains(event.target);
@@ -54,6 +79,55 @@ document.addEventListener("click", (event) => {
 
 closeSidebar();
 window.scrollTo({ top: 0, behavior: "smooth" });
+=======
+  if (name === "chat") {
+    if (mobileMq.matches) {
+      setChatMobileSubview("list");
+    } else {
+      setChatMobileSubview("room");
+    }
+  }
+
+  closeSidebar();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function setActiveThread(card) {
+  if (!card) return;
+
+  threadCards.forEach((item) => {
+    item.classList.toggle("active", item === card);
+  });
+
+  selectedThreadId = card.dataset.thread || selectedThreadId;
+
+  if (chatHeaderName) {
+    chatHeaderName.textContent = card.dataset.name || "Elara";
+  }
+
+  if (chatHeaderStatus) {
+    chatHeaderStatus.textContent = card.dataset.status || "Online now";
+  }
+
+  if (chatHeaderAvatar) {
+    chatHeaderAvatar.className = "avatar";
+    if (card.dataset.avatar) {
+      chatHeaderAvatar.classList.add(card.dataset.avatar);
+    }
+  }
+
+  if (mobileMq.matches) {
+    setChatMobileSubview("room");
+  }
+}
+
+function restoreSelectedThread() {
+  if (!selectedThreadId) return;
+  const active = document.querySelector(`.thread-card[data-thread="${selectedThreadId}"]`);
+  if (active) {
+    setActiveThread(active);
+  }
+}
 
 navButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -67,15 +141,39 @@ jumpButtons.forEach((btn) => {
   });
 });
 
+threadCards.forEach((card) => {
+  card.addEventListener("click", () => setActiveThread(card));
+});
+
+chatBackBtn?.addEventListener("click", () => {
+  setChatMobileSubview("list");
+  restoreSelectedThread();
+});
+
 menuBtn?.addEventListener("click", toggleSidebar);
 sidebarBackdrop?.addEventListener("click", closeSidebar);
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeSidebar();
+  if (event.key === "Escape") {
+    closeSidebar();
+
+    if (mobileMq.matches && views.chat?.classList.contains("active") && chatView?.dataset.chatMobileView === "room") {
+      setChatMobileSubview("list");
+    }
+  }
 });
 
 mobileMq.addEventListener("change", (event) => {
-  if (!event.matches) closeSidebar();
+  if (!event.matches) {
+    closeSidebar();
+    setChatMobileSubview("room");
+    return;
+  }
+
+  if (views.chat?.classList.contains("active")) {
+    setChatMobileSubview("list");
+    restoreSelectedThread();
+  }
 });
 
 const filterPills = document.querySelectorAll(".filter-pill");
@@ -151,3 +249,6 @@ chatForm?.addEventListener("submit", (event) => {
   chatInput.value = "";
   chatInput.focus();
 });
+
+syncChatMobileDefault();
+restoreSelectedThread();

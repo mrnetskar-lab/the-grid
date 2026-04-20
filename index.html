@@ -525,67 +525,68 @@
         </section>
 
         <!-- CHAT -->
-        <section class="view" id="view-chat">
+        <section class="view" id="view-chat" data-chat-mobile-view="list">
           <div class="chat-layout">
-            <aside class="thread-list-panel">
+            <aside class="thread-list-panel" aria-label="Chat threads">
               <div class="thread-list-header">
                 <h2>Chats</h2>
                 <button class="ghost-btn">New</button>
               </div>
 
-              <div class="thread-card active">
+              <button class="thread-card active" type="button" data-thread="elara" data-name="Elara" data-avatar="" data-status="Online now">
                 <div class="avatar"></div>
                 <div class="thread-copy">
                   <div class="name">Elara</div>
                   <div class="preview">I kept the lights low in here tonight.</div>
                 </div>
                 <div class="thread-meta">now</div>
-              </div>
+              </button>
 
-              <div class="thread-card">
+              <button class="thread-card" type="button" data-thread="mara" data-name="Mara" data-avatar="a4" data-status="Away">
                 <div class="avatar a4"></div>
                 <div class="thread-copy">
                   <div class="name">Mara</div>
                   <div class="preview">Would you like the gold lounge or the quieter suite?</div>
                 </div>
                 <div class="thread-meta">7m</div>
-              </div>
+              </button>
 
-              <div class="thread-card">
+              <button class="thread-card" type="button" data-thread="nyra" data-name="Nyra" data-avatar="a3" data-status="Online now">
                 <div class="avatar a3"></div>
                 <div class="thread-copy">
                   <div class="name">Nyra</div>
                   <div class="preview">There’s always more to say after midnight.</div>
                 </div>
                 <div class="thread-meta">15m</div>
-              </div>
+              </button>
 
-              <div class="thread-card">
+              <button class="thread-card" type="button" data-thread="rose" data-name="Rose" data-avatar="a6" data-status="Online now">
                 <div class="avatar a6"></div>
                 <div class="thread-copy">
                   <div class="name">Rose</div>
                   <div class="preview">Tell me your mood and I’ll match it.</div>
                 </div>
                 <div class="thread-meta">1h</div>
-              </div>
+              </button>
 
-              <div class="thread-card">
+              <button class="thread-card" type="button" data-thread="mina" data-name="Mina" data-avatar="a5" data-status="Last active 3m ago">
                 <div class="avatar a5"></div>
                 <div class="thread-copy">
                   <div class="name">Mina</div>
                   <div class="preview">I made a tiny gallery inspired by your last message.</div>
                 </div>
                 <div class="thread-meta">2h</div>
-              </div>
+              </button>
             </aside>
 
             <section class="chat-panel">
               <div class="chat-header">
+                <button class="chat-back-btn" id="chatBackBtn" type="button" aria-label="Back to chats">←</button>
                 <div class="chat-user">
-                  <div class="avatar"></div>
+                  <div class="avatar" id="chatHeaderAvatar"></div>
                   <div>
-                    <h3>Elara</h3>
-                    <p><span class="status-dot"></span><span class="dot"></span>Online now</p>
+                    <h3 id="chatHeaderName">Elara</h3>
+                    <p><span class="status-dot"></span><span class="dot"></span><span id="chatHeaderStatus">Online now</span></p>
                   </div>
                 </div>
 
