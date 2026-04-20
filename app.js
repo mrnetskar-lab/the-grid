@@ -49,43 +49,20 @@ function setChatMobileSubview(view) {
 
 function syncChatMobileDefault() {
   if (!chatView) return;
-
-  if (mobileMq.matches) {
-    setChatMobileSubview("list");
-  } else {
-    setChatMobileSubview("room");
-  }
+  setChatMobileSubview(mobileMq.matches ? "list" : "room");
 }
 
 function setActiveView(name) {
   Object.entries(views).forEach(([key, view]) => {
-    view.classList.toggle("active", key === name);
+    view?.classList.toggle("active", key === name);
   });
 
   navButtons.forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.viewTarget === name);
   });
 
-<<<<<<< HEAD
-// Sidebar close handler: if overlays/modals are added in the future, check for their presence before closing sidebar.
-document.addEventListener("click", (event) => {
-  const clickedInsideSidebar = sidebar.contains(event.target);
-  const clickedMenu = menuBtn && menuBtn.contains(event.target);
-  // TODO: If overlays/modals are present, skip closing sidebar here.
-  if (window.innerWidth <= 980 && !clickedInsideSidebar && !clickedMenu) {
-    sidebar.classList.remove("open");
-  }
-});
-
-closeSidebar();
-window.scrollTo({ top: 0, behavior: "smooth" });
-=======
   if (name === "chat") {
-    if (mobileMq.matches) {
-      setChatMobileSubview("list");
-    } else {
-      setChatMobileSubview("room");
-    }
+    setChatMobileSubview(mobileMq.matches ? "list" : "room");
   }
 
   closeSidebar();
@@ -189,6 +166,8 @@ const chatInput = document.getElementById("chatInput");
 const chatBody = document.getElementById("chatBody");
 
 function appendMessage(text) {
+  if (!chatBody) return;
+
   const row = document.createElement("div");
   row.className = "msg-row me";
 
@@ -243,12 +222,16 @@ function appendMessage(text) {
 
 chatForm?.addEventListener("submit", (event) => {
   event.preventDefault();
-  const text = chatInput.value.trim();
+  const text = chatInput?.value.trim();
   if (!text) return;
   appendMessage(text);
-  chatInput.value = "";
-  chatInput.focus();
+  if (chatInput) {
+    chatInput.value = "";
+    chatInput.focus();
+  }
 });
 
 syncChatMobileDefault();
 restoreSelectedThread();
+
+if (typeof initHubSalvage === "function") initHubSalvage();
