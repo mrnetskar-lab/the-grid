@@ -1,3 +1,101 @@
+.panel-card, .price-card, .note-card, .discover-card, .persona-card {
+  word-break: break-word;
+}
+
+@media (max-width: 1180px) and (min-width: 981px) {
+  .panel-card, .price-card, .note-card, .discover-card, .persona-card {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+}
+@media (max-width: 1180px) and (min-width: 981px) {
+  /* Discover grid: 2 columns on tablet */
+  .discover-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
+  .discover-card {
+    min-width: 0;
+    font-size: 1.08rem;
+  }
+  .discover-footer h3 {
+    font-size: 1.22rem;
+  }
+  .discover-footer p {
+    font-size: 1.01rem;
+    line-height: 1.6;
+    word-break: break-word;
+  }
+
+  /* Home persona cards: 2 columns */
+  .cards-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
+  .persona-card {
+    min-width: 0;
+    font-size: 1.08rem;
+  }
+  .persona-content h3 {
+    font-size: 1.18rem;
+  }
+  .persona-sub {
+    font-size: 0.98rem;
+    line-height: 1.6;
+    word-break: break-word;
+  }
+
+  /* Lower grid: stack panels */
+  .lower-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  /* Chat layout: stack thread list and chat panel */
+  .chat-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .thread-list-panel {
+    margin-bottom: 22px;
+  }
+}
+@media (max-width: 1180px) and (min-width: 981px) {
+  /* Gallery: stack side panel, widen cards */
+  .gallery-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .gallery-main {
+    padding-bottom: 0;
+  }
+  .gallery-side {
+    margin-top: 28px;
+    padding-top: 0;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
+  .gallery-tile {
+    min-width: 0;
+    max-width: 100%;
+    font-size: 1.08rem;
+  }
+  .gallery-tile .caption h3 {
+    font-size: 1.25rem;
+  }
+  .gallery-tile .caption p {
+    font-size: 1.02rem;
+    line-height: 1.6;
+    word-break: break-word;
+  }
+}
 :root {
       --bg: #09090d;
       --panel: #101016;

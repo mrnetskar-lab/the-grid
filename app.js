@@ -42,27 +42,24 @@ function setActiveView(name) {
     btn.classList.toggle("active", btn.dataset.viewTarget === name);
   });
 
-<<<<<<< HEAD
-    // Sidebar close handler: if overlays/modals are added in the future, check for their presence before closing sidebar.
-    document.addEventListener("click", (event) => {
-      const clickedInsideSidebar = sidebar.contains(event.target);
-      const clickedMenu = menuBtn && menuBtn.contains(event.target);
-      // TODO: If overlays/modals are present, skip closing sidebar here.
-      if (window.innerWidth <= 980 && !clickedInsideSidebar && !clickedMenu) {
-        sidebar.classList.remove("open");
-      }
-    });
-=======
-  closeSidebar();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
+// Sidebar close handler: if overlays/modals are added in the future, check for their presence before closing sidebar.
+document.addEventListener("click", (event) => {
+  const clickedInsideSidebar = sidebar.contains(event.target);
+  const clickedMenu = menuBtn && menuBtn.contains(event.target);
+  // TODO: If overlays/modals are present, skip closing sidebar here.
+  if (window.innerWidth <= 980 && !clickedInsideSidebar && !clickedMenu) {
+    sidebar.classList.remove("open");
+  }
+});
+
+closeSidebar();
+window.scrollTo({ top: 0, behavior: "smooth" });
 
 navButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     setActiveView(btn.dataset.viewTarget);
   });
 });
->>>>>>> bbfb3a9ae7a233e1ee3c0c805bec8c3c6a829197
 
 jumpButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
