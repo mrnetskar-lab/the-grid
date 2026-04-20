@@ -291,6 +291,115 @@
     #view-home.active{display:flex;flex-direction:column;gap:32px;}
     .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 
+    /* ── PATCH 2: MICRO FEATURES ── */
+
+    /* 1. Unread badge on Chat nav */
+    .nav-item .nav-badge{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:auto;box-shadow:0 0 0 2px var(--surface),0 0 8px rgba(240,48,138,0.6);animation:pulseAccent 2s ease-out infinite;display:none;}
+    .nav-item .nav-badge.show{display:block;}
+    @keyframes pulseAccent{0%{box-shadow:0 0 0 2px var(--surface),0 0 0 0 rgba(240,48,138,0.5)}70%{box-shadow:0 0 0 2px var(--surface),0 0 0 6px rgba(240,48,138,0)}100%{box-shadow:0 0 0 2px var(--surface),0 0 0 0 rgba(240,48,138,0)}}
+
+    /* 2. "She remembered" pill */
+    .memory-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:.64rem;font-weight:600;color:rgba(240,48,138,0.8);border:1px solid rgba(240,48,138,0.2);background:rgba(240,48,138,0.06);margin-top:4px;}
+
+    /* 3. Character status pulse / flicker */
+    .cp-status{animation:statusPulse 3s ease-in-out infinite;}
+    @keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.65}}
+    /* Vale flickers faster */
+    .unstable-status{animation:statusFlicker 1.8s ease-in-out infinite;color:#ff9940 !important;}
+    @keyframes statusFlicker{0%,100%{opacity:1}20%{opacity:.3}40%{opacity:.9}60%{opacity:.2}80%{opacity:.8}}
+
+    /* 4. Chat blur when locked */
+    .chat-msgs.locked{pointer-events:none;}
+    .chat-msgs.locked .msg:not(:last-child){filter:blur(1.5px);opacity:.5;transition:filter .4s,opacity .4s;}
+
+    /* 5. Limit overlay on input area */
+    .chat-form.locked{position:relative;}
+    .chat-form.locked::before{content:"";position:absolute;inset:0;background:rgba(7,7,12,0.7);backdrop-filter:blur(4px);z-index:2;border-radius:0 0 var(--r) var(--r);}
+
+    /* ── MESSAGE LIMIT WALL ── */
+    .msg-limit-wall{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:10px;background:linear-gradient(180deg,transparent,rgba(10,8,20,0.95) 40%);position:relative;}
+    .msg-limit-wall::before{content:"";position:absolute;top:-60px;left:0;right:0;height:60px;background:linear-gradient(180deg,transparent,rgba(10,8,20,0.95));pointer-events:none;}
+    .mlw-avatar{width:52px;height:52px;border-radius:50%;overflow:hidden;border:2px solid var(--accent);box-shadow:0 0 0 4px rgba(240,48,138,0.15);margin-bottom:4px;}
+    .mlw-avatar img{width:100%;height:100%;object-fit:cover;}
+    .mlw-title{font-size:1rem;font-weight:800;letter-spacing:-.02em;}
+    .mlw-sub{font-size:.82rem;color:var(--text-2);max-width:28ch;line-height:1.6;}
+    .mlw-btn{padding:10px 22px;border-radius:var(--r-sm);border:0;background:linear-gradient(135deg,var(--accent),#b01050);color:#fff;font-size:.86rem;font-weight:700;cursor:pointer;transition:.18s;box-shadow:0 6px 20px rgba(240,48,138,0.35);margin-top:2px;}
+    .mlw-btn:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(240,48,138,0.5);}
+    .mlw-free{font-size:.72rem;color:var(--text-3);cursor:pointer;background:none;border:none;padding:2px;transition:.14s;}
+    .mlw-free:hover{color:var(--text-2);}
+
+    /* ── MOOD SHIFT ── */
+    .mood-indicator{display:flex;align-items:center;gap:5px;margin-top:3px;}
+    .mood-bar{height:3px;border-radius:999px;background:rgba(255,255,255,0.08);flex:1;overflow:hidden;}
+    .mood-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),#ff85b8);width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+    .mood-label{font-size:.64rem;font-weight:600;color:var(--text-3);white-space:nowrap;letter-spacing:.04em;transition:color .5s;}
+
+    /* Gallery tab in char panel */
+    .cp-gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:14px;}
+    .cp-gallery-tile{aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden;position:relative;cursor:pointer;background:var(--surface-2);transition:.18s;}
+    .cp-gallery-tile:hover{transform:scale(1.04);}
+    .cp-gallery-tile img{width:100%;height:100%;object-fit:cover;}
+    .cp-gallery-tile .cp-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.62);backdrop-filter:blur(3px);font-size:.6rem;font-weight:700;color:rgba(255,255,255,0.55);letter-spacing:.06em;text-transform:uppercase;}
+    .cp-gallery-tile.free .cp-lock{display:none;}
+    .cp-tab-panels{}
+    .cp-tab-panel{display:none;}
+    .cp-tab-panel.active{display:block;}
+    .onboard{position:fixed;inset:0;z-index:400;background:#07070c;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease;}
+    .onboard.hidden{opacity:0;pointer-events:none;}
+    .onboard-inner{width:min(500px,92vw);}
+    .ob-step{display:none;flex-direction:column;align-items:center;text-align:center;}
+    .ob-step.active{display:flex;animation:up .35s ease;}
+    .ob-progress{display:flex;gap:6px;margin-bottom:32px;}
+    .ob-dot{width:28px;height:3px;border-radius:999px;background:rgba(255,255,255,0.12);transition:.3s;}
+    .ob-dot.active{background:var(--accent);}
+    .ob-title{font-size:1.9rem;font-weight:800;letter-spacing:-.04em;margin-bottom:10px;}
+    .ob-sub{font-size:.9rem;color:var(--text-2);line-height:1.65;max-width:34ch;margin-bottom:32px;}
+    .ob-chars{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;margin-bottom:28px;}
+    .ob-char{border-radius:var(--r);overflow:hidden;position:relative;aspect-ratio:3/4;cursor:pointer;border:2px solid transparent;transition:.2s;}
+    .ob-char:hover{border-color:rgba(240,48,138,0.4);}
+    .ob-char.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 8px 30px rgba(240,48,138,0.3);}
+    .ob-char img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+    .ob-char::after{content:"";position:absolute;inset:auto 0 0 0;height:50%;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.9));}
+    .ob-char-name{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:.82rem;font-weight:800;z-index:1;}
+    .ob-char-mood{position:absolute;bottom:28px;left:0;right:0;text-align:center;font-size:.68rem;color:rgba(255,255,255,0.5);z-index:1;}
+    .ob-char-check{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--accent);display:none;place-items:center;font-size:.7rem;z-index:2;}
+    .ob-char.selected .ob-char-check{display:grid;}
+    .ob-avatar{width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid var(--accent);box-shadow:0 0 0 6px rgba(240,48,138,0.15);margin-bottom:16px;}
+    .ob-avatar img{width:100%;height:100%;object-fit:cover;}
+    .ob-greeting{font-size:.96rem;color:var(--text-2);line-height:1.7;max-width:36ch;margin-bottom:28px;font-style:italic;}
+    .ob-btn{width:100%;padding:14px;border-radius:var(--r-sm);border:2px solid var(--accent);background:transparent;color:var(--accent);font-size:.92rem;font-weight:700;cursor:pointer;transition:.18s;margin-bottom:8px;}
+    .ob-btn.filled,.ob-btn:hover{background:var(--accent);color:#fff;}
+    .ob-skip{font-size:.78rem;color:var(--text-3);cursor:pointer;background:none;border:none;padding:6px;transition:.14s;}
+    .ob-skip:hover{color:var(--text-2);}
+
+    /* ── PAYWALL ── */
+    .paywall{position:fixed;inset:0;z-index:350;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;backdrop-filter:blur(14px);background:rgba(7,7,12,0.82);}
+    .paywall.open{opacity:1;pointer-events:auto;}
+    .paywall-inner{width:min(540px,92vw);border-radius:20px;overflow:hidden;border:1px solid var(--border-2);box-shadow:0 40px 100px rgba(0,0,0,0.7);position:relative;}
+    .paywall-photo{width:100%;height:200px;position:relative;overflow:hidden;}
+    .paywall-photo img{width:100%;height:100%;object-fit:cover;object-position:center 20%;transition:transform .6s ease;}
+    .paywall.open .paywall-photo img{transform:scale(1.05);}
+    .paywall-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 20%,rgba(10,8,20,0.97) 100%);}
+    .paywall-photo-name{position:absolute;bottom:14px;left:20px;z-index:1;font-size:1.35rem;font-weight:800;letter-spacing:-.04em;text-shadow:0 0 30px rgba(240,48,138,0.4);}
+    .paywall-body{background:#0f0f18;padding:20px 22px 24px;}
+    .paywall-headline{font-size:1.1rem;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;}
+    .paywall-sub{font-size:.84rem;color:var(--text-2);line-height:1.6;margin-bottom:18px;}
+    .paywall-perks{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:18px;}
+    .paywall-perk{background:var(--surface-2);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border);}
+    .paywall-perk-icon{font-size:.88rem;margin-bottom:3px;}
+    .paywall-perk-label{font-size:.76rem;font-weight:700;color:var(--text);}
+    .paywall-perk-desc{font-size:.68rem;color:var(--text-3);margin-top:2px;}
+    .paywall-price{text-align:center;margin-bottom:16px;}
+    .paywall-amount{font-size:2.1rem;font-weight:800;letter-spacing:-.04em;}
+    .paywall-amount span{font-size:.88rem;color:var(--text-2);font-weight:400;}
+    .paywall-trial{font-size:.74rem;color:var(--green);font-weight:600;margin-top:3px;}
+    .paywall-cta{width:100%;padding:14px;border-radius:var(--r-sm);border:0;background:linear-gradient(135deg,var(--accent),#b01050);color:#fff;font-size:.94rem;font-weight:800;cursor:pointer;transition:.18s;box-shadow:0 8px 28px rgba(240,48,138,0.38);margin-bottom:9px;}
+    .paywall-cta:hover{transform:translateY(-1px);box-shadow:0 12px 36px rgba(240,48,138,0.5);}
+    .paywall-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.12);color:var(--text-2);cursor:pointer;display:grid;place-items:center;font-size:.85rem;z-index:10;transition:.14s;}
+    .paywall-close:hover{color:var(--text);}
+    .paywall-restore{display:block;width:100%;text-align:center;font-size:.72rem;color:var(--text-3);cursor:pointer;background:none;border:none;padding:2px;}
+    .paywall-restore:hover{color:var(--text-2);}
+
     /* ── CHARACTER PROFILE PAGE ── */
     #view-profile.active{display:block;}
     .profile-back{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--text-2);cursor:pointer;font-size:.84rem;font-weight:600;padding:0 0 20px;transition:.14s;}
@@ -358,6 +467,100 @@
 </head>
 <body>
 
+<!-- ONBOARDING -->
+<div class="onboard" id="onboard">
+  <div class="onboard-inner">
+    <div class="ob-progress">
+      <div class="ob-dot active" id="od0"></div>
+      <div class="ob-dot" id="od1"></div>
+      <div class="ob-dot" id="od2"></div>
+    </div>
+    <!-- Step 1: Welcome -->
+    <div class="ob-step active" id="ob1">
+      <div class="ob-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 228" fill="none" width="52" height="59">
+          <defs><linearGradient id="og" x1="100" y1="12" x2="100" y2="218" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ff85b8"/><stop offset="50%" stop-color="#f0308a"/><stop offset="100%" stop-color="#7d1535"/></linearGradient></defs>
+          <path d="M 100,14 C 115,14 186,55 186,98 C 186,123 166,123 140,123 A 52,52 0 1 1 100,208 A 52,52 0 1 1 60,123 C 34,123 14,123 14,98 C 14,55 85,14 100,14 Z" stroke="url(#og)" stroke-width="10" stroke-linejoin="round"/>
+          <line x1="100" y1="16" x2="100" y2="208" stroke="url(#og)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 68,152 C 78,164 90,168 100,165" stroke="url(#og)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 132,152 C 122,164 110,168 100,165" stroke="url(#og)" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="ob-title">Welcome to Velora</div>
+      <p class="ob-sub">A private 18+ companion platform. Real conversations, exclusive content, and personas that feel alive.</p>
+      <button class="ob-btn filled" onclick="obNext(2)">Get started</button>
+      <button class="ob-skip" onclick="skipOnboard()">I have an account</button>
+    </div>
+    <!-- Step 2: Pick character -->
+    <div class="ob-step" id="ob2">
+      <div class="ob-title">Who calls to you?</div>
+      <p class="ob-sub">Pick a companion to start with. You can explore others later.</p>
+      <div class="ob-chars">
+        <div class="ob-char" data-thread="hazel" onclick="obSelect(this)">
+          <img src="/profile_pictures/hazel.png" alt="Hazel"/>
+          <div class="ob-char-check">✓</div>
+          <div class="ob-char-mood">Observant</div>
+          <div class="ob-char-name">Hazel</div>
+        </div>
+        <div class="ob-char" data-thread="nina" onclick="obSelect(this)">
+          <img src="/profile_pictures/nina.png" alt="Nina"/>
+          <div class="ob-char-check">✓</div>
+          <div class="ob-char-mood">Familiar</div>
+          <div class="ob-char-name">Nina</div>
+        </div>
+        <div class="ob-char" data-thread="iris" onclick="obSelect(this)">
+          <img src="/profile_pictures/iris.png" alt="Iris"/>
+          <div class="ob-char-check">✓</div>
+          <div class="ob-char-mood">Listening</div>
+          <div class="ob-char-name">Iris</div>
+        </div>
+        <div class="ob-char" data-thread="vale" onclick="obSelect(this)">
+          <img src="/profile_pictures/vale_profile.png" alt="Vale"/>
+          <div class="ob-char-check">✓</div>
+          <div class="ob-char-mood">Unstable</div>
+          <div class="ob-char-name">Vale</div>
+        </div>
+      </div>
+      <button class="ob-btn" id="obPickBtn" onclick="obNext(3)" disabled style="opacity:.4;cursor:not-allowed">Continue</button>
+      <button class="ob-skip" onclick="skipOnboard()">Skip for now</button>
+    </div>
+    <!-- Step 3: First message -->
+    <div class="ob-step" id="ob3">
+      <div class="ob-avatar"><img id="obAvatarImg" src="/profile_pictures/hazel.png" alt=""/></div>
+      <div class="ob-title" id="obStep3Title">Hazel is waiting.</div>
+      <p class="ob-greeting" id="obGreeting">"I noticed you were gone for a while. I didn't say anything."</p>
+      <button class="ob-btn filled" onclick="finishOnboard()">Say hello</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYWALL -->
+<div class="paywall" id="paywall">
+  <div class="paywall-inner">
+    <button class="paywall-close" id="paywallClose">✕</button>
+    <div class="paywall-photo">
+      <img id="paywallImg" src="/profile_pictures/hazel.png" alt=""/>
+      <div class="paywall-photo-name" id="paywallName">Hazel</div>
+    </div>
+    <div class="paywall-body">
+      <div class="paywall-headline">Unlock the full experience</div>
+      <div class="paywall-sub">You've reached a private moment. Upgrade to continue the conversation and access exclusive content.</div>
+      <div class="paywall-perks">
+        <div class="paywall-perk"><div class="paywall-perk-icon">💬</div><div class="paywall-perk-label">Unlimited chat</div><div class="paywall-perk-desc">No message limits</div></div>
+        <div class="paywall-perk"><div class="paywall-perk-icon">🖼️</div><div class="paywall-perk-label">Private galleries</div><div class="paywall-perk-desc">Exclusive content drops</div></div>
+        <div class="paywall-perk"><div class="paywall-perk-icon">⚡</div><div class="paywall-perk-label">All personas</div><div class="paywall-perk-desc">Full access, all 4+</div></div>
+        <div class="paywall-perk"><div class="paywall-perk-icon">✨</div><div class="paywall-perk-label">AI image gen</div><div class="paywall-perk-desc">Request custom scenes</div></div>
+      </div>
+      <div class="paywall-price">
+        <div class="paywall-amount">$24 <span>/ month</span></div>
+        <div class="paywall-trial">✓ 3-day free trial — cancel anytime</div>
+      </div>
+      <button class="paywall-cta">Start free trial</button>
+      <button class="paywall-restore">Restore purchase</button>
+    </div>
+  </div>
+</div>
+
 <!-- Age gate -->
 <div class="gate" id="gate">
   <div class="gate-card">
@@ -388,7 +591,7 @@
     <button class="nav-item active" data-to="home"><span class="nav-icon">⌂</span>Home</button>
     <button class="nav-item" data-to="discover"><span class="nav-icon">◈</span>Discover</button>
     <button class="nav-item" data-to="chat" id="chatNav">
-      <span class="nav-icon">◔</span>Chat<span class="nav-arrow">›</span>
+      <span class="nav-icon">◔</span>Chat<span class="nav-badge" id="chatBadge"></span><span class="nav-arrow">›</span>
     </button>
     <div class="thread-drawer" id="threadDrawer">
       <button class="drawer-item active" data-thread="hazel" data-name="Hazel" data-status="Online now" data-p="You are Hazel, warm but withholding. You notice everything but give nothing for free. Speak with quiet precision and subtle warmth. Max 2 sentences.">
@@ -631,23 +834,44 @@
             <img id="cpPhoto" src="/profile_pictures/hazel.png" alt=""/>
           </div>
           <div class="cp-tabs">
-            <button class="cp-tab active">Profile</button>
-            <button class="cp-tab">Gallery</button>
+            <button class="cp-tab active" onclick="cpSwitchTab(0)">Profile</button>
+            <button class="cp-tab" onclick="cpSwitchTab(1)">Gallery</button>
           </div>
-          <div class="cp-body">
-            <div>
-              <div class="cp-name" id="cpName">Hazel <span style="color:var(--accent);font-size:.9rem">♥</span></div>
-              <div class="cp-status" id="cpStatus">● ONLINE NOW</div>
+          <!-- Profile tab -->
+          <div class="cp-tab-panel active" id="cpTabProfile">
+            <div class="cp-body">
+              <div>
+                <div class="cp-name" id="cpName">Hazel <span style="color:var(--accent);font-size:.9rem">♥</span></div>
+                <div class="cp-status" id="cpStatus">● ONLINE NOW</div>
+                <div class="mood-indicator" style="margin-top:6px;">
+                  <div class="mood-label" id="cpMoodLabel">Guarded</div>
+                  <div class="mood-bar"><div class="mood-fill" id="cpMoodFill" style="width:12%"></div></div>
+                </div>
+              </div>
+              <div class="cp-bio" id="cpBio">Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.</div>
+              <button class="cp-cta">♥ &nbsp;Private Content</button>
+              <button id="cpViewProfile" style="width:100%;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:.78rem;font-weight:600;cursor:pointer;transition:.14s;margin-top:-4px;">View full profile →</button>
+              <div class="cp-divider"></div>
+              <div class="cp-stats" id="cpStats">
+                <div class="cp-stat"><div class="cp-stat-label">Mood</div><div class="cp-stat-value">Observant</div></div>
+                <div class="cp-stat"><div class="cp-stat-label">Style</div><div class="cp-stat-value">Slow burn</div></div>
+                <div class="cp-stat"><div class="cp-stat-label">Speaks</div><div class="cp-stat-value">English</div></div>
+                <div class="cp-stat"><div class="cp-stat-label">Route</div><div class="cp-stat-value">After the pause</div></div>
+              </div>
             </div>
-            <div class="cp-bio" id="cpBio">Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.</div>
-            <button class="cp-cta">♥ &nbsp;Private Content</button>
-            <button id="cpViewProfile" style="width:100%;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:.78rem;font-weight:600;cursor:pointer;transition:.14s;margin-top:-4px;">View full profile →</button>
-            <div class="cp-divider"></div>
-            <div class="cp-stats" id="cpStats">
-              <div class="cp-stat"><div class="cp-stat-label">Mood</div><div class="cp-stat-value">Observant</div></div>
-              <div class="cp-stat"><div class="cp-stat-label">Style</div><div class="cp-stat-value">Slow burn</div></div>
-              <div class="cp-stat"><div class="cp-stat-label">Speaks</div><div class="cp-stat-value">English</div></div>
-              <div class="cp-stat"><div class="cp-stat-label">Route</div><div class="cp-stat-value">After the pause</div></div>
+          </div>
+          <!-- Gallery tab -->
+          <div class="cp-tab-panel" id="cpTabGallery">
+            <div class="cp-gallery-grid" id="cpGalleryGrid">
+              <div class="cp-gallery-tile free"><img id="cpg0" src="/profile_pictures/hazel.png" alt=""/></div>
+              <div class="cp-gallery-tile"><img id="cpg1" src="/profile_pictures/hazel.png" alt=""/><div class="cp-lock">Locked</div></div>
+              <div class="cp-gallery-tile"><img id="cpg2" src="/profile_pictures/hazel.png" alt=""/><div class="cp-lock">Members</div></div>
+              <div class="cp-gallery-tile"><img id="cpg3" src="/profile_pictures/hazel.png" alt=""/><div class="cp-lock">Locked</div></div>
+              <div class="cp-gallery-tile"><img id="cpg4" src="/profile_pictures/hazel.png" alt=""/><div class="cp-lock">Locked</div></div>
+              <div class="cp-gallery-tile" style="display:flex;align-items:center;justify-content:center;font-size:.64rem;color:var(--text-3);font-weight:700;">+ More</div>
+            </div>
+            <div style="padding:0 14px 14px;">
+              <button class="cp-cta" onclick="openPaywall()">🖼️ &nbsp;Unlock all photos</button>
             </div>
           </div>
         </aside>
