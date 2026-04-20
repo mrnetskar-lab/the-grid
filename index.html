@@ -96,6 +96,7 @@
     }
     .topbar-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
     .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .sidebar-mob-bar { display: none; align-items: center; gap: 8px; padding: 10px 10px 0; flex-wrap: wrap; }
     .menu-btn { display: none; width: 36px; height: 36px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); color: var(--text); cursor: pointer; }
     .search {
       display: flex; align-items: center; gap: 8px; background: var(--surface-2);
@@ -376,6 +377,8 @@
       .menu-btn{display:inline-grid;place-items:center;flex:0 0 36px}
       .gallery-wrap{grid-template-columns:1fr}
       .topbar{padding:max(9px,env(safe-area-inset-top,0px)) 12px 9px;height:auto;min-height:var(--topbar);flex-wrap:wrap;row-gap:8px}
+      .topbar-right{display:none}
+      .sidebar-mob-bar{display:flex}
       .topbar-left,.topbar-right{flex:1 1 100%}
       .topbar-right{justify-content:flex-start}
       .views{padding:12px;padding-bottom:calc(60px + 14px + env(safe-area-inset-bottom,0px))}
@@ -446,6 +449,10 @@
     <div class="sidebar-bottom">
       <button class="sidebar-link">☺ &nbsp;Profile</button>
       <button class="sidebar-link">⚙ &nbsp;Settings</button>
+    </div>
+    <div class="sidebar-mob-bar">
+      <div class="tokens-pill"><span class="token-icon"></span>41.4 tokens</div>
+      <button class="btn btn-primary"><span class="profile-av"></span>My Profile</button>
     </div>
     <div class="sidebar-meta">VELORA.AI · 2026</div>
   </aside>
