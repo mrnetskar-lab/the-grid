@@ -1998,7 +1998,7 @@
       }
 
       .view.active {
-        display: grid;
+        display: block !important;
         gap: 14px;
       }
 
