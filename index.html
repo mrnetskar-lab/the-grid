@@ -850,8 +850,19 @@ allNavBtns.forEach(b => {
   b.addEventListener('click', () => setActiveView(b.dataset.viewTarget));
 });
 
-document.querySelectorAll('[data-view-jump]').forEach(b => b.addEventListener('click', ()=>setActiveView(b.dataset.viewJump)));
-document.querySelectorAll('.story[data-view-jump]').forEach(b => b.addEventListener('click',()=>setActiveView(b.dataset.viewJump)));
+document.querySelectorAll('[data-view-jump]').forEach(b => b.addEventListener('click', e => {
+  const target = b.dataset.viewJump;
+  // If jumping to chat with a persona, activate that thread first
+  const personaName = b.closest('[data-thread]')?.dataset.thread
+    || b.closest('.persona-card, .discover-card')?.querySelector('.persona-name, .discover-footer h3')?.textContent?.trim().toLowerCase();
+  if (target === 'chat' && personaName) {
+    const thread = document.querySelector(`.sthread[data-thread="${personaName}"]`);
+    if (thread) thread.click();
+    else setActiveView('chat');
+  } else {
+    setActiveView(target);
+  }
+}));
 
 menuBtn.addEventListener('click', ()=> mobileMq.matches && (sidebar.classList.contains('open') ? closeSidebar() : openSidebar()));
 sidebarBackdrop.addEventListener('click', closeSidebar);
