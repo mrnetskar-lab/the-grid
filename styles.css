@@ -1,3 +1,83 @@
+/* === Independent scrolling per view & panels === */
+
+/* Main scroll container: let this control page scroll instead of body */
+.views {
+  /* full viewport height minus top bar (and minus mobile nav on small screens) */
+  height: calc(100vh - var(--topbar-h));
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+
+  /* preserve existing layout behavior */
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  min-height: 0; /* critical for grid children using overflow */
+}
+
+/* Each view should not force the document taller than .views */
+.view {
+  min-height: 0;
+}
+
+.view.active {
+  /* keep whichever display mode existing rules define */
+  min-height: 0;
+}
+
+/* Named views: allow them to live inside the constrained .views */
+#view-home,
+#view-chat,
+#view-gallery,
+#view-discover {
+  min-height: 0;
+}
+
+/* Chat layout: columns should not stretch parent vertically */
+.chat-layout {
+  min-height: 0;
+}
+
+/* Panels that should scroll independently */
+.thread-list-panel,
+.chat-panel,
+.chat-body,
+.gallery-main,
+.gallery-side {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Chat internals: header / body / input rows */
+.chat-panel {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.chat-body {
+  /* already has visual styling elsewhere; this ensures it scrolls */
+  overflow-y: auto;
+}
+
+/* Optional: cap panel height so they never push page taller than viewport */
+.thread-list-panel,
+.chat-panel,
+.gallery-main,
+.gallery-side {
+  max-height: calc(100vh - var(--topbar-h) - 32px);
+}
+
+/* Mobile: account for mobile nav bar height */
+@media (max-width: 980px) {
+  .views {
+    height: calc(100vh - var(--topbar-h) - var(--mobile-nav-h));
+  }
+}
+
+/* === end independent scrolling patch === */
+
 @media (min-width: 1100px) and (max-width: 1180px) {
   .chat-layout {
     grid-template-columns: 330px 1fr;
@@ -2117,95 +2197,3 @@
       border-width: 0;
     }
 
-/* ===== FIX: Independent Scroll per View ===== */
-
-/* Make the main views container control viewport scrolling */
-.views {
-  height: calc(100vh - var(--topbar-h));
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  display: grid;
-  gap: 18px;
-  align-content: start;
-  min-height: 0;
-}
-
-/* Ensure each .view doesn't expand the containing grid */
-.view {
-  min-height: 0; /* critical to allow parent .views to control height */
-  display: none;
-}
-
-.view.active {
-  display: grid;
-  gap: 18px;
-  min-height: 0;
-}
-
-/* Named views safe for grid/flex overflow */
-#view-home,
-#view-chat,
-#view-gallery,
-#view-discover {
-  min-height: 0;
-}
-
-/* Chat layout: let panels manage their own scroll */
-.chat-layout {
-  display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 16px;
-  min-height: 0;
-  align-items: stretch;
-}
-
-/* Make scrollable panels independent */
-.thread-list-panel,
-.chat-panel,
-.chat-body,
-.gallery-main,
-.gallery-side,
-.discover-grid {
-  min-height: 0; /* critical for grid/flex children */
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Keep chat internals intact: header / body / input rows */
-.chat-panel {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 0;
-}
-
-.chat-body {
-  overflow-y: auto;
-  min-height: 0;
-}
-
-/* Optional: cap max heights relative to viewport so panels never push page taller */
-.thread-list-panel,
-.gallery-main,
-.gallery-side,
-.chat-panel {
-  max-height: calc(100vh - var(--topbar-h) - 40px);
-}
-
-/* Mobile: account for mobile nav bar height */
-@media (max-width: 980px) {
-  .views {
-    height: calc(100vh - var(--topbar-h) - var(--mobile-nav-h));
-  }
-}
-
-/* Helper: ensure nested grids/flex containers can overflow properly */
-.lower-grid,
-.cards-4,
-.discover-grid,
-.gallery-grid,
-.hero,
-.story {
-  min-height: 0;
-}
