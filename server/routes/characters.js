@@ -93,6 +93,11 @@ router.post('/:id/chat', async (req, res) => {
     const text = (req.body?.text || '').trim();
     if (!text) return res.status(400).json({ ok: false, error: 'text required' });
 
+    if (text === '__greeting__') {
+      const greeting = char.greeting || '…';
+      return res.json({ ok: true, reply: greeting, character: char.name, meta: { toneClass: 'soft', subtextStrength: 0.3 } });
+    }
+
     const rateLimit = enforceChatRateLimit(req, req.params.id);
     if (rateLimit.limited) {
       return res.status(429)

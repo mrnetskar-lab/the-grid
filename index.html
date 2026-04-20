@@ -260,6 +260,7 @@
     .chat-who h3 { font-size: 1rem; font-weight: 800; letter-spacing: -.03em; }
     .chat-who p { font-size: .76rem; color: var(--text-2); margin-top: 1px; display: flex; align-items: center; gap: 4px; }
     .online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: glow 2.2s ease-out infinite; flex: 0 0 6px; }
+    #chatStatus { transition: opacity .3s; }
     .chat-actions { display: flex; gap: 6px; }
     .chat-btn { width: 34px; height: 34px; border-radius: var(--r-sm); border: 1px solid var(--border); background: transparent; color: var(--text-2); cursor: pointer; transition: .14s; display: grid; place-items: center; font-size: .85rem; }
     .chat-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); border-color: var(--border-2); }
@@ -294,7 +295,9 @@
     .gallery-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
     .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
     .g-tile { border-radius: var(--r); overflow: hidden; position: relative; aspect-ratio: 2/3; background: var(--surface-2); border: 1px solid var(--border); cursor: pointer; transition: .22s; }
-    .g-tile:hover { transform: translateY(-2px); border-color: rgba(240,48,138,0.22); }
+    .g-tile:hover { transform: translateY(-3px) scale(1.02); border-color: rgba(240,48,138,0.55); box-shadow: 0 0 18px rgba(240,48,138,0.18), 0 6px 24px rgba(0,0,0,0.4); }
+    .g-tile:hover .g-caption { opacity: 1; transform: translateY(0); }
+    .g-caption { transition: opacity .2s, transform .2s; }
     .g-bg { position: absolute; inset: 0; }
     .g-bg.gb-0 { background: linear-gradient(155deg, #3a1e28, #1a1020 65%); }
     .g-bg.gb-1 { background: linear-gradient(155deg, #3d2010, #1a1210 65%); }
@@ -687,8 +690,11 @@ document.querySelectorAll('.drawer-item').forEach(item=>{item.addEventListener('
   curAvStyle=av;
   chatMsgs.innerHTML='';
   const empty=document.getElementById('chatEmpty');if(empty)empty.remove();
-  addMsg('theirs',greetings[curThread]||'Hello…',av);
   goTo('chat');
+  const tr=addTyping(av);
+  fetch(`/api/characters/${curThread}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__greeting__'})})
+    .then(r=>r.json()).then(d=>{tr.remove();addMsg('theirs',(d.reply||greetings[curThread]||'…').trim(),av);})
+    .catch(()=>{tr.remove();addMsg('theirs',greetings[curThread]||'…',av);});
 });});
 
 // Persona-aware routing from cards
@@ -726,6 +732,23 @@ document.getElementById('chatForm').addEventListener('submit',async e=>{
   }catch{tr.remove();addMsg('theirs','One moment…',curAvStyle);}
   sendBtn.disabled=false;chatInput.focus();
 });
+
+// Presence indicator — live status rotation
+const PRESENCE={
+  nina: ['Online now','Thinking about something','Just got back','Active'],
+  hazel:['Watching','OBSERVANT','Somewhere nearby','Reading you'],
+  iris: ['LISTENING','Quiet','…','Low signal'],
+  vale: ['UNSTABLE','Here. For now.','Brief window','Flickering'],
+};
+function tickPresence(){
+  const id=curThread||'nina';
+  const opts=PRESENCE[id]||PRESENCE.nina;
+  const s=opts[Math.floor(Math.random()*opts.length)];
+  const el=document.getElementById('chatStatus');
+  if(el&&el.textContent!==s){el.style.opacity='0';setTimeout(()=>{el.textContent=s;el.style.opacity='1';},300);}
+  setTimeout(tickPresence,45000+Math.random()*45000);
+}
+setTimeout(tickPresence,60000);
 
 // Camera — 📷 button in chat header
 document.getElementById('camBtn')?.addEventListener('click',async()=>{

@@ -9,6 +9,7 @@ export class CharacterAIService {
     const systemPrompt = buildSystemPrompt(characterName, personality, ctx);
     const userPrompt = buildUserPrompt(input, ctx);
     const model = getModelForCharacter(characterName);
+    console.log(`[AI] ${characterName} → model:${model} beat:${context?.conversation?.emotionalBeat||'neutral'}`);
 
     let raw;
     try {
