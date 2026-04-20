@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velora — Logo Colors</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#08080c;font-family:'Inter',sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;gap:52px;padding:52px 32px;}
+    h1{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#3a3445;font-weight:700;}
+    .grid{display:flex;gap:32px;align-items:flex-end;justify-content:center;flex-wrap:wrap;}
+    .swatch{display:flex;flex-direction:column;align-items:center;gap:12px;}
+    .label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#5e5868;font-weight:600;}
+    .pad-dark{background:#08080c;border-radius:18px;padding:28px 32px;border:1px solid rgba(255,255,255,0.06);}
+    .pad-mid{background:#111118;border-radius:18px;padding:28px 32px;border:1px solid rgba(255,255,255,0.06);}
+    .pad-white{background:#fff;border-radius:18px;padding:28px 32px;}
+
+    /* Recolor technique: invert removes white bg, then we colorize the lines */
+    .logo-img { display:block; }
+
+    /* 1. Velora Red — crimson */
+    .c-red{
+      filter: brightness(0) saturate(100%) invert(18%) sepia(85%) saturate(3000%) hue-rotate(330deg) brightness(1.1);
+    }
+    /* 2. Hot Pink */
+    .c-pink{
+      filter: brightness(0) saturate(100%) invert(30%) sepia(90%) saturate(2500%) hue-rotate(300deg) brightness(1.15);
+    }
+    /* 3. Rose Gold */
+    .c-rosegold{
+      filter: brightness(0) saturate(100%) invert(62%) sepia(40%) saturate(600%) hue-rotate(310deg) brightness(0.95);
+    }
+    /* 4. Gold — warm amber */
+    .c-gold{
+      filter: brightness(0) saturate(100%) invert(72%) sepia(80%) saturate(600%) hue-rotate(0deg) brightness(0.92);
+    }
+    /* 5. White */
+    .c-white{
+      filter: brightness(0) invert(1);
+    }
+
+    /* Wordmark row */
+    .wordmark-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:32px 40px;background:#08080c;border-radius:18px;border:1px solid rgba(255,255,255,0.06);}
+    .wordmark{font-size:1.8rem;font-weight:800;letter-spacing:-.04em;color:#f0edf2;}
+    .wordmark span.red{color:#e0245a;}
+    .wordmark span.rose{background:linear-gradient(135deg,#f4a0b8,#c87090);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .wordmark span.gold{background:linear-gradient(135deg,#ffe48a,#c89030);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+    .dl-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+    .dl-btn{padding:8px 16px;border-radius:8px;border:2px solid #e0245a;background:#18181f;color:#e0245a;font-size:.78rem;font-weight:700;cursor:pointer;transition:.16s;letter-spacing:.04em;}
+    .dl-btn:hover{background:#e0245a;color:#fff;}
+  </style>
+</head>
+<body>
+
+<h1>Velora.ai — Logo Color Variants</h1>
+
+<div class="grid">
+
+  <!-- 1. Velora Red -->
+  <div class="swatch">
+    <div class="pad-dark">
+      <img src="logo-source.png" width="180" class="logo-img c-red"/>
+    </div>
+    <div class="label">Velora Red</div>
+  </div>
+
+  <!-- 2. Hot Pink -->
+  <div class="swatch">
+    <div class="pad-dark">
+      <img src="logo-source.png" width="180" class="logo-img c-pink"/>
+    </div>
+    <div class="label">Hot Pink</div>
+  </div>
+
+  <!-- 3. Rose Gold -->
+  <div class="swatch">
+    <div class="pad-dark">
+      <img src="logo-source.png" width="180" class="logo-img c-rosegold"/>
+    </div>
+    <div class="label">Rose Gold</div>
+  </div>
+
+  <!-- 4. Gold -->
+  <div class="swatch">
+    <div class="pad-dark">
+      <img src="logo-source.png" width="180" class="logo-img c-gold"/>
+    </div>
+    <div class="label">Gold</div>
+  </div>
+
+  <!-- 5. White -->
+  <div class="swatch">
+    <div class="pad-dark">
+      <img src="logo-source.png" width="180" class="logo-img c-white"/>
+    </div>
+    <div class="label">White on Dark</div>
+  </div>
+
+  <!-- 6. Original (reference) -->
+  <div class="swatch">
+    <div class="pad-white">
+      <img src="logo-source.png" width="180" class="logo-img"/>
+    </div>
+    <div class="label">Original</div>
+  </div>
+
+</div>
+
+<!-- With wordmarks -->
+<div class="grid">
+
+  <div class="swatch">
+    <div class="wordmark-wrap">
+      <img src="logo-source.png" width="100" class="logo-img c-red"/>
+      <div class="wordmark">velora<span class="red">.ai</span></div>
+    </div>
+    <div class="label">Red + wordmark</div>
+  </div>
+
+  <div class="swatch">
+    <div class="wordmark-wrap">
+      <img src="logo-source.png" width="100" class="logo-img c-rosegold"/>
+      <div class="wordmark">velora<span class="rose">.ai</span></div>
+    </div>
+    <div class="label">Rose gold + wordmark</div>
+  </div>
+
+  <div class="swatch">
+    <div class="wordmark-wrap">
+      <img src="logo-source.png" width="100" class="logo-img c-gold"/>
+      <div class="wordmark">velora<span class="gold">.ai</span></div>
+    </div>
+    <div class="label">Gold + wordmark</div>
+  </div>
+
+  <div class="swatch">
+    <div class="wordmark-wrap">
+      <img src="logo-source.png" width="100" class="logo-img c-white"/>
+      <div class="wordmark" style="color:#f0edf2">velora<span style="color:#888">.ai</span></div>
+    </div>
+    <div class="label">White + wordmark</div>
+  </div>
+
+</div>
+
+</body>
+</html>

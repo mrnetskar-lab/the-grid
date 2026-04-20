@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velora.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface-2: #18181f;
+      --surface-3: #1e1e27;
+      --border: rgba(255,255,255,0.08);
+      --border-2: rgba(255,255,255,0.14);
+      --text: #f0edf2;
+      --text-2: #9990a0;
+      --text-3: #5e5868;
+      --accent: #f0308a;
+      --accent-dim: rgba(240,48,138,0.2);
+      --accent-border: rgba(240,48,138,0.42);
+      --green: #22c55e;
+      --shadow: 0 8px 32px rgba(0,0,0,0.5);
+      --r: 14px;
+      --r-sm: 9px;
+      --sidebar: 220px;
+      --topbar: 60px;
+      --font: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; font-size: 14px; line-height: 1.5; }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+
+    /* ── LAYOUT ── */
+    .app { display: grid; grid-template-columns: var(--sidebar) 1fr; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: sticky; top: 0; height: 100vh;
+      background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 16px 12px; gap: 2px; z-index: 20;
+    }
+    .brand { display: flex; align-items: center; gap: 9px; padding: 6px 8px 18px; }
+    .brand-dot { width: 26px; height: 26px; flex: 0 0 26px; background: url('logo-source.png') center/350% auto no-repeat; filter: brightness(0) saturate(100%) invert(30%) sepia(90%) saturate(2500%) hue-rotate(300deg) brightness(1.15); }
+    .brand-name { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.04em; }
+    .brand-name span { color: var(--accent); }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--r-sm);
+      border: 1px solid transparent; background: transparent; color: var(--text-2);
+      cursor: pointer; transition: .15s; text-align: left; width: 100%; font-size: .88rem; font-weight: 500;
+    }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: var(--text); background: transparent; border-color: rgba(240,48,138,0.5); }
+    .nav-icon { width: 17px; height: 17px; flex: 0 0 17px; opacity: .7; font-size: .85rem; display: grid; place-items: center; }
+    .nav-item.active .nav-icon { opacity: 1; color: var(--accent); }
+    .nav-arrow { font-size: .62rem; margin-left: auto; color: var(--text-3); transition: transform .22s; }
+    .nav-item.open .nav-arrow { transform: rotate(90deg); }
+
+    /* Thread drawer in sidebar */
+    .thread-drawer {
+      overflow: hidden; max-height: 0; opacity: 0;
+      transition: max-height .3s cubic-bezier(.4,0,.2,1), opacity .22s;
+      display: flex; flex-direction: column; gap: 1px; padding-left: 8px;
+    }
+    .thread-drawer.open { max-height: 320px; opacity: 1; }
+    .drawer-item {
+      display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: var(--r-sm);
+      border: 1px solid transparent; background: transparent; color: var(--text);
+      cursor: pointer; transition: .14s; text-align: left; width: 100%;
+    }
+    .drawer-item:hover { background: rgba(255,255,255,0.05); }
+    .drawer-item.active { background: transparent; border-color: rgba(240,48,138,0.5); }
+    .d-av { width: 26px; height: 26px; border-radius: 50%; flex: 0 0 26px; border: 1.5px solid rgba(255,255,255,0.1); }
+    .d-name { font-size: .82rem; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .d-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex: 0 0 6px; animation: glow 2.2s ease-out infinite; }
+    @keyframes glow { 0%{box-shadow:0 0 0 0 rgba(34,197,94,.4)} 70%{box-shadow:0 0 0 5px rgba(34,197,94,0)} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0)} }
+
+    .sidebar-gap { flex: 1; }
+    .sidebar-bottom { display: flex; flex-direction: column; gap: 1px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; }
+    .sidebar-link { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: var(--r-sm); color: var(--text-3); cursor: pointer; font-size: .82rem; font-weight: 500; background: none; border: none; width: 100%; transition: .14s; }
+    .sidebar-link:hover { color: var(--text-2); background: rgba(255,255,255,0.03); }
+    .sidebar-meta { padding: 8px 10px 0; color: var(--text-3); font-size: .68rem; letter-spacing: .04em; }
+
+    /* ── MAIN ── */
+    .main { min-width: 0; display: flex; flex-direction: column; }
+    .topbar {
+      position: sticky; top: 0; z-index: 15; height: var(--topbar);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 18px;
+      background: rgba(10,10,15,0.88); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .menu-btn { display: none; width: 36px; height: 36px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); color: var(--text); cursor: pointer; }
+    .search {
+      display: flex; align-items: center; gap: 8px; background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: 9px; padding: 7px 12px;
+      color: var(--text-2); width: min(340px, 100%); flex: 1; transition: border-color .15s;
+    }
+    .search:focus-within { border-color: var(--accent-border); }
+    .search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font-size: .86rem; }
+    .search input::placeholder { color: var(--text-3); }
+
+    .tokens-pill {
+      display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+      background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px;
+      font-size: .82rem; font-weight: 600; cursor: pointer; color: var(--text-2); transition: .14s;
+    }
+    .tokens-pill:hover { border-color: var(--border-2); color: var(--text); }
+    .token-icon { width: 14px; height: 14px; border-radius: 50%; background: #f59e0b; }
+    .btn { border-radius: var(--r-sm); padding: 7px 14px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: .84rem; font-weight: 600; cursor: pointer; transition: .15s; display: inline-flex; align-items: center; gap: 7px; }
+    .btn:hover { border-color: var(--border-2); background: var(--surface-3); }
+    .btn-primary { background: transparent; border: 2px solid var(--accent); color: var(--accent); }
+    .btn-primary:hover { background: var(--accent); color: #fff; box-shadow: 0 4px 18px rgba(240,48,138,0.38); }
+    .profile-av { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #8a3a4a, #d4909a); border: 2px solid rgba(255,255,255,0.12); cursor: pointer; }
+
+    /* ── VIEWS ── */
+    .views { padding: 22px; padding-bottom: 32px; }
+    .view { display: none; animation: up .25s ease; }
+    .view.active { display: block; }
+    #view-home.active { display: flex; flex-direction: column; gap: 26px; }
+    @keyframes up { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── HOME HERO ── */
+    .hero-banner {
+      border-radius: var(--r); overflow: hidden; position: relative; height: 280px;
+      background: #0b080f;
+      border: 1px solid rgba(240,48,138,0.18);
+      box-shadow: 0 0 0 1px rgba(240,48,138,0.06), 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .hero-banner::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 80% at 70% 50%, rgba(58,14,26,0.9), transparent 70%); pointer-events: none; }
+    .hero-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(9,9,14,.9) 35%, rgba(9,9,14,.2) 70%, transparent 100%); }
+    .hero-fig { position: absolute; right: 0; top: 0; bottom: 0; width: 52%; display: flex; justify-content: flex-end; }
+    .hero-fig-body {
+      width: 260px; align-self: flex-end; margin-bottom: -2px; margin-right: 60px; height: 98%;
+      background:
+        radial-gradient(circle at 38% 10%, rgba(255,225,205,0.95) 0 6%, transparent 7%),
+        radial-gradient(circle at 50% 16%, #f0c8a8 0 12%, transparent 13%),
+        radial-gradient(ellipse 55% 22% at 50% 6%, #1a1010 0 100%),
+        linear-gradient(180deg, transparent 0 13%, #f0bfa0 14% 25%, #c09878 26% 34%, #3a2030 35% 56%, #1a1020 57% 100%);
+      clip-path: ellipse(40% 50% at 50% 50%);
+      filter: drop-shadow(-12px 0 40px rgba(240,48,138,0.15)) drop-shadow(0 32px 50px rgba(0,0,0,0.75));
+      opacity: .93;
+    }
+    .hero-text { position: relative; z-index: 1; padding: 32px 32px; display: flex; flex-direction: column; justify-content: center; height: 100%; }
+    .hero-label { font-size: .68rem; font-weight: 700; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+    .hero-text h1 { font-size: clamp(1.8rem, 2.6vw, 2.6rem); font-weight: 800; letter-spacing: -.04em; line-height: 1.1; margin-bottom: 10px; max-width: 13ch; }
+    .hero-text p { color: var(--text-2); font-size: .86rem; max-width: 32ch; line-height: 1.65; margin-bottom: 18px; }
+    .hero-actions { display: flex; gap: 8px; }
+
+    /* ── SECTION HEAD ── */
+    .sh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .sh h2 { font-size: .92rem; font-weight: 700; letter-spacing: -.02em; color: var(--text); }
+    .sh-link { font-size: .8rem; cursor: pointer; font-weight: 500; background: none; border: none; color: var(--text-3); transition: .14s; }
+    .sh-link:hover { color: var(--accent); }
+
+    /* ── AVATAR RAIL ── */
+    .avatar-rail { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+    .avatar-rail::-webkit-scrollbar { display: none; }
+    .av-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; flex: 0 0 auto; }
+    .av-ring {
+      width: 62px; height: 62px; border-radius: 50%; padding: 2.5px;
+      background: linear-gradient(135deg, #f0308a, #c01465);
+    }
+    .av-ring.offline { background: var(--surface-3); }
+    .av-inner { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--bg); overflow: hidden; }
+    .av-img { width: 100%; height: 100%; object-fit: cover; }
+    .av-css { width: 100%; height: 100%; border-radius: 50%; }
+    .av-css.c0 { background: radial-gradient(circle at 34% 28%, #ffedf4 0 10%, transparent 11%), linear-gradient(135deg, #4f2b30, #d59b8d 58%, #f3d8d1); }
+    .av-css.c1 { background: radial-gradient(circle at 34% 28%, #fff0e3 0 10%, transparent 11%), linear-gradient(135deg, #5c362f, #e2b38d 58%, #f7e4c6); }
+    .av-css.c2 { background: radial-gradient(circle at 34% 28%, #ffeef2 0 10%, transparent 11%), linear-gradient(135deg, #2c1d29, #b77a93 58%, #edd0da); }
+    .av-css.c3 { background: radial-gradient(circle at 34% 28%, #f7ede6 0 10%, transparent 11%), linear-gradient(135deg, #3a3025, #c39671 58%, #f0d3c1); }
+    .av-css.c4 { background: radial-gradient(circle at 34% 28%, #f0eefb 0 10%, transparent 11%), linear-gradient(135deg, #332d4d, #8a86d1 58%, #d8d5ff); }
+    .av-css.c5 { background: radial-gradient(circle at 34% 28%, #fff1ef 0 10%, transparent 11%), linear-gradient(135deg, #46313b, #e7a4ae 58%, #f8d4db); }
+    .av-name { font-size: .74rem; font-weight: 700; color: var(--text); }
+    .av-mood { font-size: .64rem; color: var(--text-3); }
+
+    /* ── CHARACTER CARDS ── */
+    .char-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .char-card {
+      border-radius: var(--r); overflow: hidden; position: relative;
+      aspect-ratio: 2/3; background: var(--surface); border: 1px solid var(--border);
+      cursor: pointer; transition: .22s;
+    }
+    .char-card:hover { transform: translateY(-3px); border-color: rgba(224,36,90,0.25); }
+    .char-card:hover .char-overlay { background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.88) 100%); }
+    /* Card background gradient per character */
+    .char-bg { position: absolute; inset: 0; }
+    .char-bg.bg-0 { background: linear-gradient(155deg, #3a1e28 0%, #1a1020 60%); }
+    .char-bg.bg-1 { background: linear-gradient(155deg, #3d2010 0%, #1a1210 60%); }
+    .char-bg.bg-2 { background: linear-gradient(155deg, #1e1430 0%, #0e0e1e 60%); }
+    .char-bg.bg-3 { background: linear-gradient(155deg, #2a1020 0%, #141018 60%); }
+    /* CSS figure */
+    .char-fig { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); width: 60%; height: 62%; }
+    .char-fig .fh { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 50%; padding-bottom: 36%; border-radius: 50% 50% 0 0; background: linear-gradient(180deg, #1e1410, #2e1e16); }
+    .char-fig .fface { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 44%; padding-bottom: 44%; border-radius: 50%; background: radial-gradient(circle at 40% 32%, #f9ddd3 0 16%, transparent 17%), linear-gradient(160deg, #e8c0a8, #d4a090 45%, #b5846e); box-shadow: 0 4px 12px rgba(0,0,0,0.35); }
+    .char-card.bg-1 .fface { background: radial-gradient(circle at 40% 32%, #fbe5cc 0 16%, transparent 17%), linear-gradient(160deg, #e8be95, #d4a070 45%, #b58050); }
+    .char-card.bg-2 .fface { background: radial-gradient(circle at 40% 32%, #f2e5ef 0 16%, transparent 17%), linear-gradient(160deg, #d8b8d0, #c49ab8 45%, #a07898); }
+    .char-card.bg-3 .fface { background: radial-gradient(circle at 40% 32%, #ffe5d8 0 16%, transparent 17%), linear-gradient(160deg, #edbeaa, #daa090 45%, #b87868); }
+    .char-fig .fn { position: absolute; top: 42%; left: 50%; transform: translateX(-50%); width: 20%; height: 14%; border-radius: 3px; background: linear-gradient(180deg, #d4a090, #b88070); }
+    .char-fig .fb { position: absolute; top: 55%; left: 50%; transform: translateX(-50%); width: 84%; height: 46%; border-radius: 40% 40% 20% 20%/20% 20% 14% 14%; background: linear-gradient(180deg, #2a1824, #14101a 60%); }
+    /* Overlay */
+    .char-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.82) 100%); transition: .22s; }
+    /* Hover tags */
+    .char-tags { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; opacity: 0; transition: .22s; }
+    .char-card:hover .char-tags { opacity: 1; }
+    .char-tag { padding: 3px 8px; border-radius: 999px; font-size: .66rem; font-weight: 700; background: rgba(224,36,90,0.18); border: 1px solid rgba(224,36,90,0.3); color: #ffb0c0; backdrop-filter: blur(8px); }
+    .char-badge { position: absolute; top: 10px; right: 10px; padding: 3px 8px; border-radius: 999px; font-size: .66rem; font-weight: 700; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px); }
+    .char-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; z-index: 1; }
+    .char-name { font-size: 1.45rem; font-weight: 800; letter-spacing: -.04em; }
+    .char-age { color: rgba(255,255,255,0.5); font-size: .76rem; margin-bottom: 10px; letter-spacing: .01em; }
+    .char-btn { width: 100%; padding: 8px; border-radius: var(--r-sm); border: 2px solid var(--accent); background: rgba(18,18,24,0.85); color: var(--accent); font-size: .82rem; font-weight: 700; cursor: pointer; transition: .18s; backdrop-filter: blur(6px); }
+    .char-btn:hover { background: var(--accent); color: #fff; }
+
+    /* ── INBOX ── */
+    .inbox-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+    .inbox-row { display: flex; align-items: center; gap: 11px; padding: 12px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: .14s; }
+    .inbox-row:last-child { border-bottom: 0; }
+    .inbox-row:hover { background: rgba(255,255,255,0.03); }
+    .inbox-row:hover .inbox-name { color: var(--accent); }
+    .inbox-av { width: 38px; height: 38px; border-radius: 50%; flex: 0 0 38px; border: 1.5px solid rgba(255,255,255,0.1); }
+    .inbox-av.c0 { background: radial-gradient(circle at 34% 28%, #ffedf4 0 10%, transparent 11%), linear-gradient(135deg, #4f2b30, #d59b8d 58%, #f3d8d1); }
+    .inbox-av.c3 { background: radial-gradient(circle at 34% 28%, #f7ede6 0 10%, transparent 11%), linear-gradient(135deg, #3a3025, #c39671 58%, #f0d3c1); }
+    .inbox-av.c2 { background: radial-gradient(circle at 34% 28%, #ffeef2 0 10%, transparent 11%), linear-gradient(135deg, #2c1d29, #b77a93 58%, #edd0da); }
+    .inbox-av.c5 { background: radial-gradient(circle at 34% 28%, #fff1ef 0 10%, transparent 11%), linear-gradient(135deg, #46313b, #e7a4ae 58%, #f8d4db); }
+    .inbox-body { flex: 1; min-width: 0; }
+    .inbox-name { font-size: .88rem; font-weight: 700; letter-spacing: -.01em; transition: .14s; display: flex; align-items: center; gap: 7px; }
+    .inbox-unread { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: 0 0 6px; }
+    .inbox-preview { font-size: .8rem; color: var(--text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inbox-meta { font-size: .72rem; color: var(--text-3); white-space: nowrap; }
+
+    /* ── DISCOVER ── */
+    .filter-bar { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .fpill { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: .8rem; font-weight: 600; cursor: pointer; transition: .14s; }
+    .fpill:hover { border-color: var(--border-2); color: var(--text); }
+    .fpill.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--text); }
+    .discover-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .discover-card {
+      border-radius: var(--r); overflow: hidden; position: relative; aspect-ratio: 2/3;
+      background: var(--surface); border: 1px solid var(--border); cursor: pointer;
+      transition: opacity .28s ease, transform .3s ease, border-color .22s;
+    }
+    .discover-card:hover { transform: translateY(-2px); border-color: rgba(240,48,138,0.3); }
+    .discover-card.hidden { opacity: 0; pointer-events: none; transform: scale(.96) translateY(5px); }
+    .d-bg { position: absolute; inset: 0; }
+    .d-bg.db-0 { background: linear-gradient(155deg, #3a1e28, #1a1020 60%); }
+    .d-bg.db-1 { background: linear-gradient(155deg, #3d2010, #1a1210 60%); }
+    .d-bg.db-2 { background: linear-gradient(155deg, #1e1430, #0e0e1e 60%); }
+    .d-bg.db-3 { background: linear-gradient(155deg, #162012, #0e1410 60%); }
+    .d-fig { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); width: 50%; height: 55%; }
+    .d-fig .fh { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 50%; padding-bottom: 34%; border-radius: 50% 50% 0 0; background: linear-gradient(180deg, #1e1410, #2e1e16); }
+    .d-fig .fface { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 42%; padding-bottom: 42%; border-radius: 50%; background: radial-gradient(circle at 40% 32%, #f9ddd3 0 16%, transparent 17%), linear-gradient(160deg, #e8c0a8, #d4a090 45%, #b5846e); }
+    .d-fig .fn { position: absolute; top: 43%; left: 50%; transform: translateX(-50%); width: 19%; height: 14%; border-radius: 3px; background: linear-gradient(180deg, #d4a090, #b88070); }
+    .d-fig .fb { position: absolute; top: 56%; left: 50%; transform: translateX(-50%); width: 88%; height: 44%; border-radius: 40% 40% 20% 20%/20% 20% 14% 14%; background: linear-gradient(180deg, #2a1824, #14101a 60%); }
+    .d-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(0,0,0,0.85) 100%); }
+    .d-tag { position: absolute; top: 10px; left: 10px; z-index: 1; padding: 3px 9px; border-radius: 999px; font-size: .66rem; font-weight: 700; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px); }
+    .d-footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; z-index: 1; }
+    .d-footer h3 { font-size: 1.3rem; font-weight: 800; letter-spacing: -.04em; margin-bottom: 3px; }
+    .d-footer p { font-size: .76rem; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+    .d-btn { width: 100%; padding: 7px; border-radius: var(--r-sm); border: 2px solid var(--accent); background: rgba(18,18,24,0.85); color: var(--accent); font-size: .78rem; font-weight: 700; cursor: pointer; transition: .18s; backdrop-filter: blur(6px); }
+    .d-btn:hover { background: var(--accent); color: #fff; }
+    .discover-card.hidden { opacity: 0; pointer-events: none; transform: scale(.96) translateY(5px); transition: opacity .28s ease, transform .3s ease; }
+
+    /* chat empty state */
+    .chat-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 10px; padding: 40px; background: #07070c; text-align: center; }
+    .chat-empty-icon { font-size: 2rem; margin-bottom: 4px; opacity: .25; }
+    .chat-empty h3 { font-size: .96rem; font-weight: 700; color: var(--text-2); letter-spacing: -.02em; }
+    .chat-empty p { font-size: .82rem; color: var(--text-3); max-width: 24ch; line-height: 1.6; }
+
+    /* ── CHAT ── */
+    .chat-wrap {
+      height: calc(100vh - var(--topbar) - 40px); min-height: 560px;
+      display: grid; grid-template-rows: auto 1fr auto;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden;
+    }
+    .chat-top {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      background: rgba(255,255,255,0.01);
+    }
+    .chat-who { display: flex; align-items: center; gap: 10px; }
+    .chat-who-av { width: 36px; height: 36px; border-radius: 50%; flex: 0 0 36px; border: 2px solid rgba(255,255,255,0.1); }
+    .chat-who h3 { font-size: 1rem; font-weight: 800; letter-spacing: -.03em; }
+    .chat-who p { font-size: .76rem; color: var(--text-2); margin-top: 1px; display: flex; align-items: center; gap: 4px; }
+    .online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: glow 2.2s ease-out infinite; flex: 0 0 6px; }
+    .chat-actions { display: flex; gap: 6px; }
+    .chat-btn { width: 34px; height: 34px; border-radius: var(--r-sm); border: 1px solid var(--border); background: transparent; color: var(--text-2); cursor: pointer; transition: .14s; display: grid; place-items: center; font-size: .85rem; }
+    .chat-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); border-color: var(--border-2); }
+
+    /* messages */
+    .chat-msgs { padding: 22px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; background: #07070c; scrollbar-width: thin; scrollbar-color: var(--surface-3) transparent; }
+    .chat-msgs::-webkit-scrollbar { width: 4px; }
+    .chat-msgs::-webkit-scrollbar-track { background: transparent; }
+    .chat-msgs::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+    .msg { display: flex; gap: 8px; align-items: end; }
+    .msg.mine { justify-content: flex-end; }
+    .msg-av { width: 28px; height: 28px; border-radius: 50%; flex: 0 0 28px; border: 1px solid rgba(255,255,255,0.1); }
+    .bubble { max-width: min(500px, 70%); padding: 13px 18px; border-radius: 18px; font-size: .9rem; line-height: 1.62; }
+    /* Their bubble — clearly visible */
+    .bubble.theirs { background: var(--surface-3); border: 1px solid var(--border-2); color: var(--text); border-bottom-left-radius: 4px; }
+    /* My bubble — dark fill, accent border */
+    .bubble.mine { background: transparent; border: 2px solid var(--accent); color: var(--text); border-bottom-right-radius: 4px; }
+    .msg-time { font-size: .68rem; color: var(--text-3); margin-top: 3px; }
+
+    .typing-wrap { display: flex; gap: 5px; align-items: center; padding: 10px 14px; background: var(--surface-3); border: 1px solid var(--border-2); border-radius: 16px; border-bottom-left-radius: 4px; width: fit-content; }
+    .tdot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-2); animation: tb 1.2s ease infinite; }
+    .tdot:nth-child(2) { animation-delay: .2s; }
+    .tdot:nth-child(3) { animation-delay: .4s; }
+    @keyframes tb { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+    .chat-form { padding: 10px 12px 12px; border-top: 1px solid var(--border); display: grid; grid-template-columns: auto 1fr auto; gap: 7px; align-items: center; background: rgba(255,255,255,0.01); }
+    .chat-attach { width: 34px; height: 34px; border-radius: var(--r-sm); border: 1px solid var(--border); background: transparent; color: var(--text-2); cursor: pointer; display: grid; place-items: center; transition: .14s; }
+    .chat-attach:hover { background: var(--surface-2); color: var(--text); }
+    .chat-input-wrap { display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; transition: .15s; }
+    .chat-input-wrap:focus-within { border-color: var(--accent-border); }
+    .chat-input-wrap input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); padding: 10px 0; font-size: .88rem; }
+    .chat-input-wrap input::placeholder { color: var(--text-3); }
+    .send-btn { width: 34px; height: 34px; border-radius: var(--r-sm); border: 2px solid var(--accent); background: var(--surface-2); color: var(--accent); cursor: pointer; display: grid; place-items: center; transition: .18s; }
+    .send-btn:hover { background: var(--accent); color: #fff; }
+
+    /* ── GALLERY ── */
+    .gallery-wrap { display: grid; grid-template-columns: 1fr 210px; gap: 14px; }
+    .gallery-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .g-tile {
+      border-radius: var(--r); overflow: hidden; position: relative; aspect-ratio: 2/3;
+      background: var(--surface-2); border: 1px solid var(--border); cursor: pointer; transition: .22s;
+    }
+    .g-tile:hover { transform: translateY(-2px); border-color: rgba(224,36,90,0.22); }
+    .g-bg { position: absolute; inset: 0; }
+    .g-bg.gb-0 { background: linear-gradient(155deg, #3a1e28, #1a1020 65%); }
+    .g-bg.gb-1 { background: linear-gradient(155deg, #3d2010, #1a1210 65%); }
+    .g-bg.gb-2 { background: linear-gradient(155deg, #1e1430, #0e0e1e 65%); }
+    .g-bg.gb-3 { background: linear-gradient(155deg, #2a1020, #141018 65%); }
+    .g-fig { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); width: 56%; height: 60%; }
+    .g-fig .fh { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 50%; padding-bottom: 34%; border-radius: 50% 50% 0 0; background: linear-gradient(180deg, #1e1410, #2e1e16); }
+    .g-fig .fface { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 42%; padding-bottom: 42%; border-radius: 50%; background: radial-gradient(circle at 40% 32%, #f9ddd3 0 16%, transparent 17%), linear-gradient(160deg, #e8c0a8, #d4a090 45%, #b5846e); }
+    .g-tile.gb-1 .fface { background: radial-gradient(circle at 40% 32%, #fbe5cc 0 16%, transparent 17%), linear-gradient(160deg, #e8be95, #d4a070 45%, #b58050); }
+    .g-tile.gb-2 .fface { background: radial-gradient(circle at 40% 32%, #f2e5ef 0 16%, transparent 17%), linear-gradient(160deg, #d8b8d0, #c49ab8 45%, #a07898); }
+    .g-fig .fn { position: absolute; top: 43%; left: 50%; transform: translateX(-50%); width: 19%; height: 13%; border-radius: 3px; background: linear-gradient(180deg, #d4a090, #b88070); }
+    .g-fig .fb { position: absolute; top: 56%; left: 50%; transform: translateX(-50%); width: 88%; height: 44%; border-radius: 40% 40% 20% 20%/20% 20% 14% 14%; background: linear-gradient(180deg, #2a1824, #14101a 60%); }
+    .g-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(0,0,0,0.85) 100%); }
+    .g-lock { position: absolute; top: 9px; right: 9px; padding: 3px 8px; border-radius: 999px; font-size: .65rem; font-weight: 700; background: rgba(0,0,0,0.72); border: 1px solid rgba(255,255,255,0.1); z-index: 1; }
+    .g-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 11px 12px; z-index: 1; }
+    .g-caption .g-name { font-size: 1.05rem; font-weight: 800; letter-spacing: -.03em; }
+    .g-caption .g-mood { font-size: .7rem; color: rgba(255,255,255,0.5); margin-top: 1px; }
+
+    .gallery-side { display: flex; flex-direction: column; gap: 10px; }
+    .premium-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
+    .premium-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: 5px; letter-spacing: -.03em; }
+    .premium-card p { font-size: .8rem; color: var(--text-2); line-height: 1.55; margin-bottom: 12px; }
+    .price-tag { font-size: 1.7rem; font-weight: 700; letter-spacing: -.04em; margin-bottom: 10px; }
+    .price-tag span { font-size: .8rem; color: var(--text-2); font-weight: 400; }
+    .perk-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+    .perk { display: flex; align-items: center; gap: 7px; font-size: .78rem; color: var(--text-2); }
+    .perk-dot { width: 14px; height: 14px; border-radius: 50%; background: rgba(34,197,94,0.12); color: var(--green); display: grid; place-items: center; font-size: .6rem; flex: 0 0 14px; }
+
+    /* ── AGE GATE ── */
+    .gate { position: fixed; inset: 0; z-index: 300; background: rgba(5,5,9,0.97); display: flex; align-items: center; justify-content: center; transition: .35s; }
+    .gate.hidden { opacity: 0; pointer-events: none; }
+    .gate-card { width: min(380px, 90vw); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px 28px; text-align: center; box-shadow: 0 32px 80px rgba(0,0,0,0.7); }
+    .gate-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--accent); margin: 0 auto 14px; box-shadow: 0 6px 18px rgba(224,36,90,0.35); }
+    .gate-card h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -.04em; margin-bottom: 8px; }
+    .gate-card p { font-size: .84rem; color: var(--text-2); line-height: 1.6; margin-bottom: 20px; }
+    .gate-enter { display: block; width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--accent); background: var(--surface-2); color: var(--accent); font-size: .92rem; font-weight: 700; cursor: pointer; margin-bottom: 8px; transition: .18s; }
+    .gate-enter:hover { background: var(--accent); color: #fff; }
+    .gate-leave { display: block; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text-2); font-size: .88rem; cursor: pointer; transition: .15s; }
+    .gate-leave:hover { color: var(--text); border-color: var(--border-2); }
+    .gate-fine { font-size: .68rem; color: var(--text-3); margin-top: 10px; line-height: 1.5; }
+
+    /* ── MOBILE NAV ── */
+    .mob-nav { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 40; display: none; grid-template-columns: repeat(4,1fr); gap: 5px; padding: 6px; border-radius: 14px; background: rgba(10,10,15,0.96); backdrop-filter: blur(16px); border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(0,0,0,0.4); padding-bottom: calc(6px + env(safe-area-inset-bottom,0px)); }
+    .mob-tab { border: 0; background: transparent; color: var(--text-3); border-radius: 10px; padding: 10px 6px; display: grid; place-items: center; gap: 3px; cursor: pointer; font-size: .68rem; font-weight: 600; }
+    .mob-tab.active { background: transparent; border: 1px solid rgba(240,48,138,0.45); color: var(--text); }
+    .sidebar-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .2s; border: 0; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:1280px){ .char-grid{grid-template-columns:repeat(2,1fr)} .discover-grid{grid-template-columns:repeat(2,1fr)} .gallery-grid{grid-template-columns:repeat(2,1fr)} }
+    @media(max-width:980px){
+      .app{grid-template-columns:1fr}
+      .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .28s ease;z-index:60;width:min(80vw,260px)}
+      .sidebar.open{transform:translateX(0)}
+      .menu-btn{display:inline-grid;place-items:center;flex:0 0 36px}
+      .gallery-wrap{grid-template-columns:1fr}
+      .topbar{padding:max(9px,env(safe-area-inset-top,0px)) 12px 9px;height:auto;min-height:var(--topbar);flex-wrap:wrap;row-gap:8px}
+      .topbar-left,.topbar-right{flex:1 1 100%}
+      .topbar-right{justify-content:flex-start}
+      .views{padding:12px;padding-bottom:calc(60px + 14px + env(safe-area-inset-bottom,0px))}
+      .mob-nav{display:grid}
+      .sidebar-bg{display:block}
+      body.sb-open{overflow:hidden}
+      body.sb-open .sidebar-bg{opacity:1;pointer-events:auto}
+    }
+    @media(max-width:720px){
+      .char-grid,.discover-grid,.gallery-grid{grid-template-columns:repeat(2,1fr)}
+      .avatar-rail{gap:10px}
+      .hero-text h1{font-size:1.5rem}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Age gate -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-icon"></div>
+    <h1>18+ only</h1>
+    <p>Velora is a private adult platform. You must be of legal age to continue.</p>
+    <button class="gate-enter" id="gateEnter">I am 18 or older — Enter</button>
+    <button class="gate-leave">Under 18 — Leave</button>
+    <p class="gate-fine">By entering you agree to our Terms of Service and confirm you are 18+.</p>
+  </div>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <div class="brand-name">velora<span>.ai</span></div>
+    </div>
+
+    <button class="nav-item active" data-to="home"><span class="nav-icon">⌂</span>Home</button>
+    <button class="nav-item" data-to="discover"><span class="nav-icon">◈</span>Discover</button>
+    <button class="nav-item" data-to="chat" id="chatNav">
+      <span class="nav-icon">◔</span>Chat<span class="nav-arrow">›</span>
+    </button>
+    <div class="thread-drawer" id="threadDrawer">
+      <button class="drawer-item active" data-thread="elara" data-name="Elara" data-av="" data-status="Online now" data-p="You are Elara, a warm and romantic AI companion. Soft, intimate, slightly poetic. Max 2 sentences.">
+        <div class="d-av c0" style="background:radial-gradient(circle at 34% 28%,#ffedf4 0 10%,transparent 11%),linear-gradient(135deg,#4f2b30,#d59b8d 58%,#f3d8d1)"></div>
+        <span class="d-name">Elara</span><span class="d-dot"></span>
+      </button>
+      <button class="drawer-item" data-thread="mara" data-name="Mara" data-av="c3" data-status="Away" data-p="You are Mara, luxurious and sophisticated. Upscale lounge energy. Max 2 sentences, elegant.">
+        <div class="d-av" style="background:radial-gradient(circle at 34% 28%,#f7ede6 0 10%,transparent 11%),linear-gradient(135deg,#3a3025,#c39671 58%,#f0d3c1)"></div>
+        <span class="d-name">Mara</span>
+      </button>
+      <button class="drawer-item" data-thread="nyra" data-name="Nyra" data-av="c2" data-status="Online now" data-p="You are Nyra, mysterious and poetic. Lyrical, cryptic. Max 2 sentences.">
+        <div class="d-av" style="background:radial-gradient(circle at 34% 28%,#ffeef2 0 10%,transparent 11%),linear-gradient(135deg,#2c1d29,#b77a93 58%,#edd0da)"></div>
+        <span class="d-name">Nyra</span><span class="d-dot"></span>
+      </button>
+      <button class="drawer-item" data-thread="rose" data-name="Rose" data-av="c5" data-status="Online now" data-p="You are Rose, playful and flirty. Bright teasing energy. Max 2 sentences, fun.">
+        <div class="d-av" style="background:radial-gradient(circle at 34% 28%,#fff1ef 0 10%,transparent 11%),linear-gradient(135deg,#46313b,#e7a4ae 58%,#f8d4db)"></div>
+        <span class="d-name">Rose</span><span class="d-dot"></span>
+      </button>
+      <button class="drawer-item" data-thread="mina" data-name="Mina" data-av="c4" data-status="Last active 3m ago" data-p="You are Mina, creative and dreamy. Loves art and poetry. Max 2 sentences, warm.">
+        <div class="d-av" style="background:radial-gradient(circle at 34% 28%,#f0eefb 0 10%,transparent 11%),linear-gradient(135deg,#332d4d,#8a86d1 58%,#d8d5ff)"></div>
+        <span class="d-name">Mina</span>
+      </button>
+    </div>
+    <button class="nav-item" data-to="gallery"><span class="nav-icon">▣</span>Gallery</button>
+
+    <div class="sidebar-gap"></div>
+    <div class="sidebar-bottom">
+      <button class="sidebar-link">☺ &nbsp;Profile</button>
+      <button class="sidebar-link">⚙ &nbsp;Settings</button>
+    </div>
+    <div class="sidebar-meta">VELORA.AI · 2026</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menuBtn">☰</button>
+      </div>
+      <div class="topbar-right">
+        <div class="tokens-pill"><span class="token-icon"></span>41.4 tokens</div>
+        <button class="btn btn-primary"><span class="profile-av"></span>My Profile</button>
+      </div>
+    </header>
+
+    <main class="views">
+
+      <!-- HOME -->
+      <section class="view active" id="view-home">
+        <!-- Banner -->
+        <div class="hero-banner">
+          <div class="hero-fig"><div class="hero-fig-body"></div></div>
+          <div class="hero-text">
+            <div class="hero-label">Private · 18+ · AI Companions</div>
+            <h1>Your companion<br/>is waiting.</h1>
+            <p>Exclusive personas, private galleries, and conversations that feel real.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" data-to="discover">Find a persona</button>
+              <button class="btn" data-to="chat">Open chat</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Avatar rail -->
+        <div>
+          <div class="sh"><h2>Active now</h2><button class="sh-link" data-to="discover">See all</button></div>
+          <div class="avatar-rail">
+            <div class="av-item" data-to="chat"><div class="av-ring"><div class="av-inner"><div class="av-css c0"></div></div></div><span class="av-name">Elara</span><span class="av-mood">Romantic</span></div>
+            <div class="av-item" data-to="chat"><div class="av-ring"><div class="av-inner"><div class="av-css c1"></div></div></div><span class="av-name">Nora</span><span class="av-mood">Confident</span></div>
+            <div class="av-item" data-to="chat"><div class="av-ring"><div class="av-inner"><div class="av-css c2"></div></div></div><span class="av-name">Nyra</span><span class="av-mood">Mystery</span></div>
+            <div class="av-item" data-to="chat"><div class="av-ring"><div class="av-inner"><div class="av-css c3"></div></div></div><span class="av-name">Mara</span><span class="av-mood">Elegant</span></div>
+            <div class="av-item" data-to="chat"><div class="av-ring offline"><div class="av-inner"><div class="av-css c4"></div></div></div><span class="av-name">Mina</span><span class="av-mood">Creative</span></div>
+            <div class="av-item" data-to="chat"><div class="av-ring"><div class="av-inner"><div class="av-css c5"></div></div></div><span class="av-name">Rose</span><span class="av-mood">Playful</span></div>
+          </div>
+        </div>
+
+        <!-- Character cards -->
+        <div>
+          <div class="sh"><h2>Featured</h2></div>
+          <div class="char-grid">
+            <article class="char-card bg-0">
+              <div class="char-bg bg-0"></div>
+              <div class="char-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div>
+              <div class="char-overlay"></div>
+              <div class="char-tags"><span class="char-tag">Romance</span><span class="char-tag">Late night</span></div>
+              <span class="char-badge">24</span>
+              <div class="char-info"><div class="char-name">Elara</div><div class="char-age">Romantic · Voice notes</div><button class="char-btn" data-to="chat">Chat now</button></div>
+            </article>
+            <article class="char-card bg-1">
+              <div class="char-bg bg-1"></div>
+              <div class="char-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div>
+              <div class="char-overlay"></div>
+              <div class="char-tags"><span class="char-tag">Premium</span><span class="char-tag">Gallery</span></div>
+              <span class="char-badge">27</span>
+              <div class="char-info"><div class="char-name">Mara</div><div class="char-age">Hostess · Upscale</div><button class="char-btn" data-to="chat">Chat now</button></div>
+            </article>
+            <article class="char-card bg-2">
+              <div class="char-bg bg-2"></div>
+              <div class="char-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div>
+              <div class="char-overlay"></div>
+              <div class="char-tags"><span class="char-tag">Mystery</span><span class="char-tag">Poetry</span></div>
+              <span class="char-badge">25</span>
+              <div class="char-info"><div class="char-name">Nyra</div><div class="char-age">Mystery · Slow burn</div><button class="char-btn" data-to="chat">Chat now</button></div>
+            </article>
+            <article class="char-card bg-3">
+              <div class="char-bg bg-3"></div>
+              <div class="char-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div>
+              <div class="char-overlay"></div>
+              <div class="char-tags"><span class="char-tag">Playful</span><span class="char-tag">Teasing</span></div>
+              <span class="char-badge">23</span>
+              <div class="char-info"><div class="char-name">Rose</div><div class="char-age">Playful · Bright energy</div><button class="char-btn" data-to="chat">Chat now</button></div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Inbox -->
+        <div>
+          <div class="sh"><h2>Messages</h2><button class="sh-link" data-to="chat">Open chat</button></div>
+          <div class="inbox-card">
+            <div class="inbox-row" data-to="chat"><div class="inbox-av c0"></div><div class="inbox-body"><div class="inbox-name">Elara</div><div class="inbox-preview">I saved a quieter room for us tonight. Want in?</div></div><span class="inbox-meta">2m</span></div>
+            <div class="inbox-row" data-to="chat"><div class="inbox-av c3"></div><div class="inbox-body"><div class="inbox-name">Mara</div><div class="inbox-preview">I've got a new private collection ready for you.</div></div><span class="inbox-meta">9m</span></div>
+            <div class="inbox-row" data-to="chat"><div class="inbox-av c2"></div><div class="inbox-body"><div class="inbox-name">Nyra</div><div class="inbox-preview">Some stories are better told after midnight.</div></div><span class="inbox-meta">18m</span></div>
+            <div class="inbox-row" data-to="chat"><div class="inbox-av c5"></div><div class="inbox-body"><div class="inbox-name">Rose</div><div class="inbox-preview">I'm in a playful mood — ask me anything.</div></div><span class="inbox-meta">1h</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DISCOVER -->
+      <section class="view" id="view-discover">
+        <div class="sh"><h2>Discover</h2></div>
+        <div class="filter-bar">
+          <button class="fpill active" data-f="all">All</button>
+          <button class="fpill" data-f="romantic">Romantic</button>
+          <button class="fpill" data-f="playful">Playful</button>
+          <button class="fpill" data-f="mystery">Mystery</button>
+          <button class="fpill" data-f="elegant">Elegant</button>
+          <button class="fpill" data-f="latenight">Late night</button>
+        </div>
+        <div class="discover-grid">
+          <article class="discover-card" data-tags="romantic latenight"><div class="d-bg db-0"></div><div class="d-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="d-overlay"></div><span class="d-tag">Trending</span><div class="d-footer"><h3>Elara</h3><p>Warm, attentive, slow-burn chemistry.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+          <article class="discover-card" data-tags="elegant latenight"><div class="d-bg db-1"></div><div class="d-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="d-overlay"></div><span class="d-tag">Premium</span><div class="d-footer"><h3>Mara</h3><p>Upscale lounge energy, exclusive drops.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+          <article class="discover-card" data-tags="mystery latenight"><div class="d-bg db-2"></div><div class="d-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="d-overlay"></div><span class="d-tag">New</span><div class="d-footer"><h3>Nyra</h3><p>Mystery, poetry, and private pacing.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+          <article class="discover-card" data-tags="playful romantic"><div class="d-bg db-3"></div><div class="d-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="d-overlay"></div><span class="d-tag">Popular</span><div class="d-footer"><h3>Rose</h3><p>Playful, bright, and warm.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+          <article class="discover-card" data-tags="elegant romantic"><div class="d-bg db-1"></div><div class="d-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="d-overlay"></div><span class="d-tag">Curated</span><div class="d-footer"><h3>Siena</h3><p>Calm, polished, premium image drops.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+          <article class="discover-card" data-tags="mystery playful"><div class="d-bg db-0"></div><div class="d-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="d-overlay"></div><span class="d-tag">Creators' pick</span><div class="d-footer"><h3>Mina</h3><p>Creative, artistic, soft atmosphere.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+        </div>
+      </section>
+
+      <!-- CHAT -->
+      <section class="view" id="view-chat">
+        <div class="chat-wrap">
+          <div class="chat-top">
+            <div class="chat-who">
+              <div class="chat-who-av" id="chatAv" style="background:radial-gradient(circle at 34% 28%,#ffedf4 0 10%,transparent 11%),linear-gradient(135deg,#4f2b30,#d59b8d 58%,#f3d8d1)"></div>
+              <div><h3 id="chatName">Elara</h3><p><span class="online-dot"></span><span id="chatStatus">Online now</span></p></div>
+            </div>
+            <div class="chat-actions">
+              <button class="chat-btn" title="Video call">📷</button>
+              <button class="chat-btn">☆</button>
+              <button class="chat-btn">⋯</button>
+            </div>
+          </div>
+          <div class="chat-msgs" id="chatMsgs">
+            <div class="chat-empty" id="chatEmpty">
+              <div class="chat-empty-icon">💬</div>
+              <h3>Choose a persona</h3>
+              <p>Select someone from the sidebar to start.</p>
+            </div>
+          </div>
+          <form class="chat-form" id="chatForm">
+            <button class="chat-attach" type="button">＋</button>
+            <div class="chat-input-wrap"><input id="chatInput" type="text" placeholder="Write a message…" autocomplete="off"/></div>
+            <button class="send-btn" type="submit">➤</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- GALLERY -->
+      <section class="view" id="view-gallery">
+        <div class="gallery-wrap">
+          <section class="gallery-panel">
+            <div class="sh"><h2>Gallery</h2><p style="font-size:.8rem;color:var(--text-2)">Private collections from your personas.</p></div>
+            <div class="gallery-grid">
+              <article class="g-tile" data-name="Elara" data-desc="Elara's private collection."><div class="g-bg gb-0"></div><div class="g-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="g-overlay"></div><span class="g-lock">Locked</span><div class="g-caption"><div class="g-name">Elara</div><div class="g-mood">Romantic · Late night</div></div></article>
+              <article class="g-tile gb-1" data-name="Mara" data-desc="Mara's exclusive drops."><div class="g-bg gb-1"></div><div class="g-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="g-overlay"></div><span class="g-lock">Members</span><div class="g-caption"><div class="g-name">Mara</div><div class="g-mood">Premium · Exclusive</div></div></article>
+              <article class="g-tile gb-2" data-name="Nyra" data-desc="Nyra's moody gallery."><div class="g-bg gb-2"></div><div class="g-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="g-overlay"></div><span class="g-lock">Preview</span><div class="g-caption"><div class="g-name">Nyra</div><div class="g-mood">Mystery · Poetry</div></div></article>
+              <article class="g-tile gb-3" data-name="Rose" data-desc="Rose's playful collection."><div class="g-bg gb-3"></div><div class="g-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="g-overlay"></div><span class="g-lock">New</span><div class="g-caption"><div class="g-name">Rose</div><div class="g-mood">Playful · Bright</div></div></article>
+              <article class="g-tile gb-1" data-name="Siena" data-desc="Siena's curated collection."><div class="g-bg gb-1"></div><div class="g-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="g-overlay"></div><span class="g-lock">Locked</span><div class="g-caption"><div class="g-name">Siena</div><div class="g-mood">Elegant · Curated</div></div></article>
+              <article class="g-tile gb-0" data-name="Mina" data-desc="Mina's dreamy gallery."><div class="g-bg gb-0"></div><div class="g-fig"><div class="fh"></div><div class="fface"></div><div class="fn"></div><div class="fb"></div></div><div class="g-overlay"></div><span class="g-lock">Preview</span><div class="g-caption"><div class="g-name">Mina</div><div class="g-mood">Creative · Dreamy</div></div></article>
+            </div>
+          </section>
+          <aside class="gallery-side">
+            <div class="premium-card">
+              <h3>Premium</h3>
+              <p>Unlock all collections and unlimited messaging.</p>
+              <div class="price-tag">$24 <span>/ month</span></div>
+              <div class="perk-list">
+                <div class="perk"><span class="perk-dot">✓</span>All private galleries</div>
+                <div class="perk"><span class="perk-dot">✓</span>Unlimited messaging</div>
+                <div class="perk"><span class="perk-dot">✓</span>New drops weekly</div>
+                <div class="perk"><span class="perk-dot">✓</span>Priority access</div>
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;border-width:2px">Unlock Premium</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<button class="sidebar-bg" id="sidebarBg"></button>
+<nav class="mob-nav">
+  <button class="mob-tab active" data-to="home"><span>⌂</span><span>Home</span></button>
+  <button class="mob-tab" data-to="discover"><span>◈</span><span>Discover</span></button>
+  <button class="mob-tab" data-to="chat"><span>◔</span><span>Chat</span></button>
+  <button class="mob-tab" data-to="gallery"><span>▣</span><span>Gallery</span></button>
+</nav>
+
+<script>
+// Age gate
+const gate = document.getElementById('gate');
+if(localStorage.getItem('v_in')){ gate.style.opacity='0'; gate.style.pointerEvents='none'; setTimeout(()=>gate.classList.add('hidden'),10); }
+document.getElementById('gateEnter').addEventListener('click',()=>{ localStorage.setItem('v_in','1'); gate.style.transition='opacity .35s'; gate.style.opacity='0'; setTimeout(()=>gate.classList.add('hidden'),380); });
+
+// Nav
+const sidebar=document.getElementById('sidebar'), menuBtn=document.getElementById('menuBtn'), sbg=document.getElementById('sidebarBg');
+const views={home:document.getElementById('view-home'),discover:document.getElementById('view-discover'),chat:document.getElementById('view-chat'),gallery:document.getElementById('view-gallery')};
+const chatNav=document.getElementById('chatNav'), drawer=document.getElementById('threadDrawer');
+let chatOpen=false;
+
+function closeSb(){ sidebar.classList.remove('open'); document.body.classList.remove('sb-open'); }
+function toggleDrawer(f){ chatOpen=f!==undefined?f:!chatOpen; drawer.classList.toggle('open',chatOpen); chatNav.classList.toggle('open',chatOpen); }
+
+function goTo(name){
+  Object.entries(views).forEach(([k,v])=>v?.classList.toggle('active',k===name));
+  document.querySelectorAll('[data-to]').forEach(b=>{ if(b.closest('.sidebar')) b.classList.toggle('active', b.dataset.to===name && b!==chatNav); });
+  document.querySelectorAll('.mob-tab').forEach(b=>b.classList.toggle('active',b.dataset.to===name));
+  if(name==='chat'){ toggleDrawer(true); chatNav.classList.add('active'); } else { chatNav.classList.remove('active'); }
+  closeSb(); window.scrollTo({top:0,behavior:'smooth'}); localStorage.setItem('v_view',name);
+}
+
+chatNav.addEventListener('click',()=>{ if(!views.chat.classList.contains('active')) goTo('chat'); else toggleDrawer(); });
+document.querySelectorAll('[data-to]').forEach(b=>{ if(b===chatNav) return; b.addEventListener('click',()=>goTo(b.dataset.to)); });
+menuBtn.addEventListener('click',()=>{ sidebar.classList.contains('open')?closeSb():(sidebar.classList.add('open'),document.body.classList.add('sb-open')); });
+sbg.addEventListener('click',closeSb);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSb(); });
+const sv=localStorage.getItem('v_view'); if(sv&&views[sv]) goTo(sv); else toggleDrawer(false);
+
+// Discover filters
+document.querySelectorAll('.fpill').forEach(p=>{ p.addEventListener('click',()=>{ document.querySelectorAll('.fpill').forEach(x=>x.classList.remove('active')); p.classList.add('active'); const f=p.dataset.f; document.querySelectorAll('.discover-card').forEach(c=>c.classList.toggle('hidden',f!=='all'&&!(c.dataset.tags||'').includes(f))); }); });
+
+// Chat
+const chatMsgs=document.getElementById('chatMsgs'), chatInput=document.getElementById('chatInput'), sendBtn=document.querySelector('.send-btn');
+let chatAv=document.getElementById('chatAv'), chatName=document.getElementById('chatName'), chatStatus=document.getElementById('chatStatus');
+let curPersona='You are Elara, a warm and romantic AI companion. Soft, intimate, slightly poetic. Max 2 sentences.';
+let curAvStyle='background:radial-gradient(circle at 34% 28%,#ffedf4 0 10%,transparent 11%),linear-gradient(135deg,#4f2b30,#d59b8d 58%,#f3d8d1)';
+
+const avStyles={
+  '':  'background:radial-gradient(circle at 34% 28%,#ffedf4 0 10%,transparent 11%),linear-gradient(135deg,#4f2b30,#d59b8d 58%,#f3d8d1)',
+  'c3':'background:radial-gradient(circle at 34% 28%,#f7ede6 0 10%,transparent 11%),linear-gradient(135deg,#3a3025,#c39671 58%,#f0d3c1)',
+  'c2':'background:radial-gradient(circle at 34% 28%,#ffeef2 0 10%,transparent 11%),linear-gradient(135deg,#2c1d29,#b77a93 58%,#edd0da)',
+  'c5':'background:radial-gradient(circle at 34% 28%,#fff1ef 0 10%,transparent 11%),linear-gradient(135deg,#46313b,#e7a4ae 58%,#f8d4db)',
+  'c4':'background:radial-gradient(circle at 34% 28%,#f0eefb 0 10%,transparent 11%),linear-gradient(135deg,#332d4d,#8a86d1 58%,#d8d5ff)'
+};
+const greetings={elara:'I kept this room quiet, just for us.',mara:'Welcome back. The lounge is ready.',nyra:'You came. I wondered if you would.',rose:'Hey! What mood are you in tonight?',mina:'I was just thinking about you.'};
+
+function ts(){ const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; }
+function addMsg(side,text,avStyle){
+  const row=document.createElement('div'); row.className='msg'+(side==='mine'?' mine':'');
+  if(side!=='mine'){ const a=document.createElement('div'); a.style.cssText=`${avStyle};width:28px;height:28px;border-radius:50%;flex:0 0 28px;border:1px solid rgba(255,255,255,0.1)`; row.appendChild(a); }
+  const w=document.createElement('div'),b=document.createElement('div'),t=document.createElement('div');
+  b.className='bubble '+(side==='mine'?'mine':'theirs'); b.textContent=text;
+  t.className='msg-time'; t.textContent=ts(); if(side==='mine') t.style.textAlign='right';
+  w.appendChild(b); w.appendChild(t); row.appendChild(w); chatMsgs.appendChild(row); chatMsgs.scrollTop=chatMsgs.scrollHeight;
+}
+function addTyping(avStyle){
+  const row=document.createElement('div'); row.className='msg'; row.id='trow';
+  const a=document.createElement('div'); a.style.cssText=`${avStyle};width:28px;height:28px;border-radius:50%;flex:0 0 28px;border:1px solid rgba(255,255,255,0.1)`; row.appendChild(a);
+  const tw=document.createElement('div'); tw.className='typing-wrap';
+  for(let i=0;i<3;i++){ const d=document.createElement('div'); d.className='tdot'; tw.appendChild(d); }
+  row.appendChild(tw); chatMsgs.appendChild(row); chatMsgs.scrollTop=chatMsgs.scrollHeight; return row;
+}
+
+document.querySelectorAll('.drawer-item').forEach(item=>{ item.addEventListener('click',()=>{
+  document.querySelectorAll('.drawer-item').forEach(x=>x.classList.toggle('active',x===item));
+  const av=avStyles[item.dataset.av||'']||avStyles[''];
+  chatAv.style.cssText=av+';width:36px;height:36px;border-radius:50%;flex:0 0 36px;border:2px solid rgba(255,255,255,0.1)';
+  chatName.textContent=item.dataset.name; chatStatus.textContent=item.dataset.status;
+  curPersona=item.dataset.p; curAvStyle=av;
+  chatMsgs.innerHTML=''; addMsg('theirs',greetings[item.dataset.thread]||'Hello…',av);
+  goTo('chat');
+}); });
+
+document.getElementById('chatForm').addEventListener('submit',async e=>{ e.preventDefault(); const txt=chatInput.value.trim(); if(!txt) return; chatInput.value=''; sendBtn.disabled=true; addMsg('mine',txt); const tr=addTyping(curAvStyle); try{ const r=await window.claude.complete({messages:[{role:'user',content:`${curPersona}\n\nUser: "${txt}"\n\nRespond in character.`}]}); tr.remove(); addMsg('theirs',r.trim(),curAvStyle); }catch{ tr.remove(); addMsg('theirs','One moment…',curAvStyle); } sendBtn.disabled=false; chatInput.focus(); });
+</script>
+</body>
+</html>
