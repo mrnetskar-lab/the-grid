@@ -591,10 +591,11 @@
             <div class="msg"><div class="msg-av" style="background:radial-gradient(circle at 34% 28%,#ffedf4 0 10%,transparent 11%),linear-gradient(135deg,#4f2b30,#d59b8d 58%,#f3d8d1);width:28px;height:28px;border-radius:50%;flex:0 0 28px;border:1px solid rgba(255,255,255,0.1)"></div><div><div class="bubble theirs">Then stay. I'll keep the lights low.</div><div class="msg-time">4:19 AM</div></div></div>
           </div>
           <form class="chat-form" id="chatForm">
-            <button class="chat-attach" type="button">＋</button>
+            <button class="chat-attach" type="button" id="camBtn" title="Generate photo">📷</button>
             <div class="chat-input-wrap"><input id="chatInput" type="text" placeholder="Write a message…" autocomplete="off"/></div>
             <button class="send-btn" type="submit">➤</button>
           </form>
+          <div id="camStatus" style="font-size:.72rem;color:var(--text-2);padding:0 12px 8px;min-height:16px;display:none"></div>
         </div>
       </section>
 
@@ -709,11 +710,12 @@ const avStyles={
 const greetings={elara:'I kept this room quiet, just for us.',mara:'Welcome back. The lounge is ready.',nyra:'You came. I wondered if you would.',rose:'Hey! What mood are you in tonight?',mina:'I lit a little moonlight for you—let\'s make something beautiful tonight.'};
 
 function ts(){ const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; }
-function addMsg(side,text,avStyle){
+function addMsg(side,text,avStyle,extraEl){
   const row=document.createElement('div'); row.className='msg'+(side==='mine'?' mine':'');
   if(side!=='mine'){ const a=document.createElement('div'); a.style.cssText=`${avStyle};width:28px;height:28px;border-radius:50%;flex:0 0 28px;border:1px solid rgba(255,255,255,0.1)`; row.appendChild(a); }
   const w=document.createElement('div'),b=document.createElement('div'),t=document.createElement('div');
-  b.className='bubble '+(side==='mine'?'mine':'theirs'); b.textContent=text;
+  b.className='bubble '+(side==='mine'?'mine':'theirs'); if(text) b.textContent=text;
+  if(extraEl) b.appendChild(extraEl);
   t.className='msg-time'; t.textContent=ts(); if(side==='mine') t.style.textAlign='right';
   w.appendChild(b); w.appendChild(t); row.appendChild(w); chatMsgs.appendChild(row); chatMsgs.scrollTop=chatMsgs.scrollHeight;
 }
@@ -757,7 +759,29 @@ document.addEventListener('click',e=>{
   if(persona) { e.stopImmediatePropagation(); activateThreadByPersona(persona); return; }
 },true);
 
-// Camera — generate photo
+// Camera — generate photo from chat bar
+document.getElementById('camBtn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('camBtn');
+  const statusEl = document.getElementById('camStatus');
+  const character = document.querySelector('.drawer-item.active')?.dataset.thread || 'elara';
+  btn.disabled = true; btn.textContent = '⏳';
+  statusEl.style.display = 'block'; statusEl.textContent = 'Generating… (~20s)';
+  try {
+    const res = await fetch('/api/camera/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ character, mood: 'warm' }) });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Generation failed');
+    // Show image as a chat message
+    const img = document.createElement('img');
+    img.src = data.shot.path; img.alt = character; img.loading = 'lazy';
+    img.style.cssText = 'max-width:260px;border-radius:10px;display:block;margin-top:4px';
+    addMsg('theirs', '', curAvStyle, img);
+    statusEl.textContent = '';  statusEl.style.display = 'none';
+  } catch (err) {
+    statusEl.textContent = 'Error: ' + err.message;
+  }
+  btn.disabled = false; btn.textContent = '📷';
+});
+
 document.getElementById('genBtn')?.addEventListener('click', async () => {
   const btn = document.getElementById('genBtn');
   const status = document.getElementById('genStatus');
@@ -768,7 +792,6 @@ document.getElementById('genBtn')?.addEventListener('click', async () => {
     const res = await fetch('/api/camera/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ character, mood }) });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || 'Generation failed');
-    // Prepend generated tile to gallery grid
     const grid = document.querySelector('.gallery-grid');
     const tile = document.createElement('article');
     tile.className = 'g-tile';
