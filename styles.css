@@ -1620,6 +1620,53 @@
       }
     }
 
+    @media (min-width: 981px) and (max-width: 1180px) {
+      :root {
+        --sidebar-w: 220px;
+      }
+
+      .views {
+        padding: 20px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .lower-grid,
+      .chat-layout,
+      .gallery-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .chat-layout,
+      .chat-panel {
+        min-height: 680px;
+      }
+
+      .gallery-main {
+        padding: 18px;
+      }
+
+      .gallery-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .gallery-tile {
+        min-height: 300px;
+      }
+
+      .gallery-tile .caption p {
+        max-width: 30ch;
+      }
+
+      .gallery-side {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+      }
+    }
+
     @media (max-width: 980px) {
       .app {
         grid-template-columns: 1fr;
