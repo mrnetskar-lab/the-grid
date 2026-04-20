@@ -291,7 +291,43 @@
     #view-home.active{display:flex;flex-direction:column;gap:32px;}
     .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 
-    /* Wide desktop — keep sidebar visible, tighten main content */
+    /* ── CHARACTER PROFILE PAGE ── */
+    #view-profile.active{display:block;}
+    .profile-back{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--text-2);cursor:pointer;font-size:.84rem;font-weight:600;padding:0 0 20px;transition:.14s;}
+    .profile-back:hover{color:var(--text);}
+    .profile-back svg{opacity:.6;}
+    .profile-layout{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;}
+    .profile-photo-col{position:sticky;top:calc(var(--topbar) + 20px);}
+    .profile-photo{border-radius:var(--r);overflow:hidden;aspect-ratio:3/4;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.055);}
+    .profile-photo img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+    .profile-photo::after{content:"";position:absolute;inset:auto 0 0 0;height:35%;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.6));}
+    .profile-photo-name{position:absolute;bottom:16px;left:16px;z-index:1;}
+    .profile-photo-name h2{font-size:1.8rem;font-weight:800;letter-spacing:-.04em;text-shadow:0 0 40px rgba(240,48,138,0.4);}
+    .profile-photo-name .pstatus{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--green);margin-top:2px;}
+    .profile-cta{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+    .profile-cta .btn-primary{width:100%;justify-content:center;padding:12px;font-size:.9rem;font-weight:700;}
+    .profile-cta .btn{width:100%;justify-content:center;padding:11px;font-size:.86rem;}
+
+    .profile-info{display:flex;flex-direction:column;gap:20px;}
+    .profile-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.04);}
+    .profile-section-title{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;}
+    .profile-bio{font-size:.92rem;color:var(--text-2);line-height:1.75;}
+    .profile-tags{display:flex;flex-wrap:wrap;gap:7px;}
+    .profile-tag{padding:5px 12px;border-radius:999px;font-size:.76rem;font-weight:600;border:1px solid var(--border);color:var(--text-2);background:var(--surface-2);}
+    .profile-tag.accent{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim);}
+    .profile-stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+    .profile-stat{background:var(--surface-2);border-radius:var(--r-sm);padding:12px 14px;}
+    .profile-stat-label{font-size:.64rem;color:var(--text-3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+    .profile-stat-value{font-size:.9rem;font-weight:700;color:var(--text);}
+    .profile-gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+    .profile-gallery-tile{aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden;position:relative;cursor:pointer;background:var(--surface-2);border:1px solid var(--border);transition:.2s;}
+    .profile-gallery-tile:hover{border-color:rgba(240,48,138,0.3);transform:scale(1.02);}
+    .profile-gallery-tile img{width:100%;height:100%;object-fit:cover;}
+    .profile-gallery-tile .tile-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);font-size:.72rem;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:.06em;text-transform:uppercase;}
+    .profile-gallery-tile.unlocked .tile-lock{display:none;}
+    @media(max-width:900px){.profile-layout{grid-template-columns:1fr;}.profile-photo-col{position:static;}.profile-photo{aspect-ratio:4/3;}}
+
+    /* ── CHARACTER PROFILE PAGE ── */ — keep sidebar visible, tighten main content */
     @media(min-width:1400px){
       :root{--sidebar:250px;}
       .views{padding:28px;padding-bottom:40px;}
@@ -468,6 +504,65 @@
         </div>
       </section>
 
+      <!-- CHARACTER PROFILE -->
+      <section class="view" id="view-profile">
+        <button class="profile-back" id="profileBack">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Discover
+        </button>
+        <div class="profile-layout">
+          <div class="profile-photo-col">
+            <div class="profile-photo">
+              <img id="profileImg" src="/profile_pictures/hazel.png" alt=""/>
+              <div class="profile-photo-name">
+                <h2 id="profileName">Hazel</h2>
+                <div class="pstatus" id="profileStatus">● ONLINE NOW</div>
+              </div>
+            </div>
+            <div class="profile-cta">
+              <button class="btn btn-primary" id="profileChatBtn">♥ &nbsp;Start chatting</button>
+              <button class="btn">Unlock gallery</button>
+            </div>
+          </div>
+          <div class="profile-info">
+            <div class="profile-section">
+              <div class="profile-section-title">About</div>
+              <p class="profile-bio" id="profileBio">Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.</p>
+            </div>
+            <div class="profile-section">
+              <div class="profile-section-title">Mood &amp; style</div>
+              <div class="profile-tags" id="profileTags">
+                <span class="profile-tag accent">Observant</span>
+                <span class="profile-tag accent">Slow burn</span>
+                <span class="profile-tag">Late night</span>
+                <span class="profile-tag">Voice notes</span>
+                <span class="profile-tag">Warm</span>
+              </div>
+            </div>
+            <div class="profile-section">
+              <div class="profile-section-title">Details</div>
+              <div class="profile-stats-grid" id="profileStats">
+                <div class="profile-stat"><div class="profile-stat-label">Mood</div><div class="profile-stat-value">Observant</div></div>
+                <div class="profile-stat"><div class="profile-stat-label">Style</div><div class="profile-stat-value">Slow burn</div></div>
+                <div class="profile-stat"><div class="profile-stat-label">Speaks</div><div class="profile-stat-value">English</div></div>
+                <div class="profile-stat"><div class="profile-stat-label">Route</div><div class="profile-stat-value">After the pause</div></div>
+              </div>
+            </div>
+            <div class="profile-section">
+              <div class="profile-section-title">Gallery preview</div>
+              <div class="profile-gallery-grid">
+                <div class="profile-gallery-tile unlocked"><img id="pgTile0" src="/profile_pictures/hazel.png" alt=""/></div>
+                <div class="profile-gallery-tile"><img id="pgTile1" src="/profile_pictures/hazel_large_picture.png" alt=""/><div class="tile-lock">Locked</div></div>
+                <div class="profile-gallery-tile"><img id="pgTile2" src="/profile_pictures/hazel.png" alt=""/><div class="tile-lock">Members</div></div>
+                <div class="profile-gallery-tile"><img id="pgTile3" src="/profile_pictures/hazel.png" alt=""/><div class="tile-lock">Locked</div></div>
+                <div class="profile-gallery-tile"><img id="pgTile4" src="/profile_pictures/hazel.png" alt=""/><div class="tile-lock">Locked</div></div>
+                <div class="profile-gallery-tile"><div class="tile-lock" style="background:var(--surface-2);color:var(--text-3)">+ More</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- DISCOVER -->
       <section class="view" id="view-discover">
         <div class="sh"><h2>Discover</h2></div>
@@ -479,10 +574,10 @@
           <button class="fpill" data-f="silent">Silent</button>
         </div>
         <div class="discover-grid">
-          <article class="discover-card" data-tags="romantic mystery"><div class="d-photo"><img src="/profile_pictures/hazel.png" alt="Hazel"/></div><div class="d-overlay"></div><span class="d-tag">Observant</span><div class="d-footer"><h3>Hazel</h3><p>She notices before she speaks.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
-          <article class="discover-card" data-tags="romantic"><div class="d-photo"><img src="/profile_pictures/nina.png" alt="Nina"/></div><div class="d-overlay"></div><span class="d-tag">Familiar</span><div class="d-footer"><h3>Nina</h3><p>Warm, easy, and quietly funny.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
-          <article class="discover-card" data-tags="silent mystery"><div class="d-photo"><img src="/profile_pictures/iris.png" alt="Iris"/></div><div class="d-overlay"></div><span class="d-tag">Watcher</span><div class="d-footer"><h3>Iris</h3><p>When she speaks, it lands.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
-          <article class="discover-card" data-tags="volatile mystery"><div class="d-photo"><img src="/profile_pictures/vale_profile.png" alt="Vale"/></div><div class="d-overlay"></div><span class="d-tag">Unstable</span><div class="d-footer"><h3>Vale</h3><p>Electric when present. Gone fast.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+          <article class="discover-card" data-tags="romantic mystery" data-thread="hazel"><div class="d-photo"><img src="/profile_pictures/hazel.png" alt="Hazel"/></div><div class="d-overlay"></div><span class="d-tag">Observant</span><div class="d-footer"><h3>Hazel</h3><p>She notices before she speaks.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+          <article class="discover-card" data-tags="romantic" data-thread="nina"><div class="d-photo"><img src="/profile_pictures/nina.png" alt="Nina"/></div><div class="d-overlay"></div><span class="d-tag">Familiar</span><div class="d-footer"><h3>Nina</h3><p>Warm, easy, and quietly funny.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+          <article class="discover-card" data-tags="silent mystery" data-thread="iris"><div class="d-photo"><img src="/profile_pictures/iris.png" alt="Iris"/></div><div class="d-overlay"></div><span class="d-tag">Watcher</span><div class="d-footer"><h3>Iris</h3><p>When she speaks, it lands.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
+          <article class="discover-card" data-tags="volatile mystery" data-thread="vale"><div class="d-photo"><img src="/profile_pictures/vale_profile.png" alt="Vale"/></div><div class="d-overlay"></div><span class="d-tag">Unstable</span><div class="d-footer"><h3>Vale</h3><p>Electric when present. Gone fast.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
         </div>
       </section>
 
@@ -546,6 +641,7 @@
             </div>
             <div class="cp-bio" id="cpBio">Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.</div>
             <button class="cp-cta">♥ &nbsp;Private Content</button>
+            <button id="cpViewProfile" style="width:100%;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:.78rem;font-weight:600;cursor:pointer;transition:.14s;margin-top:-4px;">View full profile →</button>
             <div class="cp-divider"></div>
             <div class="cp-stats" id="cpStats">
               <div class="cp-stat"><div class="cp-stat-label">Mood</div><div class="cp-stat-value">Observant</div></div>
@@ -574,16 +670,10 @@
               <h3>Generate</h3>
               <p>Create a photo with any persona using AI.</p>
               <select id="genCharSelect" class="gen-select" style="width:100%;margin-bottom:8px;padding:8px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text)">
-                <option value="nina">Nina</option>
-                <option value="hazel">Hazel</option>
-                <option value="iris">Iris</option>
-                <option value="vale">Vale</option>
+                <option value="nina">Nina</option><option value="hazel">Hazel</option><option value="iris">Iris</option><option value="vale">Vale</option>
               </select>
               <select id="genMoodSelect" class="gen-select" style="width:100%;margin-bottom:8px;padding:8px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text)">
-                <option value="warm">Warm</option>
-                <option value="calm">Calm</option>
-                <option value="charged">Charged</option>
-                <option value="tense">Tense</option>
+                <option value="warm">Warm</option><option value="calm">Calm</option><option value="charged">Charged</option><option value="tense">Tense</option>
               </select>
               <button class="btn btn-primary" id="genBtn" style="width:100%;justify-content:center">Generate photo</button>
               <div id="genStatus" style="font-size:.75rem;color:var(--text-2);margin-top:8px;min-height:16px"></div>
@@ -624,7 +714,7 @@ document.getElementById('gateEnter').addEventListener('click',()=>{localStorage.
 
 // Nav
 const sidebar=document.getElementById('sidebar'),menuBtn=document.getElementById('menuBtn'),sbg=document.getElementById('sidebarBg');
-const views={home:document.getElementById('view-home'),discover:document.getElementById('view-discover'),chat:document.getElementById('view-chat'),gallery:document.getElementById('view-gallery')};
+const views={home:document.getElementById('view-home'),discover:document.getElementById('view-discover'),chat:document.getElementById('view-chat'),gallery:document.getElementById('view-gallery'),profile:document.getElementById('view-profile')};
 const chatNav=document.getElementById('chatNav'),drawer=document.getElementById('threadDrawer');
 let chatOpen=false;
 
@@ -633,7 +723,7 @@ function toggleDrawer(f){chatOpen=f!==undefined?f:!chatOpen;drawer.classList.tog
 
 function goTo(name){
   Object.entries(views).forEach(([k,v])=>v?.classList.toggle('active',k===name));
-  document.querySelectorAll('[data-to]').forEach(b=>{if(b.closest('.sidebar'))b.classList.toggle('active',b.dataset.to===name&&b!==chatNav);});
+  document.querySelectorAll('.nav-item').forEach(b=>{if(b!==chatNav)b.classList.toggle('active',b.dataset.to===name);});
   document.querySelectorAll('.mob-tab').forEach(b=>b.classList.toggle('active',b.dataset.to===name));
   if(name==='chat'){toggleDrawer(true);chatNav.classList.add('active');}else{chatNav.classList.remove('active');}
   closeSb();window.scrollTo({top:0,behavior:'smooth'});localStorage.setItem('v_view',name);
@@ -651,27 +741,47 @@ document.querySelectorAll('.fpill').forEach(p=>{p.addEventListener('click',()=>{
 
 // Chat
 const chatMsgs=document.getElementById('chatMsgs'),chatInput=document.getElementById('chatInput'),sendBtn=document.querySelector('.send-btn');
-let chatAv=document.getElementById('chatAv'),chatName=document.getElementById('chatName'),chatStatus=document.getElementById('chatStatus');
-const CHAR_PICS={nina:'/profile_pictures/nina_profile.png',hazel:'/profile_pictures/hazel.png',iris:'/profile_pictures/iris_profile.png',vale:'/profile_pictures/vale_profile.png'};
-function avImgStyle(id){return `background:#111 url(${CHAR_PICS[id]||''}) center/cover no-repeat`;}
-let curThread='nina';
-let curAvStyle=avImgStyle('nina');
+const charData={
+  hazel:{photo:'/profile_pictures/hazel.png',bio:'Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.',status:'ONLINE NOW',stats:[{l:'Mood',v:'Observant'},{l:'Style',v:'Slow burn'},{l:'Speaks',v:'English'},{l:'Route',v:'After the pause'}]},
+  nina:{photo:'/profile_pictures/nina.png',bio:'Warm, easy, and quietly funny. You knew each other before — years of silence, but the closeness never fully left.',status:'ONLINE NOW',stats:[{l:'Mood',v:'Familiar'},{l:'Style',v:'Warm'},{l:'Speaks',v:'English'},{l:'Route',v:'The return'}]},
+  iris:{photo:'/profile_pictures/iris.png',bio:'Deeply attentive yet almost impossible to reach. When she does say something real, it lands with unexpected weight.',status:'LISTENING',stats:[{l:'Mood',v:'Distant'},{l:'Style',v:'Minimal'},{l:'Speaks',v:'English'},{l:'Route',v:'Low signal'}]},
+  vale:{photo:'/profile_pictures/vale_profile.png',bio:'Unpredictable and brief. Electric when present. She connects fast and hard, then closes just as fast. No explanation.',status:'UNSTABLE',stats:[{l:'Mood',v:'Volatile'},{l:'Style',v:'Intense'},{l:'Speaks',v:'English'},{l:'Route',v:'Brief window'}]}
+};
 
-const greetings={nina:'It\'s strange — being back here with you feels completely natural.',hazel:'You came back.',iris:'…',vale:'You caught me. I almost wasn\'t here.'};
+function updateCharPanel(thread){
+  const d=charData[thread];if(!d)return;
+  document.getElementById('cpPhoto').src=d.photo;
+  document.getElementById('cpName').innerHTML=`${thread.charAt(0).toUpperCase()+thread.slice(1)} <span style="color:var(--accent);font-size:.9rem">♥</span>`;
+  document.getElementById('cpStatus').textContent=`● ${d.status}`;
+  document.getElementById('cpBio').textContent=d.bio;
+  const stats=document.getElementById('cpStats');
+  stats.innerHTML=d.stats.map(s=>`<div class="cp-stat"><div class="cp-stat-label">${s.l}</div><div class="cp-stat-value">${s.v}</div></div>`).join('');
+}
+const chatAv=document.getElementById('chatAv'),chatName=document.getElementById('chatName'),chatStatus=document.getElementById('chatStatus');
 
-function ts(){const n=new Date();return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
-function addMsg(side,text,avStyle,extraEl){
+let curPersona='',curAvSrc='/profile_pictures/hazel.png';
+let curThread='hazel';
+const greetings={
+  hazel:'I noticed you were gone for a while. I didn\'t say anything.',
+  nina:'It\'s strange — it feels like we never stopped talking.',
+  iris:'…',
+  vale:'You\'re here. Good. I have maybe five minutes.'
+};
+
+function ts(){const n=new Date();return`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
+
+function addMsg(side,text,avSrc){
   const row=document.createElement('div');row.className='msg'+(side==='mine'?' mine':'');
-  if(side!=='mine'){const a=document.createElement('div');a.style.cssText=`${avStyle};width:28px;height:28px;border-radius:50%;flex:0 0 28px;border:1px solid rgba(255,255,255,0.1)`;row.appendChild(a);}
+  if(side!=='mine'){const a=document.createElement('img');a.src=avSrc;a.className='msg-av';a.alt='';row.appendChild(a);}
   const w=document.createElement('div'),b=document.createElement('div'),t=document.createElement('div');
-  b.className='bubble '+(side==='mine'?'mine':'theirs');if(text)b.textContent=text;
-  if(extraEl)b.appendChild(extraEl);
+  b.className='bubble '+(side==='mine'?'mine':'theirs');b.textContent=text;
   t.className='msg-time';t.textContent=ts();if(side==='mine')t.style.textAlign='right';
   w.appendChild(b);w.appendChild(t);row.appendChild(w);chatMsgs.appendChild(row);chatMsgs.scrollTop=chatMsgs.scrollHeight;
 }
-function addTyping(avStyle){
+
+function addTyping(avSrc){
   const row=document.createElement('div');row.className='msg';row.id='trow';
-  const a=document.createElement('div');a.style.cssText=`${avStyle};width:28px;height:28px;border-radius:50%;flex:0 0 28px;border:1px solid rgba(255,255,255,0.1)`;row.appendChild(a);
+  const a=document.createElement('img');a.src=avSrc;a.className='msg-av';a.alt='';row.appendChild(a);
   const tw=document.createElement('div');tw.className='typing-wrap';
   for(let i=0;i<3;i++){const d=document.createElement('div');d.className='tdot';tw.appendChild(d);}
   row.appendChild(tw);chatMsgs.appendChild(row);chatMsgs.scrollTop=chatMsgs.scrollHeight;return row;
@@ -679,89 +789,108 @@ function addTyping(avStyle){
 
 document.querySelectorAll('.drawer-item').forEach(item=>{item.addEventListener('click',()=>{
   document.querySelectorAll('.drawer-item').forEach(x=>x.classList.toggle('active',x===item));
-  curThread=item.dataset.thread;
-  const av=avImgStyle(curThread);
-  if(chatAv.tagName==='IMG'){chatAv.src=CHAR_PICS[curThread]||chatAv.src;chatAv.style.cssText='width:36px;height:36px;border-radius:50%;flex:0 0 36px;border:2px solid rgba(255,255,255,0.1);object-fit:cover';}
-  else{chatAv.style.cssText=av+';width:36px;height:36px;border-radius:50%;flex:0 0 36px;border:2px solid rgba(255,255,255,0.1)';}
-  chatName.textContent=item.dataset.name;chatStatus.textContent=item.dataset.status;
-  curAvStyle=av;
-  chatMsgs.innerHTML='';
-  const empty=document.getElementById('chatEmpty');if(empty)empty.remove();
+  const thread=item.dataset.thread;
+  const imgSrc=item.querySelector('img')?.src||'';
+  chatAv.src=imgSrc;chatName.textContent=item.dataset.name;chatStatus.textContent=item.dataset.status;
+  curPersona=item.dataset.p;curAvSrc=imgSrc;curThread=thread;
+  chatMsgs.innerHTML='';updateCharPanel(thread);
   goTo('chat');
-  const tr=addTyping(av);
+  const tr=addTyping(curAvSrc);
   fetch(`/api/characters/${curThread}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__greeting__'})})
-    .then(r=>r.json()).then(d=>{tr.remove();addMsg('theirs',(d.reply||greetings[curThread]||'…').trim(),av);})
-    .catch(()=>{tr.remove();addMsg('theirs',greetings[curThread]||'…',av);});
+    .then(r=>r.json()).then(d=>{tr.remove();addMsg('theirs',(d.reply||greetings[curThread]||'…').trim(),curAvSrc);})
+    .catch(()=>{tr.remove();addMsg('theirs',greetings[curThread]||'…',curAvSrc);});
 });});
 
-// Persona-aware routing from cards
-function getPersonaFromEl(el){
-  const card=el.closest('.discover-card,.char-card,.inbox-row,.av-item');
-  if(!card)return '';
-  const nameEl=card.querySelector('h3,.char-name,.inbox-name,.av-name');
-  return(nameEl?.textContent||'').trim().toLowerCase();
+document.getElementById('chatForm').addEventListener('submit',async e=>{
+  e.preventDefault();const txt=chatInput.value.trim();if(!txt)return;
+  chatInput.value='';sendBtn.disabled=true;addMsg('mine',txt);
+  const tr=addTyping(curAvSrc);
+  try{
+    const res=await fetch(`/api/characters/${curThread||'hazel'}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
+    const data=await res.json();
+    tr.remove();addMsg('theirs',(data.reply||data.result||'…').trim(),curAvSrc);
+  }catch{tr.remove();addMsg('theirs','One moment…',curAvSrc);}
+  sendBtn.disabled=false;chatInput.focus();
+});
+
+document.getElementById('cpViewProfile').addEventListener('click',()=>{
+  const thread=document.querySelector('.drawer-item.active')?.dataset.thread;
+  if(thread){window._profileFrom='chat';openProfile(thread);}
+});
+
+// Profile page
+const profileData={
+  hazel:{photo:'/profile_pictures/hazel.png',wide:'/profile_pictures/hazel_large_picture.png',name:'Hazel',status:'● ONLINE NOW',bio:'Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.',tags:['Observant','Slow burn','Late night','Voice notes','Warm'],stats:[{l:'Mood',v:'Observant'},{l:'Style',v:'Slow burn'},{l:'Speaks',v:'English'},{l:'Route',v:'After the pause'}],thread:'hazel'},
+  nina:{photo:'/profile_pictures/nina.png',wide:'/profile_pictures/nina.png',name:'Nina',status:'● ONLINE NOW',bio:'Warm, easy, and quietly funny. You knew each other before — years of silence, but the closeness never fully left. She asks real questions and remembers the answers.',tags:['Familiar','Romantic','Emotionally honest','Nostalgic'],stats:[{l:'Mood',v:'Familiar'},{l:'Style',v:'Warm'},{l:'Speaks',v:'English'},{l:'Route',v:'The return'}],thread:'nina'},
+  iris:{photo:'/profile_pictures/iris.png',wide:'/profile_pictures/iris.png',name:'Iris',status:'● LISTENING',bio:'Deeply attentive yet almost impossible to reach. She goes silent sometimes with no warning. When she does say something real, it lands with unexpected weight.',tags:['Silent','Watcher','Melancholic','Hard to reach'],stats:[{l:'Mood',v:'Distant'},{l:'Style',v:'Minimal'},{l:'Speaks',v:'English'},{l:'Route',v:'Low signal'}],thread:'iris'},
+  vale:{photo:'/profile_pictures/vale_profile.png',wide:'/profile_pictures/vale_profile.png',name:'Vale',status:'● UNSTABLE',bio:'Unpredictable and brief. She connects fast and hard, then closes just as fast. Electric when present. She does not apologize for disappearing.',tags:['Volatile','Electric','Intense','Brief'],stats:[{l:'Mood',v:'Volatile'},{l:'Style',v:'Intense'},{l:'Speaks',v:'English'},{l:'Route',v:'Brief window'}],thread:'vale'}
+};
+
+function openProfile(id){
+  const d=profileData[id];if(!d)return;
+  document.getElementById('profileImg').src=d.photo;
+  document.getElementById('profileName').textContent=d.name;
+  document.getElementById('profileStatus').textContent=d.status;
+  document.getElementById('profileBio').textContent=d.bio;
+  // tags
+  const tagsEl=document.getElementById('profileTags');
+  tagsEl.innerHTML=d.tags.map((t,i)=>`<span class="profile-tag${i<2?' accent':''}">${t}</span>`).join('');
+  // stats
+  document.getElementById('profileStats').innerHTML=d.stats.map(s=>`<div class="profile-stat"><div class="profile-stat-label">${s.l}</div><div class="profile-stat-value">${s.v}</div></div>`).join('');
+  // gallery tiles — use same photo as placeholder
+  [0,1,2,3,4].forEach(i=>{const el=document.getElementById('pgTile'+i);if(el)el.src=d.photo;});
+  // wire chat button
+  document.getElementById('profileChatBtn').onclick=()=>startChat(d.thread);
+  // navigate
+  goTo('profile');
+  window._profileFrom='discover';
 }
-function activateThreadByPersona(name){
-  if(!name)return;
-  const item=document.querySelector(`.drawer-item[data-thread="${name}"]`);
-  if(!item)return;
-  document.querySelectorAll('.drawer-item').forEach(x=>x.classList.remove('active'));
-  item.classList.add('active');
-  item.click();
+
+function startChat(thread){
+  const item=document.querySelector(`.drawer-item[data-thread="${thread}"]`);
+  if(item) item.click(); else goTo('chat');
+}
+
+document.getElementById('profileBack').addEventListener('click',()=>goTo(window._profileFrom||'discover'));
+
+// Wire discover cards to open profile
+document.querySelectorAll('.discover-card').forEach(card=>{
+  card.addEventListener('click',e=>{
+    if(e.target.closest('.d-btn'))return; // let chat button through
+    const thread=card.dataset.thread;
+    if(thread) openProfile(thread);
+  });
+});
+
+
+// Persona-aware routing from cards/buttons
+function getPersonaFromEl(el){
+  const card=el.closest('.discover-card,.char-card,.inbox-row,.av-item,.profile-card');
+  if(card?.dataset.thread)return card.dataset.thread;
+  const nameEl=card?.querySelector('h3,.char-name,.inbox-name,.av-name,#profileName');
+  return (nameEl?.textContent||'').trim().toLowerCase();
 }
 document.addEventListener('click',e=>{
   const btn=e.target.closest('[data-to="chat"]');
   if(!btn||btn===chatNav)return;
   const persona=getPersonaFromEl(btn);
-  if(persona){e.stopImmediatePropagation();activateThreadByPersona(persona);return;}
+  if(persona){e.stopImmediatePropagation();startChat(persona);}
 },true);
 
-// AI chat submit
-document.getElementById('chatForm').addEventListener('submit',async e=>{
-  e.preventDefault();const txt=chatInput.value.trim();if(!txt)return;
-  chatInput.value='';sendBtn.disabled=true;addMsg('mine',txt);
-  const tr=addTyping(curAvStyle);
-  try{
-    const threadId=curThread||'nina';
-    const res=await fetch(`/api/characters/${threadId}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
-    const data=await res.json();
-    tr.remove();addMsg('theirs',(data.reply||data.result||'…').trim(),curAvStyle);
-  }catch{tr.remove();addMsg('theirs','One moment…',curAvStyle);}
-  sendBtn.disabled=false;chatInput.focus();
-});
-
-// Presence indicator — live status rotation
-const PRESENCE={
-  nina: ['Online now','Thinking about something','Just got back','Active'],
-  hazel:['Watching','OBSERVANT','Somewhere nearby','Reading you'],
-  iris: ['LISTENING','Quiet','…','Low signal'],
-  vale: ['UNSTABLE','Here. For now.','Brief window','Flickering'],
-};
-function tickPresence(){
-  const id=curThread||'nina';
-  const opts=PRESENCE[id]||PRESENCE.nina;
-  const s=opts[Math.floor(Math.random()*opts.length)];
-  const el=document.getElementById('chatStatus');
-  if(el&&el.textContent!==s){el.style.opacity='0';setTimeout(()=>{el.textContent=s;el.style.opacity='1';},300);}
-  setTimeout(tickPresence,45000+Math.random()*45000);
-}
-setTimeout(tickPresence,60000);
-
-// Camera — 📷 button in chat header
+// Camera — chat header
 document.getElementById('camBtn')?.addEventListener('click',async()=>{
   const btn=document.getElementById('camBtn');
   const statusEl=document.getElementById('camStatus');
-  const character=curThread||'nina';
+  const character=curThread||'hazel';
   btn.disabled=true;btn.textContent='⏳';
   statusEl.style.display='block';statusEl.textContent='Generating… (~20s)';
   try{
     const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood:'warm'})});
     const data=await res.json();
-    if(!data.ok)throw new Error(data.error||'Generation failed');
-    const img=document.createElement('img');
-    img.src=data.shot.path;img.alt=character;img.loading='lazy';
-    img.style.cssText='max-width:260px;border-radius:10px;display:block;margin-top:4px';
-    addMsg('theirs','',curAvStyle,img);
+    if(!data.ok) throw new Error(data.error||'Generation failed');
+    addMsg('theirs',data.shot?.path? '': '',curAvSrc);
+    const row=chatMsgs.lastElementChild?.querySelector('.bubble.theirs');
+    if(row&&data.shot?.path){ const img=document.createElement('img'); img.src=data.shot.path; img.alt=character; img.loading='lazy'; img.style.cssText='max-width:260px;border-radius:10px;display:block;margin-top:4px'; row.appendChild(img); }
     statusEl.textContent='';statusEl.style.display='none';
   }catch(err){statusEl.textContent='Error: '+err.message;}
   btn.disabled=false;btn.textContent='📷';
@@ -777,7 +906,7 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
   try{
     const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood})});
     const data=await res.json();
-    if(!data.ok)throw new Error(data.error||'Generation failed');
+    if(!data.ok) throw new Error(data.error||'Generation failed');
     const grid=document.querySelector('.gallery-grid');
     const tile=document.createElement('article');
     tile.className='g-tile';
@@ -787,6 +916,7 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
   }catch(err){status.textContent='Error: '+err.message;btn.textContent='Generate photo';}
   btn.disabled=false;
 });
+
 </script>
 </body>
 </html>
