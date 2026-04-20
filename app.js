@@ -140,7 +140,8 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-mobileMq.addEventListener("change", (event) => {
+
+function handleMobileMqChange(event) {
   if (!event.matches) {
     closeSidebar();
     setChatMobileSubview("room");
@@ -151,7 +152,13 @@ mobileMq.addEventListener("change", (event) => {
     setChatMobileSubview("list");
     restoreSelectedThread();
   }
-});
+}
+
+if (typeof mobileMq.addEventListener === "function") {
+  mobileMq.addEventListener("change", handleMobileMqChange);
+} else if (typeof mobileMq.addListener === "function") {
+  mobileMq.addListener(handleMobileMqChange);
+}
 
 const filterPills = document.querySelectorAll(".filter-pill");
 filterPills.forEach((pill) => {
