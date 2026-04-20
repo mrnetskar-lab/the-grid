@@ -14,19 +14,17 @@ if (!fs.existsSync(IMAGES_DIR)) fs.mkdirSync(IMAGES_DIR, { recursive: true });
 // ─── Character tables ─────────────────────────────────────────────────────────
 
 const CHARACTER_LOOKS = {
-  elara: 'a young woman in her mid-twenties, warm romantic energy, soft features, intimate gaze, naturally beautiful',
-  mara:  'a young woman in her late twenties, sophisticated and upscale, sharp elegant features, confident presence',
-  nyra:  'a young woman in her mid-twenties, mysterious and poetic, dark expressive eyes, quiet intensity',
-  rose:  'a young woman in her early twenties, playful and bright, warm smile, light energy, inviting',
-  mina:  'a young woman in her mid-twenties, creative and dreamy, artistic softness, warm and imaginative',
+  nina:  'a young woman in her mid-twenties, warm and familiar energy, soft brunette features, intimate gaze, naturally beautiful, quiet chemistry',
+  hazel: 'a young woman in her late twenties, warm but withholding, sharp observant eyes, composed and elegant, quietly intense',
+  iris:  'a young woman in her mid-twenties, melancholic and mysterious, dark expressive eyes, quiet presence, ethereal softness',
+  vale:  'a young woman in her mid-twenties, electric and volatile energy, striking features, intense direct gaze, unpredictable beauty',
 };
 
 const CHARACTER_SEEDS = {
-  elara: 3847291650,
-  mara:  9182736450,
-  nyra:  5647382910,
-  rose:  7291836450,
-  mina:  4829103756,
+  nina:  3847291650,
+  hazel: 9182736450,
+  iris:  5647382910,
+  vale:  7291836450,
 };
 
 const ATMOSPHERE_STYLES = {
