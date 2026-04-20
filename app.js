@@ -240,5 +240,3 @@ chatForm?.addEventListener("submit", (event) => {
 
 syncChatMobileDefault();
 restoreSelectedThread();
-
-if (typeof initHubSalvage === "function") initHubSalvage();
