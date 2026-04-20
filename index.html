@@ -1,784 +1,949 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-  <title>Velora — Mockup</title>
-  <meta
-    name="description"
-    content="Luxury adult companion platform mockup — non-explicit, modern, premium UI."
-  />
-    <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velora.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#08080c;
+      --panel:#0f0f15;
+      --panel-2:#13131b;
+      --stroke:rgba(255,255,255,0.07);
+      --stroke-2:rgba(255,255,255,0.12);
+      --text:#f4f0f2;
+      --muted:#a89ea6;
+      --muted-2:#6e6470;
+      --pink:#ff4f9a;
+      --pink-2:#ff8cc3;
+      --gold:#ffcb70;
+      --violet:#7a5cff;
+      --green:#49d17d;
+      --red:#ff5555;
+      --shadow:0 20px 60px rgba(0,0,0,0.5);
+      --shadow-sm:0 8px 24px rgba(0,0,0,0.35);
+      --rx:26px;
+      --rx-md:18px;
+      --rx-sm:12px;
+      --sidebar-w:252px;
+      --topbar-h:68px;
+      --font:'DM Sans',ui-sans-serif,system-ui,sans-serif;
+      --display:'Cormorant Garamond',Georgia,serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+    /* Ambient background */
+    body::before{
+      content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse 70% 50% at 0% 0%,rgba(255,79,154,0.11),transparent 55%),
+        radial-gradient(ellipse 50% 40% at 100% 0%,rgba(255,203,112,0.07),transparent 50%),
+        radial-gradient(ellipse 60% 60% at 50% 100%,rgba(122,92,255,0.06),transparent 60%);
+    }
+    /* Grain */
+    body::after{
+      content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    }
+
+    .app{position:relative;z-index:1;display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh;}
+    a{color:inherit;text-decoration:none;}
+    button,input{font:inherit;}
+
+    /* ════════════════════════════
+       SIDEBAR
+    ════════════════════════════ */
+    .sidebar{
+      position:sticky;top:0;height:100vh;
+      background:linear-gradient(180deg,rgba(255,79,154,0.05) 0%,transparent 20%),#0b0b10;
+      border-right:1px solid var(--stroke);
+      display:flex;flex-direction:column;
+      padding:20px 14px 18px;gap:6px;z-index:20;overflow:hidden;
+    }
+
+    .brand{display:flex;align-items:center;gap:11px;padding:8px 8px 18px;}
+    .brand-mark{
+      width:36px;height:36px;border-radius:12px;flex:0 0 36px;
+      background:radial-gradient(circle at 32% 28%,#ffd3e8 0 16%,transparent 17%),linear-gradient(135deg,var(--pink),#ff73b3 48%,var(--gold));
+      box-shadow:0 8px 20px rgba(255,79,154,0.32);position:relative;overflow:hidden;
+    }
+    .brand-mark::after{content:"";position:absolute;inset:8px;border-radius:9px 9px 12px 12px;background:rgba(8,8,12,0.2);clip-path:polygon(0 0,100% 8%,74% 100%,15% 100%);}
+    .brand-title{font-size:1.5rem;font-weight:800;letter-spacing:-0.03em;line-height:1;}
+    .brand-title span{color:var(--pink);}
+
+    /* Nav buttons */
+    .nav-btn{
+      width:100%;border:1px solid transparent;background:transparent;color:var(--muted);
+      display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--rx-md);
+      cursor:pointer;transition:.22s ease;text-align:left;
+    }
+    .nav-btn:hover{color:var(--text);background:rgba(255,255,255,0.04);}
+    .nav-btn.active{background:rgba(255,79,154,0.11);border-color:rgba(255,140,195,0.22);color:var(--text);}
+    .nav-icon{width:20px;height:20px;display:grid;place-items:center;color:var(--pink-2);flex:0 0 20px;font-size:0.95rem;}
+    .nav-btn.active .nav-icon{color:var(--pink);}
+    .nav-label{font-weight:600;font-size:0.9rem;letter-spacing:-0.01em;flex:1;}
+    .nav-arrow{font-size:0.7rem;color:var(--muted-2);transition:transform .25s ease;}
+    .nav-btn.open .nav-arrow{transform:rotate(90deg);}
+
+    /* Thread list inside sidebar */
+    .sidebar-threads{
+      overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease;
+      opacity:0;display:flex;flex-direction:column;gap:3px;padding:0 0 0 10px;
+    }
+    .sidebar-threads.open{max-height:360px;opacity:1;}
+    .sthread{
+      display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--rx-sm);
+      border:1px solid transparent;background:transparent;color:var(--text);
+      cursor:pointer;transition:.18s ease;text-align:left;width:100%;
+    }
+    .sthread:hover{background:rgba(255,255,255,0.04);}
+    .sthread.active{background:rgba(255,79,154,0.1);border-color:rgba(255,140,195,0.16);}
+    .sthread-av{width:30px;height:30px;border-radius:50%;flex:0 0 30px;border:1.5px solid rgba(255,255,255,0.1);}
+    .sthread-copy{min-width:0;flex:1;}
+    .sthread-name{font-weight:700;font-size:0.84rem;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sthread-preview{color:var(--muted-2);font-size:0.74rem;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sthread-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:0 0 7px;animation:pulseRing 2.2s ease-out infinite;}
+
+    .sidebar-divider{height:1px;background:var(--stroke);margin:8px 4px;}
+
+    .upgrade-card{
+      border-radius:18px;padding:15px;margin:4px 0;
+      background:linear-gradient(145deg,rgba(255,79,154,0.18),rgba(255,203,112,0.08)),#111119;
+      border:1px solid rgba(255,140,195,0.16);
+    }
+    .upgrade-card h3{font-size:0.92rem;margin-bottom:6px;font-family:var(--display);font-size:1.05rem;}
+    .upgrade-card p{color:var(--muted);line-height:1.45;font-size:0.82rem;margin-bottom:12px;}
+    .upgrade-btn{width:100%;border:0;border-radius:11px;padding:10px;font-weight:700;font-size:0.86rem;color:#1a0c15;background:linear-gradient(135deg,#ff8cc3,var(--gold));cursor:pointer;transition:.2s;}
+    .upgrade-btn:hover{filter:brightness(1.06);transform:translateY(-1px);}
+
+    .sidebar-spacer{flex:1;}
+    .sidebar-footer{display:flex;flex-direction:column;gap:4px;}
+    .footer-btn{width:100%;border:1px solid transparent;background:transparent;color:var(--muted-2);display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rx-sm);cursor:pointer;transition:.2s;font-size:0.85rem;font-weight:600;}
+    .footer-btn:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+    .sidebar-meta{padding:6px 10px 0;color:var(--muted-2);font-size:0.7rem;line-height:1.6;letter-spacing:0.02em;}
+
+    /* ════════════════════════════
+       TOPBAR
+    ════════════════════════════ */
+    .main{min-width:0;display:flex;flex-direction:column;}
+    .topbar{
+      position:sticky;top:0;z-index:15;height:var(--topbar-h);
+      display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 22px;
+      border-bottom:1px solid var(--stroke);
+      background:rgba(8,8,12,0.8);backdrop-filter:blur(20px);
+    }
+    .topbar-left{display:flex;align-items:center;gap:12px;flex:1 1 360px;min-width:0;}
+    .mobile-menu-btn{display:none;width:40px;height:40px;border-radius:12px;background:var(--panel-2);border:1px solid var(--stroke);color:var(--text);cursor:pointer;}
+    .search{
+      display:flex;align-items:center;gap:10px;width:min(400px,100%);flex:1;
+      background:rgba(255,255,255,0.04);border:1px solid var(--stroke);border-radius:14px;padding:9px 14px;
+      color:var(--muted);transition:border-color .2s;
+    }
+    .search:focus-within{border-color:rgba(255,79,154,0.3);}
+    .search input{width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:0.9rem;}
+    .search input::placeholder{color:var(--muted);}
+    .topbar-right{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end;}
+
+    .pill-btn,.ghost-btn,.solid-btn{
+      border-radius:13px;padding:9px 15px;border:1px solid var(--stroke);
+      background:rgba(255,255,255,0.04);color:var(--text);display:inline-flex;align-items:center;
+      gap:8px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap;font-size:0.88rem;
+    }
+    .pill-btn:hover,.ghost-btn:hover{border-color:var(--stroke-2);background:rgba(255,255,255,0.07);transform:translateY(-1px);}
+    .solid-btn{border:0;background:linear-gradient(135deg,var(--pink),#ff6cad 55%,#ffbc88);color:#fff;box-shadow:0 10px 26px rgba(255,79,154,0.26);}
+    .solid-btn:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(255,79,154,0.34);}
+    .token-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(255,203,112,0.1);}
+    .avatar-mini{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#ffe8ef 0 12%,transparent 13%),linear-gradient(145deg,#744139,#e8ac9c 58%,#f4d6cb);border:1px solid rgba(255,255,255,0.16);}
+
+    /* ════════════════════════════
+       VIEWS
+    ════════════════════════════ */
+    .views{padding:22px;padding-bottom:36px;}
+    .view{display:none;animation:fadeUp .3s ease;}
+    .view.active{display:block;}
+    #view-home.active{display:grid;gap:18px;align-content:start;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ════════════════════════════
+       HERO
+    ════════════════════════════ */
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;}
+    .hero-card{background:linear-gradient(180deg,rgba(255,255,255,0.018),transparent),var(--panel);border:1px solid var(--stroke);border-radius:var(--rx);box-shadow:var(--shadow);}
+
+    .hero-copy{
+      padding:32px;display:flex;flex-direction:column;justify-content:space-between;min-height:360px;
+      position:relative;overflow:hidden;
+      background:radial-gradient(circle at top left,rgba(255,79,154,0.17),transparent 30%),radial-gradient(circle at bottom right,rgba(255,203,112,0.1),transparent 24%),#10101a;
+    }
+    .hero-copy::before{content:"";position:absolute;width:300px;height:300px;right:-70px;top:-90px;background:radial-gradient(circle,rgba(255,140,195,0.15),transparent 68%);filter:blur(4px);pointer-events:none;}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 12px;font-size:0.78rem;color:#ffdcec;background:rgba(255,79,154,0.1);border:1px solid rgba(255,140,195,0.14);width:fit-content;margin-bottom:14px;}
+    .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--pink);animation:pulseRing 2s ease-out infinite;}
+    .hero-copy h1{font-family:var(--display);font-size:clamp(2.6rem,4vw,4.8rem);line-height:.95;letter-spacing:-.01em;font-weight:600;font-style:italic;max-width:11ch;margin-bottom:14px;}
+    .hero-copy>div>p{color:var(--muted);line-height:1.72;font-size:.98rem;max-width:52ch;margin-bottom:24px;}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:10px;}
+    .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px;}
+    .stat{padding:13px 15px;border-radius:16px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.05);}
+    .stat-value{font-family:var(--display);font-size:1.4rem;font-weight:700;letter-spacing:-.02em;}
+    .stat-label{color:var(--muted);margin-top:4px;font-size:0.82rem;}
+
+    .hero-visual{padding:16px;display:grid;gap:12px;background:radial-gradient(circle at top right,rgba(255,203,112,0.12),transparent 22%),radial-gradient(circle at bottom left,rgba(122,92,255,0.1),transparent 24%),#0f0f17;}
+    .visual-main{min-height:230px;border-radius:20px;border:1px solid rgba(255,255,255,0.07);position:relative;overflow:hidden;background:linear-gradient(140deg,#2b1c26,#1c1722 24%,#24213a 58%,#3a2134);}
+    .visual-main::before{content:"";position:absolute;inset:auto 0 0 0;height:56%;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.5));}
+    .portrait{position:absolute;inset:0;}
+    .portrait .glow{position:absolute;width:160px;height:160px;right:48px;top:26px;border-radius:50%;background:radial-gradient(circle,rgba(255,192,203,0.38),transparent 65%);filter:blur(5px);}
+    .portrait .body{position:absolute;right:48px;bottom:-8px;width:200px;height:270px;background:radial-gradient(circle at 50% 22%,#f9d8cf 0 13%,transparent 14%),radial-gradient(circle at 48% 28%,#61454a 0 22%,transparent 23%),linear-gradient(180deg,transparent 0 24%,#d2a08d 25% 40%,#7e5760 41% 72%,#28161d 73%);clip-path:ellipse(42% 49% at 50% 50%);filter:drop-shadow(0 22px 28px rgba(0,0,0,0.38));opacity:.9;}
+    .visual-caption{position:absolute;left:20px;bottom:20px;z-index:2;max-width:58%;}
+    .visual-caption h3{font-family:var(--display);font-size:1.55rem;font-style:italic;margin-bottom:5px;}
+    .visual-caption p{color:rgba(255,255,255,0.72);line-height:1.5;font-size:0.88rem;}
+    .visual-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .mini-tile{min-height:104px;border-radius:17px;border:1px solid rgba(255,255,255,0.07);padding:14px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;background:#12121c;}
+    .mini-tile::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,0.1),transparent 18%),linear-gradient(135deg,rgba(255,79,154,0.18),rgba(255,203,112,0.06));}
+    .mini-tile:nth-child(2)::before{background:radial-gradient(circle at 70% 24%,rgba(255,255,255,0.1),transparent 18%),linear-gradient(135deg,rgba(122,92,255,0.2),rgba(255,79,154,0.07));}
+    .mini-tile:nth-child(3)::before{background:radial-gradient(circle at 50% 20%,rgba(255,255,255,0.1),transparent 16%),linear-gradient(135deg,rgba(255,203,112,0.18),rgba(255,79,154,0.08));}
+    .mini-tile>*{position:relative;z-index:1;}
+    .mini-title{font-weight:700;letter-spacing:-.02em;margin-bottom:3px;font-size:0.88rem;}
+    .mini-sub{color:var(--muted);font-size:0.8rem;line-height:1.4;}
+
+    /* ════════════════════════════
+       SECTIONS
+    ════════════════════════════ */
+    .section{margin-bottom:22px;}
+    .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:15px;}
+    .section-head h2{font-family:var(--display);font-size:clamp(1.7rem,2.2vw,2.3rem);letter-spacing:-.01em;font-weight:600;}
+    .section-head p{margin-top:5px;color:var(--muted);font-size:0.88rem;}
+
+    /* ════════════════════════════
+       STORIES
+    ════════════════════════════ */
+    .stories{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:12px;}
+    .story{border-radius:22px;padding:13px;min-height:118px;background:#0f0f17;border:1px solid var(--stroke);position:relative;overflow:hidden;transition:.25s ease;cursor:pointer;}
+    .story:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.14);box-shadow:0 18px 38px rgba(0,0,0,0.38);}
+    .story::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top left,rgba(255,255,255,0.1),transparent 20%),linear-gradient(135deg,rgba(255,79,154,0.16),transparent 60%);}
+    .story:nth-child(2)::before{background:radial-gradient(circle at 75% 18%,rgba(255,255,255,0.1),transparent 18%),linear-gradient(135deg,rgba(255,203,112,0.2),transparent 60%);}
+    .story:nth-child(3)::before{background:radial-gradient(circle at 35% 18%,rgba(255,255,255,0.1),transparent 18%),linear-gradient(135deg,rgba(122,92,255,0.22),transparent 60%);}
+    .story:nth-child(4)::before{background:radial-gradient(circle at 70% 18%,rgba(255,255,255,0.1),transparent 18%),linear-gradient(135deg,rgba(255,79,154,0.11),rgba(255,203,112,0.09));}
+    .story:nth-child(5)::before{background:radial-gradient(circle at 15% 18%,rgba(255,255,255,0.1),transparent 18%),linear-gradient(135deg,rgba(255,203,112,0.14),rgba(122,92,255,0.08));}
+    .story:nth-child(6)::before{background:radial-gradient(circle at 55% 18%,rgba(255,255,255,0.1),transparent 18%),linear-gradient(135deg,rgba(255,79,154,0.16),rgba(122,92,255,0.07));}
+    .story>*{position:relative;z-index:1;}
+    .story-top{display:flex;align-items:center;gap:9px;margin-bottom:14px;}
+    .story-name{font-weight:700;line-height:1.2;letter-spacing:-.02em;font-size:0.88rem;}
+    .story-mood{color:var(--muted);font-size:0.76rem;margin-top:2px;}
+    .muted-line{color:var(--muted);line-height:1.65;font-size:0.82rem;}
+
+    @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(73,209,125,0.45)}70%{box-shadow:0 0 0 7px rgba(73,209,125,0)}100%{box-shadow:0 0 0 0 rgba(73,209,125,0)}}
+    .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);margin-left:auto;margin-top:2px;animation:pulseRing 2.2s ease-out infinite;}
+
+    /* ════════════════════════════
+       AVATARS
+    ════════════════════════════ */
+    .avatar{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,0.12);background:radial-gradient(circle at 34% 28%,#ffedf4 0 10%,transparent 11%),linear-gradient(135deg,#4f2b30,#d59b8d 58%,#f3d8d1);box-shadow:0 10px 20px rgba(0,0,0,0.28);flex:0 0 auto;}
+    .avatar.a2{background:radial-gradient(circle at 34% 28%,#fff0e3 0 10%,transparent 11%),linear-gradient(135deg,#5c362f,#e2b38d 58%,#f7e4c6);}
+    .avatar.a3{background:radial-gradient(circle at 34% 28%,#ffeef2 0 10%,transparent 11%),linear-gradient(135deg,#2c1d29,#b77a93 58%,#edd0da);}
+    .avatar.a4{background:radial-gradient(circle at 34% 28%,#f7ede6 0 10%,transparent 11%),linear-gradient(135deg,#3a3025,#c39671 58%,#f0d3c1);}
+    .avatar.a5{background:radial-gradient(circle at 34% 28%,#f0eefb 0 10%,transparent 11%),linear-gradient(135deg,#332d4d,#8a86d1 58%,#d8d5ff);}
+    .avatar.a6{background:radial-gradient(circle at 34% 28%,#fff1ef 0 10%,transparent 11%),linear-gradient(135deg,#46313b,#e7a4ae 58%,#f8d4db);}
+
+    /* ════════════════════════════
+       PERSONA CARDS
+    ════════════════════════════ */
+    .cards-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+    .persona-card{border-radius:24px;overflow:hidden;border:1px solid var(--stroke);background:#0f0f17;box-shadow:var(--shadow);position:relative;min-height:400px;display:flex;align-items:end;transition:.3s ease;cursor:pointer;}
+    .persona-card:hover{transform:translateY(-4px);border-color:rgba(255,140,195,0.2);box-shadow:0 28px 65px rgba(0,0,0,0.55);}
+    .persona-card:hover .persona-hover{opacity:1;transform:translateY(0);}
+    .persona-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 14%,rgba(255,255,255,0.14),transparent 11%),linear-gradient(180deg,rgba(0,0,0,0) 8%,rgba(0,0,0,0.18) 58%,rgba(0,0,0,0.7) 100%),linear-gradient(140deg,#3c2232,#161622 45%,#19131b);}
+    .persona-card[data-tone="gold"] .persona-bg{background:radial-gradient(circle at 50% 14%,rgba(255,255,255,0.14),transparent 11%),linear-gradient(180deg,rgba(0,0,0,0) 8%,rgba(0,0,0,0.18) 58%,rgba(0,0,0,0.7) 100%),linear-gradient(140deg,#533825,#1a1515 48%,#181115);}
+    .persona-card[data-tone="violet"] .persona-bg{background:radial-gradient(circle at 50% 14%,rgba(255,255,255,0.14),transparent 11%),linear-gradient(180deg,rgba(0,0,0,0) 8%,rgba(0,0,0,0.18) 58%,rgba(0,0,0,0.7) 100%),linear-gradient(140deg,#312652,#151520 48%,#141118);}
+    .persona-card[data-tone="rose"] .persona-bg{background:radial-gradient(circle at 50% 14%,rgba(255,255,255,0.14),transparent 11%),linear-gradient(180deg,rgba(0,0,0,0) 8%,rgba(0,0,0,0.18) 58%,rgba(0,0,0,0.7) 100%),linear-gradient(140deg,#542d39,#1b161d 48%,#161015);}
+
+    .persona-figure{position:absolute;bottom:115px;left:50%;transform:translateX(-50%);width:58%;height:60%;}
+    .persona-figure .fig-hair{position:absolute;top:-12%;left:50%;transform:translateX(-50%);width:54%;padding-bottom:38%;border-radius:50% 50% 0 0;background:linear-gradient(180deg,#2a1c14,#3d2820);z-index:0;}
+    .persona-figure .fig-head{position:absolute;top:0;left:50%;transform:translateX(-50%);width:47%;padding-bottom:47%;border-radius:50%;background:radial-gradient(circle at 40% 32%,#f9ddd3 0 18%,transparent 19%),radial-gradient(circle at 38% 42%,rgba(80,50,45,0.88) 0 22%,transparent 23%),linear-gradient(160deg,#e8c0a8,#d4a090 45%,#b5846e);box-shadow:0 8px 16px rgba(0,0,0,0.35);}
+    .persona-card[data-tone="gold"] .fig-head{background:radial-gradient(circle at 40% 32%,#fbe5cc 0 18%,transparent 19%),radial-gradient(circle at 38% 42%,rgba(85,55,28,0.88) 0 22%,transparent 23%),linear-gradient(160deg,#e8be95,#d4a070 45%,#b58050);}
+    .persona-card[data-tone="violet"] .fig-head{background:radial-gradient(circle at 40% 32%,#f2e5ef 0 18%,transparent 19%),radial-gradient(circle at 38% 42%,rgba(55,35,70,0.88) 0 22%,transparent 23%),linear-gradient(160deg,#d8b8d0,#c49ab8 45%,#a07898);}
+    .persona-card[data-tone="rose"] .fig-head{background:radial-gradient(circle at 40% 32%,#ffe5d8 0 18%,transparent 19%),radial-gradient(circle at 38% 42%,rgba(90,50,40,0.88) 0 22%,transparent 23%),linear-gradient(160deg,#edbeaa,#daa090 45%,#b87868);}
+    .persona-figure .fig-neck{position:absolute;top:42%;left:50%;transform:translateX(-50%);width:22%;height:16%;border-radius:4px;background:linear-gradient(180deg,#d4a090,#b88070);}
+    .persona-card[data-tone="gold"] .fig-neck{background:linear-gradient(180deg,#d4a070,#b88050);}
+    .persona-card[data-tone="violet"] .fig-neck{background:linear-gradient(180deg,#c49ab8,#a07898);}
+    .persona-card[data-tone="rose"] .fig-neck{background:linear-gradient(180deg,#daa090,#b87868);}
+    .persona-figure .fig-body{position:absolute;top:55%;left:50%;transform:translateX(-50%);width:86%;height:46%;border-radius:40% 40% 20% 20%/20% 20% 14% 14%;background:linear-gradient(180deg,#2a1824,#1a1020 60%,#0e0a10);}
+    .persona-card[data-tone="gold"] .fig-body{background:linear-gradient(180deg,#2a1f14,#1a1410 60%);}
+    .persona-card[data-tone="violet"] .fig-body{background:linear-gradient(180deg,#1e1830,#141020 60%);}
+    .persona-card[data-tone="rose"] .fig-body{background:linear-gradient(180deg,#281820,#1a1015 60%);}
+    .persona-hover{position:absolute;top:0;left:0;right:0;padding:16px;z-index:3;display:flex;gap:7px;flex-wrap:wrap;opacity:0;transform:translateY(-5px);transition:.28s ease;}
+    .mood-tag{border-radius:999px;padding:5px 10px;font-size:0.72rem;font-weight:700;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(8px);}
+    .badge-row{position:absolute;top:14px;left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;gap:8px;z-index:4;}
+    .badge{display:inline-flex;align-items:center;border-radius:999px;padding:7px 11px;background:rgba(14,14,20,0.68);border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(10px);font-size:0.74rem;font-weight:700;color:#fff2f8;}
+    .age-badge{background:rgba(255,255,255,0.07);color:#fff;}
+    .persona-content{position:relative;z-index:2;width:100%;padding:20px;}
+    .persona-name{font-family:var(--display);font-size:2rem;font-weight:600;font-style:italic;letter-spacing:-.02em;margin-bottom:7px;}
+    .persona-sub{color:rgba(255,255,255,0.72);margin-bottom:14px;line-height:1.5;font-size:0.9rem;max-width:28ch;}
+    .persona-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+    /* ════════════════════════════
+       LOWER GRID
+    ════════════════════════════ */
+    .lower-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;margin-top:16px;}
+    .panel-card{background:linear-gradient(180deg,rgba(255,255,255,0.016),transparent),var(--panel);border:1px solid var(--stroke);border-radius:var(--rx);box-shadow:var(--shadow);}
+    .inbox-preview{padding:18px;}
+    .thread-row{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.045);}
+    .thread-row:last-child{border-bottom:0;}
+    .thread-title{font-weight:700;letter-spacing:-.02em;font-size:0.9rem;}
+    .thread-snippet{color:var(--muted);font-size:0.84rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38ch;}
+    .thread-meta{color:var(--muted-2);font-size:0.76rem;text-align:right;}
+    .compliance-card{padding:20px;display:flex;flex-direction:column;justify-content:space-between;background:radial-gradient(circle at top right,rgba(255,79,154,0.16),transparent 22%),radial-gradient(circle at bottom left,rgba(255,203,112,0.1),transparent 20%),#0f0f17;}
+    .compliance-card h3{font-family:var(--display);font-size:1.4rem;font-weight:600;margin-bottom:7px;}
+    .compliance-card p{color:var(--muted);line-height:1.65;font-size:0.9rem;}
+    .feature-list{display:grid;gap:9px;margin:14px 0 18px;}
+    .feature-item{display:flex;align-items:start;gap:10px;padding:10px;border-radius:13px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.045);}
+    .feature-dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,140,195,0.12);color:var(--pink-2);flex:0 0 22px;font-size:0.78rem;}
+
+    /* ════════════════════════════
+       DISCOVER
+    ════════════════════════════ */
+    .discover-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+    .filter-pill{border:1px solid var(--stroke);background:rgba(255,255,255,0.03);color:var(--muted);padding:9px 16px;border-radius:999px;cursor:pointer;transition:.2s;font-weight:600;font-size:0.86rem;}
+    .filter-pill.active,.filter-pill:hover{color:var(--text);border-color:rgba(255,140,195,0.26);background:rgba(255,79,154,0.09);}
+    .discover-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+    .discover-card{min-height:380px;border-radius:24px;padding:22px;border:1px solid var(--stroke);background:#0f0f17;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:end;box-shadow:var(--shadow);transition:.3s ease;cursor:pointer;}
+    .discover-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.13);box-shadow:0 28px 65px rgba(0,0,0,0.55);}
+    .discover-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 60% 15%,rgba(255,255,255,0.16),transparent 11%),linear-gradient(180deg,rgba(0,0,0,.02) 0%,rgba(0,0,0,.28) 55%,rgba(0,0,0,.72) 100%),linear-gradient(145deg,#432433,#191520 48%,#151118);}
+    .discover-card.tone-gold::before{background:radial-gradient(circle at 60% 15%,rgba(255,255,255,0.16),transparent 11%),linear-gradient(180deg,rgba(0,0,0,.02) 0%,rgba(0,0,0,.28) 55%,rgba(0,0,0,.72) 100%),linear-gradient(145deg,#5a3c22,#1c1714 48%,#161115);}
+    .discover-card.tone-violet::before{background:radial-gradient(circle at 60% 15%,rgba(255,255,255,0.16),transparent 11%),linear-gradient(180deg,rgba(0,0,0,.02) 0%,rgba(0,0,0,.28) 55%,rgba(0,0,0,.72) 100%),linear-gradient(145deg,#2f275c,#171422 48%,#121119);}
+    .discover-card.tone-blush::before{background:radial-gradient(circle at 60% 15%,rgba(255,255,255,0.16),transparent 11%),linear-gradient(180deg,rgba(0,0,0,.02) 0%,rgba(0,0,0,.28) 55%,rgba(0,0,0,.72) 100%),linear-gradient(145deg,#62303d,#1c151c 48%,#151016);}
+    .discover-fig{position:absolute;bottom:120px;left:50%;transform:translateX(-50%);width:52%;height:52%;pointer-events:none;}
+    .discover-fig .fig-hair{position:absolute;top:-14%;left:50%;transform:translateX(-50%);width:52%;padding-bottom:36%;border-radius:50% 50% 0 0;background:linear-gradient(180deg,#2a1c14,#3d2820);z-index:0;}
+    .discover-fig .fig-head{position:absolute;top:0;left:50%;transform:translateX(-50%);width:44%;padding-bottom:44%;border-radius:50%;background:radial-gradient(circle at 40% 32%,#f9ddd3 0 18%,transparent 19%),linear-gradient(160deg,#e8c0a8,#d4a090 45%,#b5846e);}
+    .discover-card.tone-gold .fig-head{background:radial-gradient(circle at 40% 32%,#fbe5cc 0 18%,transparent 19%),linear-gradient(160deg,#e8be95,#d4a070 45%,#b58050);}
+    .discover-card.tone-violet .fig-head{background:radial-gradient(circle at 40% 32%,#f2e5ef 0 18%,transparent 19%),linear-gradient(160deg,#d8b8d0,#c49ab8 45%,#a07898);}
+    .discover-card.tone-blush .fig-head{background:radial-gradient(circle at 40% 32%,#ffe5d8 0 18%,transparent 19%),linear-gradient(160deg,#edbeaa,#daa090 45%,#b87868);}
+    .discover-fig .fig-neck{position:absolute;top:43%;left:50%;transform:translateX(-50%);width:20%;height:15%;border-radius:4px;background:linear-gradient(180deg,#d4a090,#b88070);}
+    .discover-card.tone-gold .fig-neck{background:linear-gradient(180deg,#d4a070,#b88050);}
+    .discover-card.tone-violet .fig-neck{background:linear-gradient(180deg,#c49ab8,#a07898);}
+    .discover-card.tone-blush .fig-neck{background:linear-gradient(180deg,#daa090,#b87868);}
+    .discover-fig .fig-body{position:absolute;top:56%;left:50%;transform:translateX(-50%);width:90%;height:46%;border-radius:40% 40% 20% 20%/20% 20% 14% 14%;background:linear-gradient(180deg,#2a1824,#1a1020 60%);}
+    .discover-card.tone-gold .fig-body{background:linear-gradient(180deg,#2a1f14,#1a1410 60%);}
+    .discover-card.tone-violet .fig-body{background:linear-gradient(180deg,#1e1830,#141020 60%);}
+    .discover-card.tone-blush .fig-body{background:linear-gradient(180deg,#281820,#1a1015 60%);}
+    .discover-card>*:not(.discover-fig){position:relative;z-index:1;}
+    .discover-tag{position:absolute;top:14px;left:14px;z-index:2;}
+    .discover-footer{margin-top:auto;}
+    .discover-footer h3{font-family:var(--display);font-size:1.85rem;font-style:italic;letter-spacing:-.02em;margin-bottom:7px;font-weight:600;}
+    .discover-footer p{color:rgba(255,255,255,0.72);line-height:1.55;max-width:24ch;margin-bottom:16px;font-size:0.9rem;}
+    .discover-card{transition:opacity .3s ease,transform .3s ease,border-color .25s;}
+    .discover-card.hidden{opacity:0;pointer-events:none;transform:scale(.96);}
+
+    /* ════════════════════════════
+       CHAT — full width
+    ════════════════════════════ */
+    .chat-panel{
+      display:grid;grid-template-rows:auto 1fr auto;
+      border:1px solid var(--stroke);border-radius:var(--rx);box-shadow:var(--shadow);
+      background:radial-gradient(circle at top right,rgba(255,140,195,0.08),transparent 24%),#10101a;
+      height:calc(100vh - var(--topbar-h) - 44px);
+      min-height:600px;overflow:hidden;
+    }
+    .chat-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .chat-user{display:flex;align-items:center;gap:12px;}
+    .chat-user h3{font-family:var(--display);font-size:1.45rem;font-style:italic;letter-spacing:-.02em;}
+    .chat-user p{margin-top:2px;color:var(--muted);font-size:0.86rem;display:flex;align-items:center;gap:5px;}
+    .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulseRing 2.2s ease-out infinite;flex:0 0 7px;}
+    .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:0.5;display:inline-block;vertical-align:middle;margin:0 7px;}
+    .chat-tools{display:flex;gap:8px;}
+    .icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--stroke);background:rgba(255,255,255,0.04);color:var(--text);cursor:pointer;transition:.18s;}
+    .icon-btn:hover{background:rgba(255,255,255,0.07);border-color:var(--stroke-2);}
+
+    .chat-body{padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;}
+    .msg-row{display:flex;gap:10px;align-items:end;}
+    .msg-row.me{justify-content:end;}
+    .bubble{max-width:min(560px,72%);border-radius:20px;padding:13px 16px;line-height:1.58;}
+    .bubble.them{background:#15151f;border:1px solid rgba(255,255,255,0.055);color:#f4ecf1;border-bottom-left-radius:6px;}
+    .bubble.me{background:linear-gradient(135deg,rgba(255,79,154,0.2),rgba(255,203,112,0.1));border:1px solid rgba(255,140,195,0.17);border-bottom-right-radius:6px;}
+    .msg-time{font-size:0.74rem;color:var(--muted-2);margin-top:4px;}
+    .typing-indicator{display:flex;gap:5px;align-items:center;padding:13px 17px;background:#15151f;border-radius:20px;border-bottom-left-radius:6px;width:fit-content;border:1px solid rgba(255,255,255,0.055);}
+    .typing-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typingBounce 1.2s ease infinite;}
+    .typing-dot:nth-child(2){animation-delay:.2s;}
+    .typing-dot:nth-child(3){animation-delay:.4s;}
+    @keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+    .chat-input{padding:13px 16px 15px;border-top:1px solid rgba(255,255,255,0.045);display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;}
+    .input-wrap{display:flex;align-items:center;gap:9px;border-radius:16px;border:1px solid var(--stroke);background:rgba(255,255,255,0.04);padding:0 13px;transition:.2s;}
+    .input-wrap:focus-within{border-color:rgba(255,255,255,0.16);background:#14141e;}
+    .input-wrap span{color:var(--muted);}
+    .chat-input input{width:100%;border:0;outline:0;background:transparent;color:var(--text);padding:13px 0;}
+    .chat-input .solid-btn{min-width:80px;justify-content:center;}
+
+    /* no-thread placeholder */
+    .chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--muted-2);text-align:center;padding:40px;}
+    .chat-empty-icon{width:56px;height:56px;border-radius:18px;background:rgba(255,79,154,0.1);border:1px solid rgba(255,140,195,0.15);display:grid;place-items:center;font-size:1.4rem;margin-bottom:4px;}
+    .chat-empty h3{font-family:var(--display);font-size:1.5rem;font-style:italic;color:var(--text);}
+    .chat-empty p{font-size:0.9rem;max-width:30ch;line-height:1.65;}
+
+    /* ════════════════════════════
+       GALLERY
+    ════════════════════════════ */
+    .gallery-layout{display:grid;grid-template-columns:1fr 240px;gap:16px;}
+    .gallery-main{background:var(--panel);border:1px solid var(--stroke);border-radius:var(--rx);box-shadow:var(--shadow);padding:20px;}
+    .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px;}
+    .gallery-tile{min-height:250px;border-radius:20px;border:1px solid var(--stroke);overflow:hidden;position:relative;background:#0f0f17;box-shadow:var(--shadow-sm);cursor:pointer;transition:.28s ease;}
+    .gallery-tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.13);}
+    .gallery-tile.tall{min-height:340px;}
+    .gallery-tile::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 18%,rgba(255,255,255,0.16),transparent 11%),linear-gradient(180deg,rgba(0,0,0,.04) 0,rgba(0,0,0,.12) 45%,rgba(0,0,0,.62) 100%),linear-gradient(145deg,#402733,#18151d 50%,#131118);}
+    .gallery-tile.alt::before{background:radial-gradient(circle at 50% 18%,rgba(255,255,255,0.16),transparent 11%),linear-gradient(180deg,rgba(0,0,0,.04) 0,rgba(0,0,0,.12) 45%,rgba(0,0,0,.62) 100%),linear-gradient(145deg,#573b22,#191613 50%,#131118);}
+    .gallery-tile.violet::before{background:radial-gradient(circle at 50% 18%,rgba(255,255,255,0.16),transparent 11%),linear-gradient(180deg,rgba(0,0,0,.04) 0,rgba(0,0,0,.12) 45%,rgba(0,0,0,.62) 100%),linear-gradient(145deg,#32285a,#171420 50%,#111018);}
+    .gallery-tile .lock{position:absolute;top:12px;right:12px;z-index:1;border-radius:999px;padding:7px 11px;background:rgba(10,10,17,0.72);border:1px solid rgba(255,255,255,0.08);font-size:0.75rem;font-weight:700;}
+    .gallery-tile .caption{position:absolute;left:14px;right:14px;bottom:14px;z-index:1;}
+    .gallery-tile .caption h3{font-family:var(--display);font-size:1.2rem;font-style:italic;margin-bottom:5px;}
+    .gallery-tile .caption p{color:rgba(255,255,255,0.76);line-height:1.45;font-size:0.84rem;}
+    .gallery-side{background:var(--panel);border:1px solid var(--stroke);border-radius:var(--rx);box-shadow:var(--shadow);padding:18px;display:grid;gap:14px;align-content:start;}
+    .price-card,.note-card{border-radius:18px;border:1px solid rgba(255,255,255,0.055);background:#12121a;padding:16px;}
+    .price-card h3,.note-card h3{font-family:var(--display);font-size:1.3rem;font-style:italic;margin-bottom:7px;}
+    .price-card p,.note-card p{color:var(--muted);line-height:1.6;margin-bottom:14px;font-size:0.88rem;}
+    .price{font-family:var(--display);font-size:2.5rem;font-weight:700;letter-spacing:-.03em;margin-bottom:12px;}
+    .price span{font-size:.9rem;color:var(--muted);font-weight:400;}
+    .check-list{display:grid;gap:10px;margin-bottom:16px;}
+    .check{display:flex;gap:9px;align-items:start;}
+    .check i{width:20px;height:20px;border-radius:50%;background:rgba(73,209,125,0.1);color:var(--green);display:grid;place-items:center;flex:0 0 20px;font-style:normal;font-size:0.78rem;margin-top:1px;}
+    .subtle{color:var(--muted-2);font-size:0.78rem;line-height:1.5;}
+
+    /* ════════════════════════════
+       LIGHTBOX
+    ════════════════════════════ */
+    .lightbox{position:fixed;inset:0;z-index:200;background:rgba(3,3,7,0.92);backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s ease;}
+    .lightbox.open{opacity:1;pointer-events:auto;}
+    .lightbox-inner{width:min(620px,90vw);border-radius:28px;overflow:hidden;border:1px solid var(--stroke-2);background:#13131b;box-shadow:0 40px 100px rgba(0,0,0,0.7);transform:translateY(14px);transition:.32s ease;}
+    .lightbox.open .lightbox-inner{transform:translateY(0);}
+    .lightbox-img{width:100%;height:300px;position:relative;overflow:hidden;}
+    .lightbox-img-inner{position:absolute;inset:0;}
+    .lightbox-body{padding:22px 24px 26px;}
+    .lightbox-body h2{font-family:var(--display);font-size:1.9rem;font-style:italic;letter-spacing:-.02em;margin-bottom:7px;}
+    .lightbox-body p{color:var(--muted);line-height:1.65;margin-bottom:18px;}
+    .lightbox-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:11px;border:1px solid var(--stroke-2);background:rgba(12,12,18,0.8);color:var(--text);cursor:pointer;font-size:1.1rem;display:grid;place-items:center;z-index:2;transition:.18s;}
+    .lightbox-close:hover{background:#1a1a25;}
+
+    /* ════════════════════════════
+       AGE GATE
+    ════════════════════════════ */
+    .agegate{position:fixed;inset:0;z-index:300;background:radial-gradient(circle at 30% 40%,rgba(255,79,154,0.14),transparent 40%),radial-gradient(circle at 70% 70%,rgba(122,92,255,0.1),transparent 35%),#06060a;display:flex;align-items:center;justify-content:center;transition:.4s ease;}
+    .agegate.hidden{opacity:0;pointer-events:none;}
+    .agegate-card{width:min(420px,90vw);border-radius:30px;padding:42px 38px;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.01)),#0f0f17;border:1px solid rgba(255,140,195,0.14);box-shadow:0 40px 100px rgba(0,0,0,0.6);}
+    .agegate-mark{width:56px;height:56px;border-radius:18px;margin:0 auto 18px;background:linear-gradient(135deg,var(--pink),#ff73b3 45%,var(--gold));box-shadow:0 10px 26px rgba(255,79,154,0.3);position:relative;overflow:hidden;}
+    .agegate-mark::after{content:"";position:absolute;inset:12px;border-radius:11px 11px 14px 14px;background:rgba(8,8,12,0.2);clip-path:polygon(0 0,100% 8%,74% 100%,15% 100%);}
+    .agegate h1{font-family:var(--display);font-size:2.5rem;font-style:italic;letter-spacing:-.02em;font-weight:600;margin-bottom:10px;}
+    .agegate p{color:var(--muted);line-height:1.7;margin-bottom:26px;font-size:0.96rem;}
+    .agegate-actions{display:flex;flex-direction:column;gap:10px;}
+    .agegate-enter{border:0;border-radius:16px;padding:15px;font-size:1rem;font-weight:700;color:#1a0c15;background:linear-gradient(135deg,#ff8cc3,var(--gold));cursor:pointer;transition:.2s;}
+    .agegate-enter:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(255,79,154,0.28);}
+    .agegate-leave{border:1px solid var(--stroke);border-radius:16px;padding:15px;background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+    .agegate-leave:hover{border-color:var(--stroke-2);color:var(--text);}
+    .agegate-fine{font-size:0.74rem;color:var(--muted-2);margin-top:12px;line-height:1.5;}
+
+    /* ════════════════════════════
+       MOBILE NAV + RESPONSIVE
+    ════════════════════════════ */
+    .mobile-nav{position:fixed;left:12px;right:12px;bottom:12px;z-index:40;display:none;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px;border-radius:20px;background:rgba(9,9,14,0.92);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.07);box-shadow:0 16px 38px rgba(0,0,0,0.4);padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));}
+    .sidebar-backdrop{display:none;position:fixed;inset:0;border:0;background:rgba(6,6,10,0.56);backdrop-filter:blur(2px);opacity:0;pointer-events:none;z-index:55;transition:opacity .22s ease;}
+    .mobile-tab{border:0;background:transparent;color:var(--muted);border-radius:13px;padding:12px 6px;display:grid;place-items:center;gap:5px;cursor:pointer;font-size:0.76rem;font-weight:700;}
+    .mobile-tab.active{background:rgba(255,79,154,0.1);color:var(--text);}
+
+    @media(max-width:1200px){.cards-4{grid-template-columns:repeat(2,1fr)}.discover-grid{grid-template-columns:repeat(2,1fr)}.stories{grid-template-columns:repeat(3,1fr)}.gallery-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:980px){
+      .app{grid-template-columns:1fr}
+      .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .3s ease;width:min(86vw,300px);z-index:60;}
+      .sidebar.open{transform:translateX(0);}
+      .mobile-menu-btn{display:inline-grid;place-items:center;flex:0 0 40px;}
+      .hero,.lower-grid,.gallery-layout{grid-template-columns:1fr}
+      .search{width:100%;max-width:none}
+      .topbar{padding:max(10px,env(safe-area-inset-top,0px)) 14px 12px;height:auto;min-height:var(--topbar-h);align-items:flex-start;flex-wrap:wrap;row-gap:10px}
+      .topbar-left,.topbar-right{flex:1 1 100%}
+      .topbar-right{justify-content:flex-start}
+      .views{padding:12px;padding-bottom:calc(78px + 28px + env(safe-area-inset-bottom,0px))}
+      .mobile-nav{display:grid}
+      .sidebar-backdrop{display:block}
+      body.sidebar-open{overflow:hidden}
+      body.sidebar-open .sidebar-backdrop{opacity:1;pointer-events:auto}
+    }
+    @media(max-width:720px){
+      .hero,.lower-grid,.hero-stats,.stories,.cards-4,.discover-grid,.gallery-grid,.visual-grid{grid-template-columns:1fr}
+      .hero-copy h1{font-size:2.6rem}
+    }
+  </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true"></div>
-        <div class="brand-title">Velora<span>.ai</span></div>
+
+<!-- Age Gate -->
+<div class="agegate" id="agegate">
+  <div class="agegate-card">
+    <div class="agegate-mark"></div>
+    <h1>Members only.</h1>
+    <p>Velora is an exclusive 18+ companion platform. You must be of legal age to enter.</p>
+    <div class="agegate-actions">
+      <button class="agegate-enter" id="agegateEnter">I am 18 or older — Enter</button>
+      <button class="agegate-leave">I am under 18 — Leave</button>
+    </div>
+    <p class="agegate-fine">By entering you confirm you are 18+ and agree to our Terms of Service and Privacy Policy.</p>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div style="position:relative;width:min(620px,90vw)">
+    <button class="lightbox-close" id="lightboxClose">✕</button>
+    <div class="lightbox-inner">
+      <div class="lightbox-img"><div class="lightbox-img-inner" id="lightboxBg"></div></div>
+      <div class="lightbox-body">
+        <h2 id="lightboxTitle">Gold Hour Set</h2>
+        <p id="lightboxDesc">Warm lighting, soft styling, and an elegant evening mood.</p>
+        <button class="solid-btn" style="width:100%;justify-content:center;">Unlock Collection</button>
       </div>
-
-      <nav class="nav-group" aria-label="Primary navigation">
-        <button class="nav-btn active" data-view-target="home">
-          <span class="nav-icon">⌂</span>
-          <span class="nav-label">Home</span>
-        </button>
-        <button class="nav-btn" data-view-target="discover">
-          <span class="nav-icon">◈</span>
-          <span class="nav-label">Discover</span>
-        </button>
-        <button class="nav-btn" data-view-target="chat">
-          <span class="nav-icon">◔</span>
-          <span class="nav-label">Chat</span>
-        </button>
-        <button class="nav-btn" data-view-target="gallery">
-          <span class="nav-icon">▣</span>
-          <span class="nav-label">Gallery</span>
-        </button>
-      </nav>
-
-      <div class="upgrade-card">
-        <h3>Premium Preview</h3>
-        <p>
-          A tasteful 18+ experience with private conversations, curated galleries,
-          mood-based discovery, and a luxury nightlife aesthetic.
-        </p>
-        <button class="upgrade-btn">Upgrade Mockup</button>
-      </div>
-
-      <div class="sidebar-spacer"></div>
-
-      <div class="sidebar-footer">
-        <button class="footer-btn">
-          <span class="footer-icon">☺</span>
-          <span class="footer-label">Profile</span>
-        </button>
-        <button class="footer-btn">
-          <span class="footer-icon">?</span>
-          <span class="footer-label">Support</span>
-        </button>
-        <button class="footer-btn">
-          <span class="footer-icon">⋯</span>
-          <span class="footer-label">More</span>
-        </button>
-      </div>
-
-      <div class="sidebar-meta">
-        TERMS & PRIVACY<br />
-        2026 VELORA.AI<br />
-        ALL RIGHTS RESERVED
-      </div>
-    </aside>
-
-    <div class="main">
-      <header class="topbar">
-        <div class="topbar-left">
-          <button
-            class="mobile-menu-btn"
-            id="menuBtn"
-            type="button"
-            aria-label="Open menu"
-            aria-controls="sidebar"
-            aria-expanded="false"
-          >☰</button>
-
-          <label class="search" aria-label="Search personas">
-            <span>⌕</span>
-            <input type="text" placeholder="Search personas, moods, collections..." />
-          </label>
-        </div>
-
-        <div class="topbar-right">
-          <button class="pill-btn">
-            <span class="token-dot"></span>
-            <span>Credits 48</span>
-          </button>
-          <button class="ghost-btn">Create Persona</button>
-          <button class="solid-btn">
-            <span class="avatar-mini" aria-hidden="true"></span>
-            <span>My Profile</span>
-          </button>
-        </div>
-      </header>
-
-      <main class="views">
-        <!-- HOME -->
-        <section class="view active" id="view-home">
-          <div class="hero">
-            <article class="hero-card hero-copy">
-              <div>
-                <div class="eyebrow">
-                  <span>●</span>
-                  <span>Luxury 18+ companion platform mockup</span>
-                </div>
-                <h1>After dark, but still elegant.</h1>
-                <p>
-                  Inspired by your reference layouts, this concept blends a dark premium
-                  dashboard with softer editorial styling. The direction is intimate and
-                  flirt-forward without going explicit — more private club than adult tube site.
-                </p>
-
-                <div class="hero-actions">
-                  <button class="solid-btn" data-view-jump="discover">Explore Personas</button>
-                  <button class="ghost-btn" data-view-jump="chat">Open Chat Mockup</button>
-                </div>
-              </div>
-
-              <div class="hero-stats">
-                <div class="stat">
-                  <div class="stat-value">4 core views</div>
-                  <div class="stat-label">Home, Discover, Chat, Gallery</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-value">Luxury dark UI</div>
-                  <div class="stat-label">Pink, gold, plum accents</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-value">Non-explicit</div>
-                  <div class="stat-label">Adult but polished and tasteful</div>
-                </div>
-              </div>
-            </article>
-
-            <article class="hero-card hero-visual">
-              <div class="visual-main">
-                <div class="portrait" aria-hidden="true">
-                  <div class="glow"></div>
-                  <div class="body"></div>
-                </div>
-                <div class="visual-caption">
-                  <h3>Featured Companion</h3>
-                  <p>
-                    Private messages, playful moods, voice notes, and curated collections —
-                    framed with a cinematic premium look.
-                  </p>
-                </div>
-              </div>
-
-              <div class="visual-grid">
-                <div class="mini-tile">
-                  <div class="mini-title">Private Rooms</div>
-                  <div class="mini-sub">1:1 spaces for intimate conversations</div>
-                </div>
-                <div class="mini-tile">
-                  <div class="mini-title">Curated Galleries</div>
-                  <div class="mini-sub">Tasteful locked collections and previews</div>
-                </div>
-                <div class="mini-tile">
-                  <div class="mini-title">Mood Discovery</div>
-                  <div class="mini-sub">Romance, mystery, playful, late-night</div>
-                </div>
-              </div>
-            </article>
-          </div>
-
-          <section class="section">
-            <div class="section-head">
-              <div>
-                <h2>Tonight’s highlights</h2>
-                <p>Shortlist personas and moods, inspired by the round profile rail in your references.</p>
-              </div>
-              <button class="ghost-btn" data-view-jump="discover">See all</button>
-            </div>
-
-            <div class="stories">
-              <div class="story">
-                <div class="story-top">
-                  <div class="avatar"></div>
-                  <div>
-                    <div class="story-name">Lyra</div>
-                    <div class="story-mood">Romantic</div>
-                  </div>
-                  <div class="pulse"></div>
-                </div>
-                <div class="muted-line">Soft voice notes and late-night check-ins.</div>
-              </div>
-
-              <div class="story">
-                <div class="story-top">
-                  <div class="avatar a2"></div>
-                  <div>
-                    <div class="story-name">Nora</div>
-                    <div class="story-mood">Confident</div>
-                  </div>
-                  <div class="pulse"></div>
-                </div>
-                <div class="muted-line">High-energy teasing, playful banter.</div>
-              </div>
-
-              <div class="story">
-                <div class="story-top">
-                  <div class="avatar a3"></div>
-                  <div>
-                    <div class="story-name">Violet</div>
-                    <div class="story-mood">Mystery</div>
-                  </div>
-                  <div class="pulse"></div>
-                </div>
-                <div class="muted-line">Slow-burn chemistry and midnight moods.</div>
-              </div>
-
-              <div class="story">
-                <div class="story-top">
-                  <div class="avatar a4"></div>
-                  <div>
-                    <div class="story-name">Siena</div>
-                    <div class="story-mood">Elegant</div>
-                  </div>
-                  <div class="pulse"></div>
-                </div>
-                <div class="muted-line">Upscale hostess energy, calm and warm.</div>
-              </div>
-
-              <div class="story">
-                <div class="story-top">
-                  <div class="avatar a5"></div>
-                  <div>
-                    <div class="story-name">Mina</div>
-                    <div class="story-mood">Creative</div>
-                  </div>
-                  <div class="pulse"></div>
-                </div>
-                <div class="muted-line">Dreamy chats, art prompts, poetic replies.</div>
-              </div>
-
-              <div class="story">
-                <div class="story-top">
-                  <div class="avatar a6"></div>
-                  <div>
-                    <div class="story-name">Rose</div>
-                    <div class="story-mood">Playful</div>
-                  </div>
-                  <div class="pulse"></div>
-                </div>
-                <div class="muted-line">Flirty energy without crossing into explicit.</div>
-              </div>
-            </div>
-          </section>
-
-          <section class="section">
-            <div class="section-head">
-              <div>
-                <h2>Featured personas</h2>
-                <p>Card-heavy layout inspired by the darker dashboard references.</p>
-              </div>
-            </div>
-
-            <div class="cards-4">
-              <article class="persona-card" data-tone="rose">
-                <div class="persona-bg"></div>
-                <div class="persona-figure"></div>
-                <div class="badge-row">
-                  <span class="badge">Romance</span>
-                  <span class="badge age-badge">24</span>
-                </div>
-                <div class="persona-content">
-                  <h3 class="persona-name">Elara</h3>
-                  <div class="persona-sub">
-                    Soft-spoken, affectionate, and ideal for long-form nighttime chats.
-                  </div>
-                  <div class="persona-actions">
-                    <button class="solid-btn" data-view-jump="chat">Chat now</button>
-                    <button class="ghost-btn">Preview</button>
-                  </div>
-                </div>
-              </article>
-
-              <article class="persona-card" data-tone="gold">
-                <div class="persona-bg"></div>
-                <div class="persona-figure"></div>
-                <div class="badge-row">
-                  <span class="badge">Hostess</span>
-                  <span class="badge age-badge">27</span>
-                </div>
-                <div class="persona-content">
-                  <h3 class="persona-name">Mara</h3>
-                  <div class="persona-sub">
-                    Luxe lounge energy, polished conversation, and premium gallery drops.
-                  </div>
-                  <div class="persona-actions">
-                    <button class="solid-btn" data-view-jump="chat">Open room</button>
-                    <button class="ghost-btn">Preview</button>
-                  </div>
-                </div>
-              </article>
-
-              <article class="persona-card" data-tone="violet">
-                <div class="persona-bg"></div>
-                <div class="persona-figure"></div>
-                <div class="badge-row">
-                  <span class="badge">Mystery</span>
-                  <span class="badge age-badge">25</span>
-                </div>
-                <div class="persona-content">
-                  <h3 class="persona-name">Nyra</h3>
-                  <div class="persona-sub">
-                    Reserved and magnetic, built for slower, deeper character-driven chat.
-                  </div>
-                  <div class="persona-actions">
-                    <button class="solid-btn" data-view-jump="chat">Chat now</button>
-                    <button class="ghost-btn">Preview</button>
-                  </div>
-                </div>
-              </article>
-
-              <article class="persona-card" data-tone="rose">
-                <div class="persona-bg"></div>
-                <div class="persona-figure"></div>
-                <div class="badge-row">
-                  <span class="badge">Playful</span>
-                  <span class="badge age-badge">23</span>
-                </div>
-                <div class="persona-content">
-                  <h3 class="persona-name">Celine</h3>
-                  <div class="persona-sub">
-                    Bright energy, teasing humor, and warm check-ins that feel alive.
-                  </div>
-                  <div class="persona-actions">
-                    <button class="solid-btn" data-view-jump="chat">Say hi</button>
-                    <button class="ghost-btn">Preview</button>
-                  </div>
-                </div>
-              </article>
-            </div>
-
-            <div class="lower-grid">
-              <article class="panel-card inbox-preview">
-                <div class="section-head">
-                  <div>
-                    <h2>Inbox preview</h2>
-                    <p>A cleaner version of the chat listing pattern from your examples.</p>
-                  </div>
-                </div>
-
-                <div class="thread-row">
-                  <div class="avatar"></div>
-                  <div>
-                    <div class="thread-title">Elara</div>
-                    <div class="thread-snippet">I saved a quieter room for us tonight. Want in?</div>
-                  </div>
-                  <div class="thread-meta">2m ago</div>
-                </div>
-
-                <div class="thread-row">
-                  <div class="avatar a4"></div>
-                  <div>
-                    <div class="thread-title">Mara</div>
-                    <div class="thread-snippet">I’ve got a new private collection with a gold-hour mood.</div>
-                  </div>
-                  <div class="thread-meta">9m ago</div>
-                </div>
-
-                <div class="thread-row">
-                  <div class="avatar a3"></div>
-                  <div>
-                    <div class="thread-title">Nyra</div>
-                    <div class="thread-snippet">Some stories are better told after midnight.</div>
-                  </div>
-                  <div class="thread-meta">18m ago</div>
-                </div>
-
-                <div class="thread-row">
-                  <div class="avatar a6"></div>
-                  <div>
-                    <div class="thread-title">Rose</div>
-                    <div class="thread-snippet">I’m in a playful mood — ask me anything.</div>
-                  </div>
-                  <div class="thread-meta">1h ago</div>
-                </div>
-              </article>
-
-              <article class="panel-card compliance-card">
-                <div>
-                  <h3>Brand direction</h3>
-                  <p>
-                    This concept avoids porn-style clutter and leans into a boutique nightlife feel:
-                    softer typography, more negative space, premium gradients, and intimate copy.
-                  </p>
-
-                  <div class="feature-list">
-                    <div class="feature-item">
-                      <div class="feature-dot">✓</div>
-                      <div>
-                        <strong>Adult, not explicit</strong><br />
-                        Designed around flirtation, companionship, and exclusivity.
-                      </div>
-                    </div>
-                    <div class="feature-item">
-                      <div class="feature-dot">✓</div>
-                      <div>
-                        <strong>Stronger hierarchy</strong><br />
-                        Clear discover → chat → gallery user journey.
-                      </div>
-                    </div>
-                    <div class="feature-item">
-                      <div class="feature-dot">✓</div>
-                      <div>
-                        <strong>Mobile-ready shell</strong><br />
-                        Includes sidebar + bottom nav pattern for later expansion.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button class="solid-btn" data-view-jump="gallery">Open Gallery Mockup</button>
-              </article>
-            </div>
-          </section>
-        </section>
-
-        <!-- DISCOVER -->
-        <section class="view" id="view-discover">
-          <div class="section-head">
-            <div>
-              <h2>Discover</h2>
-              <p>Persona browsing with filters, large editorial cards, and a premium dark palette.</p>
-            </div>
-          </div>
-
-          <div class="discover-toolbar">
-            <button class="filter-pill active">All</button>
-            <button class="filter-pill">Romantic</button>
-            <button class="filter-pill">Playful</button>
-            <button class="filter-pill">Mystery</button>
-            <button class="filter-pill">Elegant</button>
-            <button class="filter-pill">Late night</button>
-            <button class="filter-pill">Voice notes</button>
-          </div>
-
-          <div class="discover-grid">
-            <article class="discover-card">
-              <span class="badge discover-tag">Trending</span>
-              <div class="discover-footer">
-                <h3>Elara</h3>
-                <p>Warm, attentive, and ideal for slow-burn chemistry.</p>
-                <div class="persona-actions">
-                  <button class="solid-btn" data-view-jump="chat">Chat</button>
-                  <button class="ghost-btn">Collection</button>
-                </div>
-              </div>
-            </article>
-
-            <article class="discover-card tone-gold">
-              <span class="badge discover-tag">Premium</span>
-              <div class="discover-footer">
-                <h3>Mara</h3>
-                <p>Upscale lounge persona with exclusive moodboards and elegant replies.</p>
-                <div class="persona-actions">
-                  <button class="solid-btn" data-view-jump="chat">Chat</button>
-                  <button class="ghost-btn">Collection</button>
-                </div>
-              </div>
-            </article>
-
-            <article class="discover-card tone-violet">
-              <span class="badge discover-tag">New</span>
-              <div class="discover-footer">
-                <h3>Nyra</h3>
-                <p>Mysterious tone, poetry-laced messages, and private-room pacing.</p>
-                <div class="persona-actions">
-                  <button class="solid-btn" data-view-jump="chat">Chat</button>
-                  <button class="ghost-btn">Collection</button>
-                </div>
-              </div>
-            </article>
-
-            <article class="discover-card tone-blush">
-              <span class="badge discover-tag">Popular</span>
-              <div class="discover-footer">
-                <h3>Rose</h3>
-                <p>Playful energy and casual flirting with a lighter, brighter tone.</p>
-                <div class="persona-actions">
-                  <button class="solid-btn" data-view-jump="chat">Chat</button>
-                  <button class="ghost-btn">Collection</button>
-                </div>
-              </div>
-            </article>
-
-            <article class="discover-card tone-gold">
-              <span class="badge discover-tag">Curated</span>
-              <div class="discover-footer">
-                <h3>Siena</h3>
-                <p>Calm, polished, hostess-like presence with premium image drops.</p>
-                <div class="persona-actions">
-                  <button class="solid-btn" data-view-jump="chat">Chat</button>
-                  <button class="ghost-btn">Collection</button>
-                </div>
-              </div>
-            </article>
-
-            <article class="discover-card tone-violet">
-              <span class="badge discover-tag">Creators’ pick</span>
-              <div class="discover-footer">
-                <h3>Mina</h3>
-                <p>Creative moodboard type, artistic language, and soft atmosphere.</p>
-                <div class="persona-actions">
-                  <button class="solid-btn" data-view-jump="chat">Chat</button>
-                  <button class="ghost-btn">Collection</button>
-                </div>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <!-- CHAT -->
-        <section class="view" id="view-chat" data-chat-mobile-view="list">
-          <div class="chat-layout">
-            <aside class="thread-list-panel" aria-label="Chat threads">
-              <div class="thread-list-header">
-                <h2>Chats</h2>
-                <button class="ghost-btn">New</button>
-              </div>
-
-              <button class="thread-card active" type="button" data-thread="elara" data-name="Elara" data-avatar="" data-status="Online now">
-                <div class="avatar"></div>
-                <div class="thread-copy">
-                  <div class="name">Elara</div>
-                  <div class="preview">I kept the lights low in here tonight.</div>
-                </div>
-                <div class="thread-meta">now</div>
-              </button>
-
-              <button class="thread-card" type="button" data-thread="mara" data-name="Mara" data-avatar="a4" data-status="Away">
-                <div class="avatar a4"></div>
-                <div class="thread-copy">
-                  <div class="name">Mara</div>
-                  <div class="preview">Would you like the gold lounge or the quieter suite?</div>
-                </div>
-                <div class="thread-meta">7m</div>
-              </button>
-
-              <button class="thread-card" type="button" data-thread="nyra" data-name="Nyra" data-avatar="a3" data-status="Online now">
-                <div class="avatar a3"></div>
-                <div class="thread-copy">
-                  <div class="name">Nyra</div>
-                  <div class="preview">There’s always more to say after midnight.</div>
-                </div>
-                <div class="thread-meta">15m</div>
-              </button>
-
-              <button class="thread-card" type="button" data-thread="rose" data-name="Rose" data-avatar="a6" data-status="Online now">
-                <div class="avatar a6"></div>
-                <div class="thread-copy">
-                  <div class="name">Rose</div>
-                  <div class="preview">Tell me your mood and I’ll match it.</div>
-                </div>
-                <div class="thread-meta">1h</div>
-              </button>
-
-              <button class="thread-card" type="button" data-thread="mina" data-name="Mina" data-avatar="a5" data-status="Last active 3m ago">
-                <div class="avatar a5"></div>
-                <div class="thread-copy">
-                  <div class="name">Mina</div>
-                  <div class="preview">I made a tiny gallery inspired by your last message.</div>
-                </div>
-                <div class="thread-meta">2h</div>
-              </button>
-            </aside>
-
-            <section class="chat-panel">
-              <div class="chat-header">
-                <button class="chat-back-btn" id="chatBackBtn" type="button" aria-label="Back to chats">←</button>
-                <div class="chat-user">
-                  <div class="avatar" id="chatHeaderAvatar"></div>
-                  <div>
-                    <h3 id="chatHeaderName">Elara</h3>
-                    <p><span class="status-dot"></span><span class="dot"></span><span id="chatHeaderStatus">Online now</span></p>
-                  </div>
-                </div>
-
-                <div class="chat-tools">
-                  <button class="icon-btn" aria-label="Pin chat">☆</button>
-                  <button class="icon-btn" aria-label="Open gallery">▣</button>
-                  <button class="icon-btn" aria-label="More">⋯</button>
-                </div>
-              </div>
-
-              <div class="chat-body" id="chatBody">
-                <div class="msg-row">
-                  <div class="avatar" style="width:34px;height:34px;"></div>
-                  <div>
-                    <div class="bubble them">
-                      I kept this room quieter than the others. It feels better for slower conversations.
-                    </div>
-                    <div class="msg-time">4:18 AM</div>
-                  </div>
-                </div>
-
-                <div class="msg-row me">
-                  <div>
-                    <div class="bubble me">
-                      That’s the direction I want for the brand too — intimate, premium, not chaotic.
-                    </div>
-                    <div class="msg-time">4:19 AM</div>
-                  </div>
-                </div>
-
-                <div class="msg-row">
-                  <div class="avatar" style="width:34px;height:34px;"></div>
-                  <div>
-                    <div class="bubble them">
-                      Then keep the palette dark, the copy restrained, and let the layouts breathe.
-                    </div>
-                    <div class="msg-time">4:19 AM</div>
-                  </div>
-                </div>
-
-                <div class="msg-row">
-                  <div class="avatar" style="width:34px;height:34px;"></div>
-                  <div>
-                    <div class="bubble them">
-                      The gallery can feel exclusive, the chat can feel personal, and the homepage can sell the fantasy without being explicit.
-                    </div>
-                    <div class="msg-time">4:20 AM</div>
-                  </div>
-                </div>
-              </div>
-
-              <form class="chat-input" id="chatForm">
-                <button class="icon-btn" type="button" aria-label="Attach">＋</button>
-
-                <label class="input-wrap">
-                  <span>✎</span>
-                  <input
-                    id="chatInput"
-                    type="text"
-                    placeholder="Write a message..."
-                    autocomplete="off"
-                  />
-                </label>
-
-                <button class="solid-btn" type="submit">Send</button>
-              </form>
-            </section>
-          </div>
-        </section>
-
-        <!-- GALLERY -->
-        <section class="view" id="view-gallery">
-          <div class="gallery-layout">
-            <section class="gallery-main">
-              <div class="section-head">
-                <div>
-                  <h2>Gallery</h2>
-                  <p>Locked collections, mood boards, and preview tiles for a premium members-only feel.</p>
-                </div>
-              </div>
-
-              <div class="gallery-grid">
-                <article class="gallery-tile tall">
-                  <div class="lock">Locked</div>
-                  <div class="caption">
-                    <h3>Gold Hour Set</h3>
-                    <p>Warm lighting, soft styling, and an elegant evening mood.</p>
-                  </div>
-                </article>
-
-                <article class="gallery-tile alt">
-                  <div class="lock">Members</div>
-                  <div class="caption">
-                    <h3>Velvet Lounge</h3>
-                    <p>Private-club atmosphere with softer contrast and richer tones.</p>
-                  </div>
-                </article>
-
-                <article class="gallery-tile violet">
-                  <div class="lock">Preview</div>
-                  <div class="caption">
-                    <h3>Midnight Notes</h3>
-                    <p>Moody, story-driven visuals that support chat narratives.</p>
-                  </div>
-                </article>
-
-                <article class="gallery-tile alt tall">
-                  <div class="lock">Locked</div>
-                  <div class="caption">
-                    <h3>Room Service</h3>
-                    <p>Tasteful, upscale, and cinematic rather than explicit.</p>
-                  </div>
-                </article>
-
-                <article class="gallery-tile violet">
-                  <div class="lock">New</div>
-                  <div class="caption">
-                    <h3>After Hours</h3>
-                    <p>Deep plum tones, late-night ambience, exclusive feel.</p>
-                  </div>
-                </article>
-
-                <article class="gallery-tile">
-                  <div class="lock">Preview</div>
-                  <div class="caption">
-                    <h3>Soft Focus</h3>
-                    <p>A subtle editorial look for premium persona pages.</p>
-                  </div>
-                </article>
-              </div>
-            </section>
-
-            <aside class="gallery-side">
-              <div class="price-card">
-                <h3>Premium Access</h3>
-                <p>Example side panel for locked content, bundles, and gallery upgrades.</p>
-                <div class="price">$24 <span>/ month</span></div>
-
-                <div class="check-list">
-                  <div class="check"><i>✓</i><span>Unlimited private messaging</span></div>
-                  <div class="check"><i>✓</i><span>Exclusive gallery drops</span></div>
-                  <div class="check"><i>✓</i><span>Priority personas and moods</span></div>
-                  <div class="check"><i>✓</i><span>Members-only collections</span></div>
-                </div>
-
-                <button class="solid-btn" style="width:100%;">Unlock Premium</button>
-              </div>
-
-              <div class="note-card">
-                <h3>Design notes</h3>
-                <p>
-                  This page shifts the “content unlock” idea away from aggressive adult-site tactics
-                  and into a more upscale members-club model.
-                </p>
-                <div class="subtle">
-                  Stronger brand fit for: AI companions, premium chat, romantic fantasy, curated content,
-                  and private memberships.
-                </div>
-              </div>
-            </aside>
-          </div>
-        </section>
-      </main>
     </div>
   </div>
-  <button
-    class="sidebar-backdrop"
-    id="sidebarBackdrop"
-    type="button"
-    aria-label="Close menu"
-    tabindex="-1"
-  ></button>
+</div>
 
-  <nav class="mobile-nav" aria-label="Mobile navigation">
-    <button class="mobile-tab active" data-view-target="home">
-      <span>⌂</span>
-      <span>Home</span>
-    </button>
-    <button class="mobile-tab" data-view-target="discover">
-      <span>◈</span>
-      <span>Discover</span>
-    </button>
-    <button class="mobile-tab" data-view-target="chat">
-      <span>◔</span>
-      <span>Chat</span>
-    </button>
-    <button class="mobile-tab" data-view-target="gallery">
-      <span>▣</span>
-      <span>Gallery</span>
-    </button>
-  </nav>
+<div class="app">
+  <!-- ════ SIDEBAR ════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-title">Velora<span>.ai</span></div>
+    </div>
 
-  <script src="app.js"></script>
+    <button class="nav-btn active" data-view-target="home">
+      <span class="nav-icon">⌂</span><span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" data-view-target="discover">
+      <span class="nav-icon">◈</span><span class="nav-label">Discover</span>
+    </button>
+
+    <!-- Chat with inline thread list -->
+    <button class="nav-btn" data-view-target="chat" id="chatNavBtn">
+      <span class="nav-icon">◔</span><span class="nav-label">Chat</span>
+      <span class="nav-arrow">›</span>
+    </button>
+    <div class="sidebar-threads" id="sidebarThreads">
+      <button class="sthread active" data-thread="elara" data-name="Elara" data-avatar="" data-status="Online now" data-persona="You are Elara, a warm and romantic AI companion. You speak in a soft, intimate, slightly poetic way. Keep responses to 1-2 sentences, personal and alluring.">
+        <div class="avatar sthread-av"></div>
+        <div class="sthread-copy"><div class="sthread-name">Elara</div><div class="sthread-preview">I kept the lights low tonight.</div></div>
+        <span class="sthread-dot"></span>
+      </button>
+      <button class="sthread" data-thread="mara" data-name="Mara" data-avatar="a4" data-status="Away" data-persona="You are Mara, a luxurious and sophisticated AI companion with upscale lounge energy. Keep responses to 1-2 sentences, elegant and refined.">
+        <div class="avatar a4 sthread-av"></div>
+        <div class="sthread-copy"><div class="sthread-name">Mara</div><div class="sthread-preview">Gold lounge or the suite?</div></div>
+      </button>
+      <button class="sthread" data-thread="nyra" data-name="Nyra" data-avatar="a3" data-status="Online now" data-persona="You are Nyra, a mysterious and poetic AI companion. You speak in lyrical, slightly cryptic ways. Keep responses to 1-2 sentences.">
+        <div class="avatar a3 sthread-av"></div>
+        <div class="sthread-copy"><div class="sthread-name">Nyra</div><div class="sthread-preview">More to say after midnight.</div></div>
+        <span class="sthread-dot"></span>
+      </button>
+      <button class="sthread" data-thread="rose" data-name="Rose" data-avatar="a6" data-status="Online now" data-persona="You are Rose, a playful and flirty AI companion with bright, teasing energy. Keep responses to 1-2 sentences, light and fun.">
+        <div class="avatar a6 sthread-av"></div>
+        <div class="sthread-copy"><div class="sthread-name">Rose</div><div class="sthread-preview">What mood are you in?</div></div>
+        <span class="sthread-dot"></span>
+      </button>
+      <button class="sthread" data-thread="mina" data-name="Mina" data-avatar="a5" data-status="Last active 3m ago" data-persona="You are Mina, a creative and dreamy AI companion who loves art and poetry. Keep responses to 1-2 sentences, imaginative and warm.">
+        <div class="avatar a5 sthread-av"></div>
+        <div class="sthread-copy"><div class="sthread-name">Mina</div><div class="sthread-preview">A gallery inspired by you.</div></div>
+      </button>
+    </div>
+
+    <button class="nav-btn" data-view-target="gallery">
+      <span class="nav-icon">▣</span><span class="nav-label">Gallery</span>
+    </button>
+
+    <div class="sidebar-divider"></div>
+    <div class="upgrade-card">
+      <h3>Premium Access</h3>
+      <p>Unlock private rooms, exclusive galleries, and priority personas.</p>
+      <button class="upgrade-btn">Upgrade to Premium</button>
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-footer">
+      <button class="footer-btn"><span style="width:16px;text-align:center">☺</span> Profile</button>
+      <button class="footer-btn"><span style="width:16px;text-align:center">⚙</span> Settings</button>
+    </div>
+    <div class="sidebar-meta">TERMS · PRIVACY · © 2026 VELORA.AI</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="menuBtn">☰</button>
+        <label class="search">
+          <span>⌕</span>
+          <input type="text" placeholder="Search personas, moods, collections…"/>
+        </label>
+      </div>
+      <div class="topbar-right">
+        <button class="pill-btn"><span class="token-dot"></span> Credits 48</button>
+        <button class="ghost-btn">Create Persona</button>
+        <button class="solid-btn"><span class="avatar-mini"></span> My Profile</button>
+      </div>
+    </header>
+
+    <main class="views">
+
+      <!-- HOME -->
+      <section class="view active" id="view-home">
+        <div class="hero">
+          <article class="hero-card hero-copy">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-dot"></span> Luxury 18+ companion platform</div>
+              <h1>After dark, but still elegant.</h1>
+              <p>A private members' club for intimate conversation. Exclusive personas, curated collections, and a mood-driven experience built around discretion and desire.</p>
+              <div class="hero-actions">
+                <button class="solid-btn" data-view-jump="discover">Explore Personas</button>
+                <button class="ghost-btn" data-view-jump="chat">Open Chat</button>
+              </div>
+            </div>
+            <div class="hero-stats">
+              <div class="stat"><div class="stat-value">2.4k+</div><div class="stat-label">Active personas</div></div>
+              <div class="stat"><div class="stat-value">Members</div><div class="stat-label">Club-only access</div></div>
+              <div class="stat"><div class="stat-value">Non-explicit</div><div class="stat-label">Premium & tasteful</div></div>
+            </div>
+          </article>
+          <article class="hero-card hero-visual">
+            <div class="visual-main">
+              <div class="portrait"><div class="glow"></div><div class="body"></div></div>
+              <div class="visual-caption"><h3>Featured Companion</h3><p>Private rooms, curated galleries, voice notes — cinematic and premium.</p></div>
+            </div>
+            <div class="visual-grid">
+              <div class="mini-tile"><div class="mini-title">Private Rooms</div><div class="mini-sub">1:1 intimate spaces</div></div>
+              <div class="mini-tile"><div class="mini-title">Mood Gallery</div><div class="mini-sub">Locked collections</div></div>
+              <div class="mini-tile"><div class="mini-title">Discovery</div><div class="mini-sub">Romance, mystery, late-night</div></div>
+            </div>
+          </article>
+        </div>
+
+        <section class="section">
+          <div class="section-head"><div><h2>Tonight's highlights</h2><p>Active right now.</p></div><button class="ghost-btn" data-view-jump="discover">See all</button></div>
+          <div class="stories">
+            <div class="story" data-view-jump="chat"><div class="story-top"><div class="avatar"></div><div><div class="story-name">Lyra</div><div class="story-mood">Romantic</div></div><div class="pulse"></div></div><div class="muted-line">Soft voice notes and late-night check-ins.</div></div>
+            <div class="story" data-view-jump="chat"><div class="story-top"><div class="avatar a2"></div><div><div class="story-name">Nora</div><div class="story-mood">Confident</div></div><div class="pulse"></div></div><div class="muted-line">High-energy teasing, playful banter.</div></div>
+            <div class="story" data-view-jump="chat"><div class="story-top"><div class="avatar a3"></div><div><div class="story-name">Violet</div><div class="story-mood">Mystery</div></div><div class="pulse"></div></div><div class="muted-line">Slow-burn chemistry and midnight moods.</div></div>
+            <div class="story" data-view-jump="chat"><div class="story-top"><div class="avatar a4"></div><div><div class="story-name">Siena</div><div class="story-mood">Elegant</div></div><div class="pulse"></div></div><div class="muted-line">Upscale hostess energy, calm and warm.</div></div>
+            <div class="story" data-view-jump="chat"><div class="story-top"><div class="avatar a5"></div><div><div class="story-name">Mina</div><div class="story-mood">Creative</div></div><div class="pulse"></div></div><div class="muted-line">Dreamy chats, art prompts, poetic replies.</div></div>
+            <div class="story" data-view-jump="chat"><div class="story-top"><div class="avatar a6"></div><div><div class="story-name">Rose</div><div class="story-mood">Playful</div></div><div class="pulse"></div></div><div class="muted-line">Flirty energy, warm and light.</div></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head"><div><h2>Featured personas</h2></div></div>
+          <div class="cards-4">
+            <article class="persona-card" data-tone="rose">
+              <div class="persona-bg"></div>
+              <div class="persona-hover"><span class="mood-tag">Romance</span><span class="mood-tag">Voice notes</span><span class="mood-tag">Late-night</span></div>
+              <div class="persona-figure"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div>
+              <div class="badge-row"><span class="badge">Romance</span><span class="badge age-badge">24</span></div>
+              <div class="persona-content"><h3 class="persona-name">Elara</h3><div class="persona-sub">Soft-spoken, affectionate, and ideal for long-form nighttime chats.</div><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Chat now</button><button class="ghost-btn">Preview</button></div></div>
+            </article>
+            <article class="persona-card" data-tone="gold">
+              <div class="persona-bg"></div>
+              <div class="persona-hover"><span class="mood-tag">Hostess</span><span class="mood-tag">Premium</span><span class="mood-tag">Gallery</span></div>
+              <div class="persona-figure"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div>
+              <div class="badge-row"><span class="badge">Hostess</span><span class="badge age-badge">27</span></div>
+              <div class="persona-content"><h3 class="persona-name">Mara</h3><div class="persona-sub">Luxe lounge energy, polished conversation, and premium gallery drops.</div><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Open room</button><button class="ghost-btn">Preview</button></div></div>
+            </article>
+            <article class="persona-card" data-tone="violet">
+              <div class="persona-bg"></div>
+              <div class="persona-hover"><span class="mood-tag">Mystery</span><span class="mood-tag">Poetry</span><span class="mood-tag">Slow burn</span></div>
+              <div class="persona-figure"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div>
+              <div class="badge-row"><span class="badge">Mystery</span><span class="badge age-badge">25</span></div>
+              <div class="persona-content"><h3 class="persona-name">Nyra</h3><div class="persona-sub">Reserved and magnetic, built for slower, deeper character-driven chat.</div><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Chat now</button><button class="ghost-btn">Preview</button></div></div>
+            </article>
+            <article class="persona-card" data-tone="rose">
+              <div class="persona-bg"></div>
+              <div class="persona-hover"><span class="mood-tag">Playful</span><span class="mood-tag">Teasing</span><span class="mood-tag">Bright</span></div>
+              <div class="persona-figure"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div>
+              <div class="badge-row"><span class="badge">Playful</span><span class="badge age-badge">23</span></div>
+              <div class="persona-content"><h3 class="persona-name">Celine</h3><div class="persona-sub">Bright energy, teasing humor, and warm check-ins that feel alive.</div><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Say hi</button><button class="ghost-btn">Preview</button></div></div>
+            </article>
+          </div>
+          <div class="lower-grid">
+            <article class="panel-card inbox-preview">
+              <div class="section-head"><div><h2>Inbox</h2></div></div>
+              <div class="thread-row"><div class="avatar"></div><div><div class="thread-title">Elara</div><div class="thread-snippet">I saved a quieter room for us tonight. Want in?</div></div><div class="thread-meta">2m ago</div></div>
+              <div class="thread-row"><div class="avatar a4"></div><div><div class="thread-title">Mara</div><div class="thread-snippet">I've got a new collection with a gold-hour mood.</div></div><div class="thread-meta">9m ago</div></div>
+              <div class="thread-row"><div class="avatar a3"></div><div><div class="thread-title">Nyra</div><div class="thread-snippet">Some stories are better told after midnight.</div></div><div class="thread-meta">18m ago</div></div>
+              <div class="thread-row"><div class="avatar a6"></div><div><div class="thread-title">Rose</div><div class="thread-snippet">I'm in a playful mood — ask me anything.</div></div><div class="thread-meta">1h ago</div></div>
+            </article>
+            <article class="panel-card compliance-card">
+              <div>
+                <h3>Premium direction</h3>
+                <p>Boutique nightlife feel — darker palette, softer typography, and intimate copy. Adult but never explicit.</p>
+                <div class="feature-list">
+                  <div class="feature-item"><div class="feature-dot">✓</div><div><strong>Adult, not explicit</strong><br/><span style="color:var(--muted)">Companionship, flirtation, exclusivity.</span></div></div>
+                  <div class="feature-item"><div class="feature-dot">✓</div><div><strong>Live AI replies</strong><br/><span style="color:var(--muted)">Each persona has a unique voice.</span></div></div>
+                  <div class="feature-item"><div class="feature-dot">✓</div><div><strong>Mobile-ready</strong><br/><span style="color:var(--muted)">Full responsive layout built in.</span></div></div>
+                </div>
+              </div>
+              <button class="solid-btn" data-view-jump="gallery">Open Gallery</button>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <!-- DISCOVER -->
+      <section class="view" id="view-discover">
+        <div class="section-head"><div><h2>Discover</h2><p>Find your companion for tonight.</p></div></div>
+        <div class="discover-toolbar">
+          <button class="filter-pill active" data-filter="all">All</button>
+          <button class="filter-pill" data-filter="romantic">Romantic</button>
+          <button class="filter-pill" data-filter="playful">Playful</button>
+          <button class="filter-pill" data-filter="mystery">Mystery</button>
+          <button class="filter-pill" data-filter="elegant">Elegant</button>
+          <button class="filter-pill" data-filter="latenight">Late night</button>
+        </div>
+        <div class="discover-grid">
+          <article class="discover-card" data-tags="romantic latenight"><div class="discover-fig"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div><span class="badge discover-tag">Trending</span><div class="discover-footer"><h3>Elara</h3><p>Warm, attentive, and ideal for slow-burn chemistry.</p><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Chat</button><button class="ghost-btn">Collection</button></div></div></article>
+          <article class="discover-card tone-gold" data-tags="elegant latenight"><div class="discover-fig"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div><span class="badge discover-tag">Premium</span><div class="discover-footer"><h3>Mara</h3><p>Upscale lounge persona with exclusive moodboards.</p><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Chat</button><button class="ghost-btn">Collection</button></div></div></article>
+          <article class="discover-card tone-violet" data-tags="mystery latenight"><div class="discover-fig"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div><span class="badge discover-tag">New</span><div class="discover-footer"><h3>Nyra</h3><p>Mysterious tone, poetry-laced messages, private pacing.</p><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Chat</button><button class="ghost-btn">Collection</button></div></div></article>
+          <article class="discover-card tone-blush" data-tags="playful romantic"><div class="discover-fig"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div><span class="badge discover-tag">Popular</span><div class="discover-footer"><h3>Rose</h3><p>Playful energy and casual flirting with a lighter tone.</p><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Chat</button><button class="ghost-btn">Collection</button></div></div></article>
+          <article class="discover-card tone-gold" data-tags="elegant romantic"><div class="discover-fig"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div><span class="badge discover-tag">Curated</span><div class="discover-footer"><h3>Siena</h3><p>Calm, polished hostess energy with premium image drops.</p><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Chat</button><button class="ghost-btn">Collection</button></div></div></article>
+          <article class="discover-card tone-violet" data-tags="mystery playful"><div class="discover-fig"><div class="fig-hair"></div><div class="fig-head"></div><div class="fig-neck"></div><div class="fig-body"></div></div><span class="badge discover-tag">Creators' pick</span><div class="discover-footer"><h3>Mina</h3><p>Creative moodboard type, artistic language, soft atmosphere.</p><div class="persona-actions"><button class="solid-btn" data-view-jump="chat">Chat</button><button class="ghost-btn">Collection</button></div></div></article>
+        </div>
+      </section>
+
+      <!-- CHAT — full width -->
+      <section class="view" id="view-chat">
+        <div class="chat-panel" id="chatPanel">
+          <div class="chat-header">
+            <div class="chat-user">
+              <div class="avatar" id="chatHeaderAvatar"></div>
+              <div><h3 id="chatHeaderName">Elara</h3><p><span class="status-dot"></span><span class="dot"></span><span id="chatHeaderStatus">Online now</span></p></div>
+            </div>
+            <div class="chat-tools">
+              <button class="icon-btn">☆</button>
+              <button class="icon-btn">▣</button>
+              <button class="icon-btn">⋯</button>
+            </div>
+          </div>
+          <div class="chat-body" id="chatBody">
+            <div class="msg-row"><div class="avatar" style="width:34px;height:34px;flex:0 0 34px"></div><div><div class="bubble them">I kept this room quieter than the others. It feels better for slower conversations.</div><div class="msg-time">4:18 AM</div></div></div>
+            <div class="msg-row me"><div><div class="bubble me">That's the direction I want — intimate, premium, not chaotic.</div><div class="msg-time">4:19 AM</div></div></div>
+            <div class="msg-row"><div class="avatar" style="width:34px;height:34px;flex:0 0 34px"></div><div><div class="bubble them">Then keep the palette dark, the copy restrained, and let the layouts breathe.</div><div class="msg-time">4:19 AM</div></div></div>
+          </div>
+          <form class="chat-input" id="chatForm">
+            <button class="icon-btn" type="button">＋</button>
+            <label class="input-wrap"><span>✎</span><input id="chatInput" type="text" placeholder="Write a message…" autocomplete="off"/></label>
+            <button class="solid-btn" type="submit" id="sendBtn">Send</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- GALLERY -->
+      <section class="view" id="view-gallery">
+        <div class="gallery-layout">
+          <section class="gallery-main">
+            <div class="section-head"><div><h2>Gallery</h2><p>Exclusive collections and mood boards for members.</p></div></div>
+            <div class="gallery-grid">
+              <article class="gallery-tile tall" data-title="Gold Hour Set" data-desc="Warm lighting, soft styling, and an elegant evening mood." data-bg="linear-gradient(145deg,#573b22,#191613 50%)"><div class="lock">Locked</div><div class="caption"><h3>Gold Hour Set</h3><p>Warm lighting, soft styling, elegant mood.</p></div></article>
+              <article class="gallery-tile alt" data-title="Velvet Lounge" data-desc="Private-club atmosphere with softer contrast and richer tones." data-bg="linear-gradient(145deg,#402733,#18151d 50%)"><div class="lock">Members</div><div class="caption"><h3>Velvet Lounge</h3><p>Private-club atmosphere, richer tones.</p></div></article>
+              <article class="gallery-tile violet" data-title="Midnight Notes" data-desc="Moody, story-driven visuals that support chat narratives." data-bg="linear-gradient(145deg,#32285a,#171420 50%)"><div class="lock">Preview</div><div class="caption"><h3>Midnight Notes</h3><p>Moody, story-driven visuals.</p></div></article>
+              <article class="gallery-tile alt tall" data-title="Room Service" data-desc="Tasteful, upscale, and cinematic rather than explicit." data-bg="linear-gradient(145deg,#573b22,#191613 50%)"><div class="lock">Locked</div><div class="caption"><h3>Room Service</h3><p>Upscale and cinematic rather than explicit.</p></div></article>
+              <article class="gallery-tile violet" data-title="After Hours" data-desc="Deep plum tones, late-night ambience, exclusive feel." data-bg="linear-gradient(145deg,#32285a,#171420 50%)"><div class="lock">New</div><div class="caption"><h3>After Hours</h3><p>Deep plum tones, late-night ambience.</p></div></article>
+              <article class="gallery-tile" data-title="Soft Focus" data-desc="A subtle editorial look for premium persona pages." data-bg="linear-gradient(145deg,#402733,#18151d 50%)"><div class="lock">Preview</div><div class="caption"><h3>Soft Focus</h3><p>Subtle editorial look for premium pages.</p></div></article>
+            </div>
+          </section>
+          <aside class="gallery-side">
+            <div class="price-card">
+              <h3>Premium Access</h3>
+              <p>Unlock all collections, private rooms, and gallery drops.</p>
+              <div class="price">$24 <span>/ month</span></div>
+              <div class="check-list">
+                <div class="check"><i>✓</i><span>Unlimited private messaging</span></div>
+                <div class="check"><i>✓</i><span>Exclusive gallery drops</span></div>
+                <div class="check"><i>✓</i><span>Priority personas and moods</span></div>
+                <div class="check"><i>✓</i><span>Members-only collections</span></div>
+              </div>
+              <button class="solid-btn" style="width:100%;justify-content:center;">Unlock Premium</button>
+            </div>
+            <div class="note-card">
+              <h3>Next drop</h3>
+              <p>Ivory Afternoon — a warm, editorial set arriving Thursday.</p>
+              <p class="subtle">New collections every week, curated by mood and persona.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<button class="sidebar-backdrop" id="sidebarBackdrop" tabindex="-1"></button>
+<nav class="mobile-nav">
+  <button class="mobile-tab active" data-view-target="home"><span>⌂</span><span>Home</span></button>
+  <button class="mobile-tab" data-view-target="discover"><span>◈</span><span>Discover</span></button>
+  <button class="mobile-tab" data-view-target="chat"><span>◔</span><span>Chat</span></button>
+  <button class="mobile-tab" data-view-target="gallery"><span>▣</span><span>Gallery</span></button>
+</nav>
+
+<script>
+// ── Age gate ──
+const agegate = document.getElementById('agegate');
+if (localStorage.getItem('velora_entered')) { agegate.style.opacity='0'; agegate.style.pointerEvents='none'; setTimeout(()=>agegate.classList.add('hidden'),10); }
+document.getElementById('agegateEnter').addEventListener('click', () => {
+  localStorage.setItem('velora_entered','1');
+  agegate.style.transition='opacity .4s ease'; agegate.style.opacity='0';
+  setTimeout(()=>agegate.classList.add('hidden'),420);
+});
+
+// ── Nav ──
+const sidebar = document.getElementById('sidebar');
+const menuBtn = document.getElementById('menuBtn');
+const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+const allNavBtns = document.querySelectorAll('[data-view-target]');
+const mobileTabs = document.querySelectorAll('.mobile-tab');
+const views = { home:document.getElementById('view-home'), discover:document.getElementById('view-discover'), chat:document.getElementById('view-chat'), gallery:document.getElementById('view-gallery') };
+const mobileMq = window.matchMedia('(max-width:980px)');
+
+// Chat nav & threads in sidebar
+const chatNavBtn = document.getElementById('chatNavBtn');
+const sidebarThreads = document.getElementById('sidebarThreads');
+let chatOpen = false;
+
+function toggleChatThreads(force) {
+  chatOpen = force !== undefined ? force : !chatOpen;
+  sidebarThreads.classList.toggle('open', chatOpen);
+  chatNavBtn.classList.toggle('open', chatOpen);
+}
+
+function closeSidebar() { sidebar.classList.remove('open'); document.body.classList.remove('sidebar-open'); }
+function openSidebar() { sidebar.classList.add('open'); document.body.classList.add('sidebar-open'); }
+
+function setActiveView(name) {
+  Object.entries(views).forEach(([k,v]) => v?.classList.toggle('active', k===name));
+  allNavBtns.forEach(b => {
+    if (b.dataset.viewTarget === name) b.classList.add('active');
+    else if (b.dataset.viewTarget !== 'chat') b.classList.remove('active');
+  });
+  mobileTabs.forEach(b => b.classList.toggle('active', b.dataset.viewTarget===name));
+  if (name==='chat') { toggleChatThreads(true); chatNavBtn.classList.add('active'); }
+  else { chatNavBtn.classList.remove('active'); }
+  closeSidebar();
+  window.scrollTo({top:0,behavior:'smooth'});
+  localStorage.setItem('velora_view', name);
+}
+
+// Chat nav click: toggle thread list & switch to chat view
+chatNavBtn.addEventListener('click', () => {
+  const isChat = views.chat.classList.contains('active');
+  if (!isChat) { setActiveView('chat'); } else { toggleChatThreads(); }
+});
+
+// Other nav buttons
+allNavBtns.forEach(b => {
+  if (b === chatNavBtn) return;
+  b.addEventListener('click', () => setActiveView(b.dataset.viewTarget));
+});
+
+document.querySelectorAll('[data-view-jump]').forEach(b => b.addEventListener('click', ()=>setActiveView(b.dataset.viewJump)));
+document.querySelectorAll('.story[data-view-jump]').forEach(b => b.addEventListener('click',()=>setActiveView(b.dataset.viewJump)));
+
+menuBtn.addEventListener('click', ()=> mobileMq.matches && (sidebar.classList.contains('open') ? closeSidebar() : openSidebar()));
+sidebarBackdrop.addEventListener('click', closeSidebar);
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeSidebar(); });
+
+const savedView = localStorage.getItem('velora_view');
+if (savedView && views[savedView]) setActiveView(savedView);
+else toggleChatThreads(false);
+
+// ── Discover filters ──
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+    const f = pill.dataset.filter;
+    document.querySelectorAll('.discover-card').forEach(card => {
+      card.classList.toggle('hidden', f!=='all' && !(card.dataset.tags||'').includes(f));
+    });
+  });
+});
+
+// ── Chat — thread switching ──
+const chatHeaderName = document.getElementById('chatHeaderName');
+const chatHeaderStatus = document.getElementById('chatHeaderStatus');
+const chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
+const chatBody = document.getElementById('chatBody');
+let currentPersona = document.querySelector('.sthread.active')?.dataset.persona || '';
+
+const greetings = { elara:'I kept this room quiet, just for us.', mara:'Welcome back. Shall I open the lounge?', nyra:'You came. I wondered if you would.', rose:'Hey! What kind of mood are you in tonight?', mina:'I was just thinking about you.' };
+
+function getTime(){ const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; }
+
+function addBubble(side, text, avClass) {
+  const row = document.createElement('div'); row.className='msg-row'+(side==='me'?' me':'');
+  if (side==='them') { const av=document.createElement('div'); av.className=avClass||'avatar'; av.style.cssText='width:34px;height:34px;flex:0 0 34px;'; row.appendChild(av); }
+  const wrap=document.createElement('div');
+  const bub=document.createElement('div'); bub.className='bubble '+side; bub.textContent=text;
+  const time=document.createElement('div'); time.className='msg-time'; time.textContent=getTime();
+  wrap.appendChild(bub); wrap.appendChild(time); row.appendChild(wrap);
+  chatBody.appendChild(row); chatBody.scrollTop=chatBody.scrollHeight;
+}
+
+function addTyping(avClass) {
+  const row=document.createElement('div'); row.className='msg-row'; row.id='typingRow';
+  const av=document.createElement('div'); av.className=avClass||'avatar'; av.style.cssText='width:34px;height:34px;flex:0 0 34px;'; row.appendChild(av);
+  const ind=document.createElement('div'); ind.className='typing-indicator';
+  for(let i=0;i<3;i++){const d=document.createElement('div');d.className='typing-dot';ind.appendChild(d);}
+  row.appendChild(ind); chatBody.appendChild(row); chatBody.scrollTop=chatBody.scrollHeight;
+  return row;
+}
+
+document.querySelectorAll('.sthread').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.sthread').forEach(c=>c.classList.toggle('active',c===card));
+    chatHeaderName.textContent = card.dataset.name||'Elara';
+    chatHeaderStatus.textContent = card.dataset.status||'Online now';
+    chatHeaderAvatar.className = 'avatar'; if(card.dataset.avatar) chatHeaderAvatar.classList.add(card.dataset.avatar);
+    currentPersona = card.dataset.persona||'';
+    chatBody.innerHTML='';
+    addBubble('them', greetings[card.dataset.thread]||'Hello…', chatHeaderAvatar.className);
+    setActiveView('chat');
+  });
+});
+
+// ── AI Chat ──
+const chatForm = document.getElementById('chatForm');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+
+async function handleSend(e) {
+  e.preventDefault();
+  const text = chatInput.value.trim(); if(!text) return;
+  chatInput.value=''; sendBtn.disabled=true;
+  addBubble('me', text);
+  const avClass = chatHeaderAvatar.className;
+  const typingRow = addTyping(avClass);
+  try {
+    const threadId = document.querySelector('.sthread.active')?.dataset.thread || 'elara';
+    const res = await fetch(`/api/characters/${threadId}/chat`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text}) });
+    const data = await res.json();
+    typingRow.remove(); addBubble('them', (data.reply || data.result || 'â¦').trim(), avClass);
+  } catch {
+    typingRow.remove(); addBubble('them', 'Something pulled me away… try again?', avClass);
+  }
+  sendBtn.disabled=false; chatInput.focus();
+}
+chatForm.addEventListener('submit', handleSend);
+
+// ── Gallery lightbox ──
+const lightbox = document.getElementById('lightbox');
+document.querySelectorAll('.gallery-tile').forEach(tile => {
+  tile.addEventListener('click', () => {
+    document.getElementById('lightboxTitle').textContent = tile.dataset.title;
+    document.getElementById('lightboxDesc').textContent = tile.dataset.desc;
+    document.getElementById('lightboxBg').style.cssText = `position:absolute;inset:0;background:${tile.dataset.bg||''},radial-gradient(circle at 50% 20%,rgba(255,255,255,0.18),transparent 14%)`;
+    lightbox.classList.add('open');
+  });
+});
+document.getElementById('lightboxClose').addEventListener('click', ()=>lightbox.classList.remove('open'));
+lightbox.addEventListener('click', e=>{ if(e.target===lightbox) lightbox.classList.remove('open'); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') lightbox.classList.remove('open'); });
+</script>
 </body>
 </html>
