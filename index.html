@@ -779,6 +779,52 @@
     </button>
   </nav>
 
-    <script src="app.js"></script>
+  <script>
+    (() => {
+      const views = document.querySelectorAll(".view");
+      const navButtons = document.querySelectorAll("[data-view-target]");
+      const jumpButtons = document.querySelectorAll("[data-view-jump]");
+      const menuBtn = document.getElementById("menuBtn");
+      const sidebar = document.getElementById("sidebar");
+
+      function setView(name) {
+        views.forEach((view) => {
+          const isActive = view.id === `view-${name}`;
+          view.classList.toggle("active", isActive);
+        });
+
+        navButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.viewTarget === name);
+        });
+
+        if (sidebar) {
+          sidebar.classList.remove("open");
+        }
+        if (menuBtn) {
+          menuBtn.setAttribute("aria-expanded", "false");
+        }
+      }
+
+      navButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = button.dataset.viewTarget;
+          if (target) setView(target);
+        });
+      });
+
+      jumpButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = button.dataset.viewJump;
+          if (target) setView(target);
+        });
+      });
+
+      menuBtn?.addEventListener("click", () => {
+        if (!sidebar) return;
+        const isOpen = sidebar.classList.toggle("open");
+        menuBtn.setAttribute("aria-expanded", String(isOpen));
+      });
+    })();
+  </script>
 </body>
 </html>
