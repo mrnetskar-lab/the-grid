@@ -716,6 +716,28 @@ document.querySelectorAll('.drawer-item').forEach(item=>{ item.addEventListener(
   goTo('chat');
 }); });
 
+// Persona-aware "Chat now" routing — resolve name from card heading, activate matching drawer thread
+function getPersonaFromEl(el){
+  const card=el.closest('.discover-card,.char-card,.inbox-row,.av-item');
+  if(!card) return '';
+  const nameEl=card.querySelector('h3,.char-name,.inbox-name,.av-name');
+  return (nameEl?.textContent||'').trim().toLowerCase();
+}
+function activateThreadByPersona(name){
+  if(!name) return;
+  const item=document.querySelector(`.drawer-item[data-thread="${name}"]`);
+  if(!item) return;
+  document.querySelectorAll('.drawer-item').forEach(x=>x.classList.remove('active'));
+  item.classList.add('active');
+  item.click();
+}
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('[data-to="chat"]');
+  if(!btn||btn===chatNav) return;
+  const persona=getPersonaFromEl(btn);
+  if(persona) { e.stopImmediatePropagation(); activateThreadByPersona(persona); return; }
+},true);
+
 document.getElementById('chatForm').addEventListener('submit',async e=>{ e.preventDefault(); const txt=chatInput.value.trim(); if(!txt) return; chatInput.value=''; sendBtn.disabled=true; addMsg('mine',txt); const tr=addTyping(curAvStyle); try{ const threadId=document.querySelector('.drawer-item.active')?.dataset.thread||'elara';
     const res=await fetch(`/api/characters/${threadId}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
     const data=await res.json();
