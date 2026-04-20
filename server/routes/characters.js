@@ -11,6 +11,36 @@ const CHARS_DIR = path.resolve(__dirname, '../../characters');
 const router = express.Router();
 const aiService = new CharacterAIService();
 
+const RATE_LIMIT_MAX = 20;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const chatRateLimit = new Map();
+
+function getRequestIp(req) {
+  const xfwd = req.headers['x-forwarded-for'];
+  if (typeof xfwd === 'string' && xfwd.trim()) {
+    return xfwd.split(',')[0].trim();
+  }
+  return req.ip || req.socket?.remoteAddress || 'unknown';
+}
+
+function enforceChatRateLimit(req, characterId) {
+  const ip = getRequestIp(req);
+  const key = `${ip}:${characterId}`;
+  const now = Date.now();
+  const cutoff = now - RATE_LIMIT_WINDOW_MS;
+  const timestamps = (chatRateLimit.get(key) || []).filter(ts => ts > cutoff);
+
+  if (timestamps.length >= RATE_LIMIT_MAX) {
+    const retryAfterSeconds = Math.ceil((timestamps[0] + RATE_LIMIT_WINDOW_MS - now) / 1000);
+    return { limited: true, retryAfterSeconds };
+  }
+
+  timestamps.push(now);
+  chatRateLimit.set(key, timestamps);
+  return { limited: false };
+}
+
+
 function withTimeout(promise, ms, message = 'AI request timed out') {
   let timer;
   return Promise.race([
@@ -62,6 +92,13 @@ router.post('/:id/chat', async (req, res) => {
 
     const text = (req.body?.text || '').trim();
     if (!text) return res.status(400).json({ ok: false, error: 'text required' });
+
+    const rateLimit = enforceChatRateLimit(req, req.params.id);
+    if (rateLimit.limited) {
+      return res.status(429)
+        .set('Retry-After', String(rateLimit.retryAfterSeconds))
+        .json({ ok: false, error: 'Rate limit exceeded: max 20 messages per character per hour per IP.' });
+    }
 
     const history = loadHistory(req.params.id);
     const characterName = CHARACTER_NAME_BY_ID[req.params.id] || char.name || req.params.id;

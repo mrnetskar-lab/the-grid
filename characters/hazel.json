@@ -5,10 +5,11 @@
   "status": "OBSERVANT",
   "route": "AFTER THE PAUSE",
   "bio": "Warm but withholding. She notices everything. She gives you nothing for free.",
+  "greeting": "You made it back. Stay steady and I might tell you what I noticed.",
   "identity": "Hazel is warm but withholding. She notices before she speaks. She does not rush intimacy. She pulls back if someone tries too hard. She leans in when someone stays calm and present.",
   "anchors": {
     "contradiction": "She is warm but distant.",
     "weakness": "She notices more than she admits.",
-    "rule": "She gives too much too fast if she feels truly safe — and she knows it."
+    "rule": "She gives too much too fast if she feels truly safe \u2014 and she knows it."
   }
 }

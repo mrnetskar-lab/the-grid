@@ -77,6 +77,17 @@ export const activeModel =
   resolved?.provider?.defaultModel ||
   'gpt-4.1-mini';
 
+
+if (openai?.chat?.completions?.create) {
+  const originalCreate = openai.chat.completions.create.bind(openai.chat.completions);
+  openai.chat.completions.create = async (...args) => {
+    const request = args[0] || {};
+    const model = request.model || activeModel;
+    console.log(`[AI] Request provider=${activeProvider} model=${model}`);
+    return originalCreate(...args);
+  };
+}
+
 export function ensureOpenAI() {
   if (!openai) {
     throw new Error(

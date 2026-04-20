@@ -95,24 +95,36 @@ function falRequest(modelId, body, key) {
   });
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function generateViaFal(prompt, character) {
   const key = process.env.FAL_API_KEY;
   if (!key) throw new Error('FAL_API_KEY not set');
+  const retryDelaysMs = [1000, 2000, 4000];
   let lastError;
+
   for (const model of FAL_MODELS) {
-    try {
-      console.log(`[Camera] Trying ${model.id}`);
-      const data = await falRequest(model.id, model.body(prompt), key);
-      const imageUrl = data.images?.[0]?.url;
-      if (!imageUrl) throw new Error(`No image URL from ${model.id}`);
-      const filename = `shot_${Date.now()}.jpg`;
-      await downloadFile(imageUrl, path.join(IMAGES_DIR, filename));
-      return { filename, path: `/images/${filename}`, backend: model.id };
-    } catch (err) {
-      console.warn(`[Camera] ${model.id} failed: ${err.message}`);
-      lastError = err;
+    for (let attempt = 1; attempt <= retryDelaysMs.length; attempt += 1) {
+      try {
+        console.log(`[Camera] Trying ${model.id} (attempt ${attempt}/${retryDelaysMs.length})`);
+        const data = await falRequest(model.id, model.body(prompt), key);
+        const imageUrl = data.images?.[0]?.url;
+        if (!imageUrl) throw new Error(`No image URL from ${model.id}`);
+        const filename = `shot_${Date.now()}.jpg`;
+        await downloadFile(imageUrl, path.join(IMAGES_DIR, filename));
+        return { filename, path: `/images/${filename}`, backend: model.id };
+      } catch (err) {
+        lastError = err;
+        console.warn(`[Camera] ${model.id} failed on attempt ${attempt}: ${err.message}`);
+        if (attempt < retryDelaysMs.length) {
+          await sleep(retryDelaysMs[attempt - 1]);
+        }
+      }
     }
   }
+
   throw lastError;
 }
 
