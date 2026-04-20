@@ -1825,12 +1825,15 @@
       }
 
       .lower-grid,
-      .chat-layout,
       .gallery-layout {
         grid-template-columns: 1fr;
       }
 
-      .chat-layout,
+      .chat-layout {
+        grid-template-columns: 260px minmax(0, 1fr);
+        min-height: 680px;
+      }
+
       .chat-panel {
         min-height: 680px;
       }
@@ -2066,11 +2069,17 @@
       }
 
       .chat-input {
-        grid-template-columns: 1fr;
+        grid-template-columns: auto 1fr auto;
+        padding: 10px 12px 12px;
       }
 
       .chat-body {
         max-height: min(52vh, 420px);
+      }
+
+      .chat-tools {
+        position: static;
+        flex-direction: row;
       }
 
       .hero-copy h1 {
@@ -2101,7 +2110,14 @@
       }
 
       .chat-header {
-        padding: 14px 14px;
+        padding: 12px 12px;
+        flex-wrap: nowrap;
+        gap: 8px;
+      }
+
+      .chat-tools .icon-btn {
+        width: 36px;
+        height: 36px;
       }
 
       .chat-back-btn {
