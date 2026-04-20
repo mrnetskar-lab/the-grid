@@ -1,43 +1,48 @@
 const sidebar = document.getElementById("sidebar");
-    const menuBtn = document.getElementById("menuBtn");
-    const navButtons = document.querySelectorAll("[data-view-target]");
-    const jumpButtons = document.querySelectorAll("[data-view-jump]");
-    const views = {
-      home: document.getElementById("view-home"),
-      discover: document.getElementById("view-discover"),
-      chat: document.getElementById("view-chat"),
-      gallery: document.getElementById("view-gallery")
-    };
+const menuBtn = document.getElementById("menuBtn");
+const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+const navButtons = document.querySelectorAll("[data-view-target]");
+const jumpButtons = document.querySelectorAll("[data-view-jump]");
+const views = {
+  home: document.getElementById("view-home"),
+  discover: document.getElementById("view-discover"),
+  chat: document.getElementById("view-chat"),
+  gallery: document.getElementById("view-gallery")
+};
 
-    function setActiveView(name) {
-      Object.entries(views).forEach(([key, view]) => {
-        view.classList.toggle("active", key === name);
-      });
+const mobileMq = window.matchMedia("(max-width: 980px)");
 
-      document.querySelectorAll("[data-view-target]").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.viewTarget === name);
-      });
+function closeSidebar() {
+  sidebar?.classList.remove("open");
+  document.body.classList.remove("sidebar-open");
+  menuBtn?.setAttribute("aria-expanded", "false");
+}
 
-      sidebar.classList.remove("open");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+function openSidebar() {
+  sidebar?.classList.add("open");
+  document.body.classList.add("sidebar-open");
+  menuBtn?.setAttribute("aria-expanded", "true");
+}
 
-    navButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        setActiveView(btn.dataset.viewTarget);
-      });
-    });
+function toggleSidebar() {
+  if (!sidebar || !mobileMq.matches) return;
+  if (sidebar.classList.contains("open")) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+}
 
-    jumpButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        setActiveView(btn.dataset.viewJump);
-      });
-    });
+function setActiveView(name) {
+  Object.entries(views).forEach(([key, view]) => {
+    view.classList.toggle("active", key === name);
+  });
 
-    menuBtn?.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-    });
+  navButtons.forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.viewTarget === name);
+  });
 
+<<<<<<< HEAD
     // Sidebar close handler: if overlays/modals are added in the future, check for their presence before closing sidebar.
     document.addEventListener("click", (event) => {
       const clickedInsideSidebar = sidebar.contains(event.target);
@@ -47,77 +52,105 @@ const sidebar = document.getElementById("sidebar");
         sidebar.classList.remove("open");
       }
     });
+=======
+  closeSidebar();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
-    const filterPills = document.querySelectorAll(".filter-pill");
-    filterPills.forEach((pill) => {
-      pill.addEventListener("click", () => {
-        filterPills.forEach((item) => item.classList.remove("active"));
-        pill.classList.add("active");
-      });
-    });
+navButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setActiveView(btn.dataset.viewTarget);
+  });
+});
+>>>>>>> bbfb3a9ae7a233e1ee3c0c805bec8c3c6a829197
 
-    const chatForm = document.getElementById("chatForm");
-    const chatInput = document.getElementById("chatInput");
-    const chatBody = document.getElementById("chatBody");
+jumpButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setActiveView(btn.dataset.viewJump);
+  });
+});
 
-    function appendMessage(text) {
-      const row = document.createElement("div");
-      row.className = "msg-row me";
+menuBtn?.addEventListener("click", toggleSidebar);
+sidebarBackdrop?.addEventListener("click", closeSidebar);
 
-      const wrapper = document.createElement("div");
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeSidebar();
+});
 
-      const bubble = document.createElement("div");
-      bubble.className = "bubble me";
-      bubble.textContent = text;
+mobileMq.addEventListener("change", (event) => {
+  if (!event.matches) closeSidebar();
+});
 
-      const time = document.createElement("div");
-      time.className = "msg-time";
+const filterPills = document.querySelectorAll(".filter-pill");
+filterPills.forEach((pill) => {
+  pill.addEventListener("click", () => {
+    filterPills.forEach((item) => item.classList.remove("active"));
+    pill.classList.add("active");
+  });
+});
 
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      time.textContent = `${hours}:${minutes}`;
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const chatBody = document.getElementById("chatBody");
 
-      wrapper.appendChild(bubble);
-      wrapper.appendChild(time);
-      row.appendChild(wrapper);
-      chatBody.appendChild(row);
-      chatBody.scrollTop = chatBody.scrollHeight;
+function appendMessage(text) {
+  const row = document.createElement("div");
+  row.className = "msg-row me";
 
-      setTimeout(() => {
-        const replyRow = document.createElement("div");
-        replyRow.className = "msg-row";
+  const wrapper = document.createElement("div");
 
-        const avatar = document.createElement("div");
-        avatar.className = "avatar";
-        avatar.style.width = "34px";
-        avatar.style.height = "34px";
+  const bubble = document.createElement("div");
+  bubble.className = "bubble me";
+  bubble.textContent = text;
 
-        const replyWrap = document.createElement("div");
-        const replyBubble = document.createElement("div");
-        replyBubble.className = "bubble them";
-        replyBubble.textContent =
-          "That message flow works well for the mockup — clean, intimate, and premium.";
+  const time = document.createElement("div");
+  time.className = "msg-time";
 
-        const replyTime = document.createElement("div");
-        replyTime.className = "msg-time";
-        replyTime.textContent = `${hours}:${minutes}`;
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  time.textContent = `${hours}:${minutes}`;
 
-        replyWrap.appendChild(replyBubble);
-        replyWrap.appendChild(replyTime);
-        replyRow.appendChild(avatar);
-        replyRow.appendChild(replyWrap);
+  wrapper.appendChild(bubble);
+  wrapper.appendChild(time);
+  row.appendChild(wrapper);
+  chatBody.appendChild(row);
+  chatBody.scrollTop = chatBody.scrollHeight;
 
-        chatBody.appendChild(replyRow);
-        chatBody.scrollTop = chatBody.scrollHeight;
-      }, 600);
-    }
+  setTimeout(() => {
+    const replyRow = document.createElement("div");
+    replyRow.className = "msg-row";
 
-    chatForm?.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const text = chatInput.value.trim();
-      if (!text) return;
-      appendMessage(text);
-      chatInput.value = "";
-      chatInput.focus();
-    });
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.style.width = "34px";
+    avatar.style.height = "34px";
+
+    const replyWrap = document.createElement("div");
+    const replyBubble = document.createElement("div");
+    replyBubble.className = "bubble them";
+    replyBubble.textContent =
+      "That message flow works well for the mockup — clean, intimate, and premium.";
+
+    const replyTime = document.createElement("div");
+    replyTime.className = "msg-time";
+    replyTime.textContent = `${hours}:${minutes}`;
+
+    replyWrap.appendChild(replyBubble);
+    replyWrap.appendChild(replyTime);
+    replyRow.appendChild(avatar);
+    replyRow.appendChild(replyWrap);
+
+    chatBody.appendChild(replyRow);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }, 600);
+}
+
+chatForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const text = chatInput.value.trim();
+  if (!text) return;
+  appendMessage(text);
+  chatInput.value = "";
+  chatInput.focus();
+});
