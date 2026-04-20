@@ -121,6 +121,9 @@
     .upgrade-btn{width:100%;border:0;border-radius:11px;padding:10px;font-weight:700;font-size:0.86rem;color:#1a0c15;background:linear-gradient(135deg,#ff8cc3,var(--gold));cursor:pointer;transition:.2s;}
     .upgrade-btn:hover{filter:brightness(1.06);transform:translateY(-1px);}
 
+    .sidebar-mobile-actions{display:none;flex-direction:column;gap:8px;margin-top:10px;}
+    .sidebar-mobile-actions .pill-btn,.sidebar-mobile-actions .ghost-btn,.sidebar-mobile-actions .solid-btn{width:100%;justify-content:center;}
+
     .sidebar-spacer{flex:1;}
     .sidebar-footer{display:flex;flex-direction:column;gap:4px;}
     .footer-btn{width:100%;border:1px solid transparent;background:transparent;color:var(--muted-2);display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rx-sm);cursor:pointer;transition:.2s;font-size:0.85rem;font-weight:600;}
@@ -459,8 +462,9 @@
       .hero,.lower-grid,.gallery-layout{grid-template-columns:1fr}
       .search{width:100%;max-width:none}
       .topbar{padding:max(10px,env(safe-area-inset-top,0px)) 14px 12px;height:auto;min-height:var(--topbar-h);align-items:flex-start;flex-wrap:wrap;row-gap:10px}
-      .topbar-left,.topbar-right{flex:1 1 100%}
-      .topbar-right{justify-content:flex-start}
+      .topbar-left{flex:1 1 100%}
+      .topbar-right{display:none}
+      .sidebar-mobile-actions{display:flex}
       .views{padding:12px;padding-bottom:calc(78px + 28px + env(safe-area-inset-bottom,0px))}
       .mobile-nav{display:grid}
       .sidebar-backdrop{display:block}
@@ -559,6 +563,11 @@
       <h3>Premium Access</h3>
       <p>Unlock private rooms, exclusive galleries, and priority personas.</p>
       <button class="upgrade-btn">Upgrade to Premium</button>
+    </div>
+    <div class="sidebar-mobile-actions" aria-label="Mobile quick actions">
+      <button class="pill-btn"><span class="token-dot"></span> Credits 48</button>
+      <button class="ghost-btn">Create Persona</button>
+      <button class="solid-btn"><span class="avatar-mini"></span> My Profile</button>
     </div>
     <div class="sidebar-spacer"></div>
     <div class="sidebar-footer">
