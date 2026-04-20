@@ -614,6 +614,25 @@
           </section>
           <aside class="gallery-side">
             <div class="premium-card">
+              <h3>Generate</h3>
+              <p>Create a new photo with any persona using AI.</p>
+              <select id="genCharSelect" style="width:100%;margin:10px 0 8px;padding:7px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-size:.82rem">
+                <option value="elara">Elara</option>
+                <option value="mara">Mara</option>
+                <option value="nyra">Nyra</option>
+                <option value="rose">Rose</option>
+                <option value="mina">Mina</option>
+              </select>
+              <select id="genMoodSelect" style="width:100%;margin-bottom:10px;padding:7px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-size:.82rem">
+                <option value="warm">Warm</option>
+                <option value="calm">Calm</option>
+                <option value="charged">Charged</option>
+                <option value="tense">Tense</option>
+              </select>
+              <button class="btn btn-primary" id="genBtn" style="width:100%;justify-content:center;border-width:2px">Generate photo</button>
+              <div id="genStatus" style="font-size:.75rem;color:var(--text-2);margin-top:8px;min-height:18px"></div>
+            </div>
+            <div class="premium-card">
               <h3>Premium</h3>
               <p>Unlock all collections and unlimited messaging.</p>
               <div class="price-tag">$24 <span>/ month</span></div>
@@ -737,6 +756,30 @@ document.addEventListener('click',e=>{
   const persona=getPersonaFromEl(btn);
   if(persona) { e.stopImmediatePropagation(); activateThreadByPersona(persona); return; }
 },true);
+
+// Camera — generate photo
+document.getElementById('genBtn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('genBtn');
+  const status = document.getElementById('genStatus');
+  const character = document.getElementById('genCharSelect').value;
+  const mood = document.getElementById('genMoodSelect').value;
+  btn.disabled = true; btn.textContent = 'Generating…'; status.textContent = 'This may take 10–30 seconds…';
+  try {
+    const res = await fetch('/api/camera/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ character, mood }) });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Generation failed');
+    // Prepend generated tile to gallery grid
+    const grid = document.querySelector('.gallery-grid');
+    const tile = document.createElement('article');
+    tile.className = 'g-tile';
+    tile.innerHTML = `<img src="${data.shot.path}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy"><div class="g-overlay"></div><div class="g-caption"><div class="g-name">${character.charAt(0).toUpperCase()+character.slice(1)}</div><div class="g-mood">AI Generated · ${mood}</div></div>`;
+    grid.prepend(tile);
+    status.textContent = 'Done!'; btn.textContent = 'Generate photo';
+  } catch (err) {
+    status.textContent = 'Error: ' + err.message; btn.textContent = 'Generate photo';
+  }
+  btn.disabled = false;
+});
 
 document.getElementById('chatForm').addEventListener('submit',async e=>{ e.preventDefault(); const txt=chatInput.value.trim(); if(!txt) return; chatInput.value=''; sendBtn.disabled=true; addMsg('mine',txt); const tr=addTyping(curAvStyle); try{ const threadId=document.querySelector('.drawer-item.active')?.dataset.thread||'elara';
     const res=await fetch(`/api/characters/${threadId}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
