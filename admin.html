@@ -158,6 +158,11 @@
       <div class="field"><label>Workflow JSON</label><textarea id="workflowJson">{}</textarea></div>
       <button class="btn secondary" id="runWorkflow" type="button">Run workflow</button>
       <div class="thumbs" id="comfyThumbs"></div>
+      <div class="sep"></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn secondary" id="launchComfy" type="button">🚀 Launch ComfyUI (NVIDIA)</button>
+        <span id="launchComfyStatus" style="font-size:12px;color:var(--muted)"></span>
+      </div>
     </section>
 
     <section id="snippets" class="section"><h2>Prompt Snippets</h2><div class="field"><label>add custom snippet</label><input id="newSnippet"/></div><button class="btn secondary" id="addSnippet" type="button">Add</button><div class="snips" id="snipList"></div></section>
@@ -378,6 +383,7 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.qu
   $('animMotion').oninput=()=>$('animMotionV').textContent=$('animMotion').value;
   $('copyPrompt').onclick=()=>navigator.clipboard.writeText($('pb_preview').value); $('saveSnippet').onclick=()=>{const s=$('pb_preview').value.trim();if(s){state.snips.push(s);localStorage.setItem(SN,JSON.stringify(state.snips));renderSnips();}};
   $('generate').onclick=()=>gen().catch(err=>stat('cameraStatus',err.message,false)); $('saveLook').onclick=()=>saveLook().catch(err=>stat('cameraStatus',err.message,false)); $('runWorkflow').onclick=()=>comfyRun().catch(err=>stat('cameraStatus',err.message,false));
+  $('launchComfy').onclick=async()=>{const st=$('launchComfyStatus');st.textContent='Launching…';st.style.color='var(--muted)';try{const r=await fetch('/api/admin/launch-comfy',{method:'POST',headers:headers()});const d=await r.json();if(d.ok){st.textContent='✓ '+d.message;st.style.color='var(--ok)';}else{st.textContent='✗ '+d.error;st.style.color='var(--bad)';}}catch(e){st.textContent='✗ '+e.message;st.style.color='var(--bad)';}setTimeout(()=>{st.textContent='';},4000);};
   $('addSnippet').onclick=()=>{const s=$('newSnippet').value.trim(); if(!s)return; state.snips.push(s); localStorage.setItem(SN,JSON.stringify(state.snips)); $('newSnippet').value=''; renderSnips();};
   $('noteImage').onchange=()=>{const f=$('noteImage').files[0]; if(!f) return; $('notePreview').src=URL.createObjectURL(f); $('notePreview').style.display='block';}; $('submitNote').onclick=()=>sendNote().catch(err=>stat('noteStatus',err.message,false)); $('exportNotes').onclick=async()=>{try{stat('noteStatus','Downloading…');const r=await fetch('/api/admin/notes/export',{headers:headers()});if(!r.ok)throw new Error('Server error '+r.status);const blob=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`admin_notes_${Date.now()}.zip`;a.click();stat('noteStatus','Downloaded ✓');}catch(e){stat('noteStatus',e.message,false);}};$('screenshotNote').onclick=()=>captureAndNote().catch(err=>stat('noteStatus',err.message,false));
   $('chatChar').onchange=updateChatIdentity; $('sendChat').onclick=()=>sendChat().catch(err=>stat('chatStatus',err.message,false)); $('clearChat').onclick=()=>clearChat().catch(err=>stat('chatStatus',err.message,false));

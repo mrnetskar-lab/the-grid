@@ -2,6 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import http from 'http';
+import { spawn } from 'child_process';
 import multer from 'multer';
 import archiver from 'archiver';
 import { fileURLToPath } from 'url';
@@ -334,5 +335,21 @@ router.post('/commands', async (req, res) => {
 router.post('/watcher/start', (_req, res) => res.json(startScreenshotWatcher()));
 router.post('/watcher/stop', (_req, res) => res.json(stopScreenshotWatcher()));
 router.get('/watcher/status', (_req, res) => res.json({ ok: true, running: !!screenshotWatcher, folder: SCREENSHOTS_DIR }));
+
+const COMFYUI_BAT = 'C:\\Users\\mn\\ComfyUI_windows_portable\\run_nvidia_gpu.bat';
+router.post('/launch-comfy', (req, res) => {
+  if (!fs.existsSync(COMFYUI_BAT)) return res.status(404).json({ ok: false, error: 'ComfyUI bat not found: ' + COMFYUI_BAT });
+  try {
+    const child = spawn('cmd.exe', ['/c', 'start', '', COMFYUI_BAT], {
+      detached: true,
+      stdio: 'ignore',
+      cwd: path.dirname(COMFYUI_BAT)
+    });
+    child.unref();
+    return res.json({ ok: true, message: 'ComfyUI launching…' });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
 
 export default router;
