@@ -238,6 +238,28 @@
     .chat-action-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-3);font-size:.74rem;font-weight:600;cursor:pointer;transition:.16s;letter-spacing:.02em;}
     .chat-action-pill:hover{border-color:rgba(240,48,138,0.35);color:var(--pink-text, #f0308a);background:rgba(240,48,138,0.06);}
     .chat-action-pill svg{opacity:.6;}
+    /* Scene builder */
+    .scene-sheet{position:fixed;inset:0;z-index:500;pointer-events:none;}
+    .scene-sheet.open{pointer-events:auto;}
+    .scene-backdrop{position:absolute;inset:0;background:rgba(7,7,12,0.75);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;transition:opacity .3s;}
+    .scene-sheet.open .scene-backdrop{opacity:1;}
+    .scene-inner{position:absolute;bottom:0;left:0;right:0;max-width:600px;margin:0 auto;background:var(--surface);border-radius:20px 20px 0 0;border:1px solid var(--border-2);border-bottom:none;padding:0 0 env(safe-area-inset-bottom,0px);transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);}
+    .scene-sheet.open .scene-inner{transform:translateY(0);}
+    .scene-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;}
+    .scene-header h3{font-size:.95rem;font-weight:700;margin:0;}
+    .scene-close{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;display:grid;place-items:center;font-size:.8rem;}
+    .scene-body{padding:0 18px 20px;display:flex;flex-direction:column;gap:14px;}
+    .scene-row{display:flex;flex-direction:column;gap:7px;}
+    .scene-label{font-size:.74rem;font-weight:700;color:var(--text-2);letter-spacing:.04em;text-transform:uppercase;}
+    .scene-pills{display:flex;flex-wrap:wrap;gap:6px;}
+    .scene-pill{padding:5px 12px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:.78rem;font-weight:600;cursor:pointer;transition:.15s;}
+    .scene-pill:hover,.scene-pill.active{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim);}
+    .scene-input{width:100%;padding:9px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:.84rem;outline:none;box-sizing:border-box;}
+    .scene-input:focus{border-color:var(--accent-border);}
+    .scene-generate{width:100%;justify-content:center;margin-top:4px;}
+    /* Toast */
+    .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface-3);border:1px solid var(--border-2);border-radius:999px;padding:8px 18px;font-size:.8rem;color:var(--text);pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;z-index:600;white-space:nowrap;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
     /* ── GALLERY ── */
     .gallery-wrap{display:grid;grid-template-columns:1fr 210px;gap:14px;}
@@ -560,6 +582,53 @@
     </div>
   </div>
 </div>
+
+<!-- Scene Builder -->
+<div class="scene-sheet" id="sceneSheet">
+  <div class="scene-backdrop" id="sceneBackdrop"></div>
+  <div class="scene-inner">
+    <div class="scene-header"><h3>Scene</h3><button class="scene-close" id="sceneClose">✕</button></div>
+    <div class="scene-body">
+      <div class="scene-row">
+        <label class="scene-label">Mood</label>
+        <div class="scene-pills" id="sceneMood">
+          <button class="scene-pill active" data-val="intimate">Intimate</button>
+          <button class="scene-pill" data-val="playful">Playful</button>
+          <button class="scene-pill" data-val="mysterious">Mysterious</button>
+          <button class="scene-pill" data-val="electric">Electric</button>
+          <button class="scene-pill" data-val="tender">Tender</button>
+        </div>
+      </div>
+      <div class="scene-row">
+        <label class="scene-label">Setting</label>
+        <div class="scene-pills" id="sceneSetting">
+          <button class="scene-pill active" data-val="bedroom">Bedroom</button>
+          <button class="scene-pill" data-val="studio">Studio</button>
+          <button class="scene-pill" data-val="outdoor">Outdoor</button>
+          <button class="scene-pill" data-val="rooftop">Rooftop</button>
+          <button class="scene-pill" data-val="bar">Bar</button>
+        </div>
+      </div>
+      <div class="scene-row">
+        <label class="scene-label">Style</label>
+        <div class="scene-pills" id="sceneStyle">
+          <button class="scene-pill active" data-val="cinematic">Cinematic</button>
+          <button class="scene-pill" data-val="editorial">Editorial</button>
+          <button class="scene-pill" data-val="soft focus">Soft focus</button>
+          <button class="scene-pill" data-val="dark and moody">Dark &amp; moody</button>
+        </div>
+      </div>
+      <div class="scene-row">
+        <label class="scene-label">Detail <span style="color:var(--text-3);font-weight:400">(optional)</span></label>
+        <input class="scene-input" id="sceneDetail" type="text" placeholder="e.g. candlelight, wet hair, mirror reflection…" autocomplete="off"/>
+      </div>
+      <div id="sceneStatus" style="font-size:.75rem;color:var(--text-2);min-height:16px;text-align:center"></div>
+      <button class="btn btn-primary scene-generate" id="sceneGenerate">Generate scene</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <!-- Age gate -->
 <div class="gate" id="gate">
@@ -1005,11 +1074,12 @@ const greetings={
 
 function ts(){const n=new Date();return`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
 
-function addMsg(side,text,avSrc){
+function addMsg(side,text,avSrc,extraEl){
   const row=document.createElement('div');row.className='msg'+(side==='mine'?' mine':'');
   if(side!=='mine'){const a=document.createElement('img');a.src=avSrc;a.className='msg-av';a.alt='';row.appendChild(a);}
   const w=document.createElement('div'),b=document.createElement('div'),t=document.createElement('div');
-  b.className='bubble '+(side==='mine'?'mine':'theirs');b.textContent=text;
+  b.className='bubble '+(side==='mine'?'mine':'theirs');if(text)b.textContent=text;
+  if(extraEl)b.appendChild(extraEl);
   t.className='msg-time';t.textContent=ts();if(side==='mine')t.style.textAlign='right';
   w.appendChild(b);w.appendChild(t);row.appendChild(w);chatMsgs.appendChild(row);chatMsgs.scrollTop=chatMsgs.scrollHeight;
 }
@@ -1129,6 +1199,103 @@ document.getElementById('camBtn')?.addEventListener('click',async()=>{
     statusEl.textContent='';statusEl.style.display='none';
   }catch(err){statusEl.textContent='Error: '+err.message;}
   btn.disabled=false;btn.textContent='📷';
+});
+
+// Toast helper
+function showToast(msg,ms=2400){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
+
+// Paywall
+function openPaywall(thread){
+  const id=thread||curThread||'hazel';
+  const d=profileData[id];
+  const pw=document.getElementById('paywall');
+  const img=document.getElementById('paywallImg');
+  const name=document.getElementById('paywallName');
+  if(img&&d)img.src=d.photo;
+  if(name&&d)name.textContent=d.name;
+  pw?.classList.add('open');
+}
+document.getElementById('paywallClose')?.addEventListener('click',()=>document.getElementById('paywall')?.classList.remove('open'));
+document.getElementById('paywall')?.addEventListener('click',e=>{if(e.target===document.getElementById('paywall'))document.getElementById('paywall').classList.remove('open');});
+
+// ☆ favourite toggle
+document.querySelector('.chat-btn:not(#camBtn)')?.addEventListener('click',function(){
+  const starred=this.textContent.trim()==='★';
+  this.textContent=starred?'☆':'★';
+  this.style.color=starred?'':'#f0308a';
+  showToast(starred?'Removed from favourites':'Added to favourites');
+});
+
+// ⋯ clear history
+document.querySelectorAll('.chat-btn')[2]?.addEventListener('click',()=>{
+  if(!confirm('Clear chat history with '+((profileData[curThread]?.name)||curThread)+'?'))return;
+  fetch(`/api/characters/${curThread}/history`,{method:'DELETE'});
+  chatMsgs.innerHTML='';
+  showToast('Chat history cleared');
+});
+
+// Image pill → camera generate
+document.querySelectorAll('.chat-action-pill')[0]?.addEventListener('click',async()=>{
+  const btn=document.querySelectorAll('.chat-action-pill')[0];
+  const statusEl=document.getElementById('camStatus');
+  const character=curThread||'hazel';
+  btn.disabled=true;
+  statusEl.style.display='block';statusEl.textContent='Generating… (~20s)';
+  try{
+    const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood:'warm'})});
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error||'Failed');
+    const img=document.createElement('img');
+    img.src=data.shot.path;img.alt=character;img.loading='lazy';
+    img.style.cssText='max-width:260px;border-radius:10px;display:block;margin-top:4px';
+    addMsg('theirs','',curAvSrc,img);
+    statusEl.textContent='';statusEl.style.display='none';
+  }catch(err){statusEl.textContent='Error: '+err.message;}
+  btn.disabled=false;
+});
+
+// Video pill → coming soon
+document.querySelectorAll('.chat-action-pill')[1]?.addEventListener('click',()=>showToast('Video is coming soon'));
+
+// Scene pill → open scene builder
+document.querySelectorAll('.chat-action-pill')[2]?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.add('open'));
+document.getElementById('sceneClose')?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.remove('open'));
+document.getElementById('sceneBackdrop')?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.remove('open'));
+
+// Scene pill selection
+document.querySelectorAll('.scene-pills').forEach(group=>{
+  group.querySelectorAll('.scene-pill').forEach(pill=>{
+    pill.addEventListener('click',()=>{
+      group.querySelectorAll('.scene-pill').forEach(p=>p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+});
+
+// Scene generate
+document.getElementById('sceneGenerate')?.addEventListener('click',async()=>{
+  const btn=document.getElementById('sceneGenerate');
+  const status=document.getElementById('sceneStatus');
+  const mood=document.querySelector('#sceneMood .scene-pill.active')?.dataset.val||'intimate';
+  const setting=document.querySelector('#sceneSetting .scene-pill.active')?.dataset.val||'bedroom';
+  const style=document.querySelector('#sceneStyle .scene-pill.active')?.dataset.val||'cinematic';
+  const detail=document.getElementById('sceneDetail')?.value.trim()||'';
+  const character=curThread||'hazel';
+  const charName=(profileData[character]?.name)||character;
+  const prompt=`${style} portrait photo, ${mood} mood, ${setting} setting${detail?', '+detail:''}, ${charName} character, cinematic lighting, photorealistic, 4k, shallow depth of field`;
+  btn.disabled=true;btn.textContent='Generating…';status.textContent='This may take 20–40 seconds…';
+  try{
+    const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood,customPrompt:prompt})});
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error||'Failed');
+    const img=document.createElement('img');
+    img.src=data.shot.path;img.alt=character;img.loading='lazy';
+    img.style.cssText='max-width:260px;border-radius:10px;display:block;margin-top:4px';
+    document.getElementById('sceneSheet')?.classList.remove('open');
+    addMsg('theirs','',curAvSrc,img);
+    status.textContent='';
+  }catch(err){status.textContent='Error: '+err.message;}
+  btn.disabled=false;btn.textContent='Generate scene';
 });
 
 // Camera — gallery generate card
