@@ -21,6 +21,49 @@ const ADMIN_KEY = process.env.ADMIN_KEY || 'velora-admin-2025';
 if (!fs.existsSync(NOTES_DIR)) fs.mkdirSync(NOTES_DIR, { recursive: true });
 if (!fs.existsSync(NOTES_JSON)) fs.writeFileSync(NOTES_JSON, '[]', 'utf-8');
 
+const SCREENSHOTS_DIR = 'C:/Users/mn/OneDrive/Bilder/Skjermbilder';
+let screenshotWatcher = null;
+let watcherSeen = new Set();
+
+function saveNote(text, mediaPath, mediaType) {
+  let notes = [];
+  try { notes = JSON.parse(fs.readFileSync(NOTES_JSON, 'utf-8')); } catch {}
+  notes.unshift({ id: `note_${Date.now()}_${Math.floor(Math.random()*9000+1000)}`, timestamp: new Date().toISOString(), text, imagePath: mediaPath || null, mediaType: mediaType || null });
+  fs.writeFileSync(NOTES_JSON, JSON.stringify(notes, null, 2), 'utf-8');
+}
+
+function startScreenshotWatcher() {
+  if (screenshotWatcher) return { ok: true, status: 'already running' };
+  if (!fs.existsSync(SCREENSHOTS_DIR)) return { ok: false, error: 'Screenshots folder not found: ' + SCREENSHOTS_DIR };
+  // seed seen set with existing files so we don't import old screenshots
+  fs.readdirSync(SCREENSHOTS_DIR).forEach(f => watcherSeen.add(f));
+  screenshotWatcher = fs.watch(SCREENSHOTS_DIR, (event, filename) => {
+    if (!filename || watcherSeen.has(filename)) return;
+    if (!/\.(png|jpg|jpeg|mp4|mov|webm)$/i.test(filename)) return;
+    watcherSeen.add(filename);
+    const src = path.join(SCREENSHOTS_DIR, filename);
+    const isVideo = /\.(mp4|mov|webm)$/i.test(filename);
+    setTimeout(() => {
+      try {
+        if (!fs.existsSync(src)) return;
+        const dest = path.join(NOTES_DIR, `${Date.now()}_${filename}`);
+        fs.copyFileSync(src, dest);
+        saveNote(`${new Date().toISOString()} — ${isVideo ? 'video' : 'screenshot'}`, `/admin_notes/${path.basename(dest)}`, isVideo ? 'video' : 'image');
+      } catch (e) { console.warn('Watcher copy error:', e.message); }
+    }, 500);
+  });
+  screenshotWatcher.on('error', () => { screenshotWatcher = null; });
+  return { ok: true, status: 'started' };
+}
+
+function stopScreenshotWatcher() {
+  if (!screenshotWatcher) return { ok: true, status: 'not running' };
+  screenshotWatcher.close();
+  screenshotWatcher = null;
+  watcherSeen = new Set();
+  return { ok: true, status: 'stopped' };
+}
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, NOTES_DIR),
   filename: (_req, file, cb) => {
@@ -28,7 +71,7 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}_${safeName}`);
   },
 });
-const upload = multer({ storage });
+const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } });
 const router = express.Router();
 
 function auth(req, res, next) {
@@ -144,10 +187,11 @@ router.get('/notes', (_req, res) => {
 router.post('/notes', upload.single('image'), (req, res) => {
   try {
     const text = String(req.body?.note || '').trim();
-    const imagePath = req.file ? `/admin_notes/${req.file.filename}` : null;
-    if (!text && !imagePath) return res.status(400).json({ ok: false, error: 'note text or image is required' });
+    const mediaPath = req.file ? `/admin_notes/${req.file.filename}` : null;
+    const mediaType = req.file ? (/\.(mp4|mov|webm)$/i.test(req.file.originalname) ? 'video' : 'image') : null;
+    if (!text && !mediaPath) return res.status(400).json({ ok: false, error: 'note text or image is required' });
 
-    const entry = { id: `note_${Date.now()}_${Math.floor(Math.random() * 10000)}`, timestamp: new Date().toISOString(), text, imagePath };
+    const entry = { id: `note_${Date.now()}_${Math.floor(Math.random() * 10000)}`, timestamp: new Date().toISOString(), text, imagePath: mediaPath, mediaType };
     const notes = readNotes();
     notes.unshift(entry);
     writeNotes(notes);
@@ -284,5 +328,9 @@ router.post('/commands', async (req, res) => {
     return res.status(500).json({ ok: false, error: err.message });
   }
 });
+
+router.post('/watcher/start', (_req, res) => res.json(startScreenshotWatcher()));
+router.post('/watcher/stop', (_req, res) => res.json(stopScreenshotWatcher()));
+router.get('/watcher/status', (_req, res) => res.json({ ok: true, running: !!screenshotWatcher, folder: SCREENSHOTS_DIR }));
 
 export default router;

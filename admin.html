@@ -69,6 +69,7 @@
       <button data-sec="lore">Story / Lore</button>
       <button data-sec="prompt-preview">Prompt Preview</button>
       <button data-sec="deploy">🚀 Deploy</button>
+      <button data-sec="notepad">📝 Notepad</button>
     </nav>
   </aside>
   <main class="content">
@@ -161,7 +162,7 @@
 
     <section id="snippets" class="section"><h2>Prompt Snippets</h2><div class="field"><label>add custom snippet</label><input id="newSnippet"/></div><button class="btn secondary" id="addSnippet" type="button">Add</button><div class="snips" id="snipList"></div></section>
 
-    <section id="notes" class="section"><h2>Smoke Test Log</h2><div class="field"><label>note</label><textarea id="noteText"></textarea></div><div class="field"><input id="noteImage" type="file" accept="image/*"/></div><img id="notePreview" class="thumb" style="display:none"/><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="submitNote" type="button">Submit</button><button class="btn secondary" id="screenshotNote" type="button">📸 Screenshot</button><button class="btn secondary" id="exportNotes" type="button">Export all notes .zip</button></div><div class="status" id="noteStatus"></div><div id="noteList"></div></section>
+    <section id="notes" class="section"><h2>Smoke Test Log</h2><div class="field"><label>note</label><textarea id="noteText"></textarea></div><div class="field"><input id="noteImage" type="file" accept="image/*,video/mp4,video/webm,video/quicktime"/></div><img id="notePreview" class="thumb" style="display:none"/><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="submitNote" type="button">Submit</button><button class="btn secondary" id="screenshotNote" type="button">📸 Screenshot</button><button class="btn secondary" id="exportNotes" type="button">Export all notes .zip</button></div><div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--muted)">Auto-import from Screenshots folder:</span><button class="btn secondary" id="watcherToggle" type="button">▶ Start watcher</button><span id="watcherDot" style="width:8px;height:8px;border-radius:50%;background:var(--bad);display:inline-block"></span><span id="watcherLabel" style="font-size:12px;color:var(--muted)">Off</span></div><div class="status" id="noteStatus"></div><div id="noteList"></div></section>
 
     <section id="chat" class="section">
       <h2>Chat</h2>
@@ -251,6 +252,23 @@
       </div>
       <div class="status" id="previewStatus"></div>
     </section>
+
+    <section id="notepad" class="section">
+      <h2>Notepad</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Local only — saved in your browser. Never sent anywhere.</p>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <button class="btn secondary" id="npNew" type="button">+ New</button>
+        <button class="btn secondary" id="npDelete" type="button">Delete</button>
+      </div>
+      <div style="display:flex;gap:12px;height:480px;">
+        <div id="npList" style="width:180px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+          <input id="npTitle" placeholder="Title…" style="font-size:13px;"/>
+          <textarea id="npBody" placeholder="Write here…" style="flex:1;resize:none;font-size:13px;line-height:1.6;font-family:inherit;"></textarea>
+        </div>
+      </div>
+      <div class="status" id="npStatus"></div>
+    </section>
   </main>
 </div>
 <script>
@@ -283,7 +301,7 @@ async function saveLore(){const id=$('loreChar').value; if(!id) throw new Error(
 async function buildPromptPreview(){const id=$('previewChar').value; if(!id) throw new Error('No character selected'); const r=await fetch(`/api/characters/${id}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__prompt_preview__'})}); const ct=r.headers.get('content-type')||''; const raw=ct.includes('application/json')?JSON.stringify(await r.json(),null,2):await r.text(); if(!r.ok){throw new Error(raw||'preview failed');} $('promptPreviewOut').value=raw; stat('previewStatus',`Built preview for ${id}`);}
 function renderAB(){const box=$('abShots'); box.innerHTML=''; state.shots.slice(0,2).forEach((s,idx)=>{const d=document.createElement('div'); d.innerHTML=`<div style="color:var(--muted);font-size:12px">${s.timestamp} — ${s.backend||'unknown'}</div><img src="${s.path}"/><div style="display:flex;gap:8px;margin-top:8px"><button class="btn secondary" type="button" data-anim="${idx}">Animate</button>${s.videoPath?`<a class="btn secondary" href="${s.videoPath}" download>Save video</a>`:''}</div>${s.videoPath?`<video src="${s.videoPath}" controls autoplay loop muted style="width:100%;margin-top:8px;border:1px solid var(--border);border-radius:8px"></video>`:''}`; box.appendChild(d);}); box.querySelectorAll('[data-anim]').forEach(btn=>btn.onclick=()=>animateShot(Number(btn.dataset.anim)).catch(err=>stat('cameraStatus',err.message,false)));}
 function renderSnips(){const list=$('snipList');list.innerHTML=''; [...baseSnips,...state.snips].forEach((s,i)=>{const d=document.createElement('div');d.className='snip';d.textContent=s;d.onclick=()=>navigator.clipboard.writeText(s); if(i>=baseSnips.length){const x=document.createElement('button');x.className='btn secondary';x.type='button';x.textContent='Delete';x.onclick=(e)=>{e.stopPropagation();state.snips.splice(i-baseSnips.length,1);localStorage.setItem(SN,JSON.stringify(state.snips));renderSnips();};d.appendChild(document.createElement('br'));d.appendChild(x);} list.appendChild(d);});}
-function renderNotes(notes){const l=$('noteList');l.innerHTML='';notes.forEach(n=>{const d=document.createElement('div');d.className='snip';d.innerHTML=`<div style="color:var(--muted);font-size:12px">${n.timestamp}</div><div>${n.text||''}</div>${n.imagePath?`<img class="thumb" src="${n.imagePath}"/>`:''}`;l.appendChild(d);});}
+function renderNotes(notes){const l=$('noteList');l.innerHTML='';notes.forEach(n=>{const d=document.createElement('div');d.className='snip';const media=n.imagePath?(n.mediaType==='video'?`<video src="${n.imagePath}" controls style="width:100%;max-width:480px;border-radius:8px;margin-top:6px;display:block;"></video>`:`<img class="thumb" src="${n.imagePath}"/>`):'';d.innerHTML=`<div style="color:var(--muted);font-size:12px">${n.timestamp}</div><div>${n.text||''}</div>${media}`;l.appendChild(d);});}
 function renderChat(){const l=$('chatList');l.innerHTML='';state.chat.forEach(m=>{const d=document.createElement('div');d.className=`bubble ${m.role==='user'?'u':'a'}`;d.textContent=m.text;if(m.toneClass){const t=document.createElement('div');t.style.cssText='font-size:10px;opacity:0.5;margin-top:4px';t.textContent=m.toneClass;d.appendChild(t);}l.appendChild(d);}); l.scrollTop=l.scrollHeight;}
 async function loadChars(){const d=await jfetch('/api/admin/characters');state.chars=d.characters||[];renderChars(); if(state.chars[0]) fill(state.chars[0]); updateChatIdentity(); if($('deployCharList')) renderDeployList();}
 async function saveChar(e){e.preventDefault();const p=payload();if(!/^[a-z0-9-]+$/.test(p.id)) return stat('charStatus','Invalid id',false);await jfetch(`/api/admin/characters/${p.id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});stat('charStatus',`Saved ${p.id}`);await loadChars();}
@@ -319,6 +337,40 @@ async function captureAndNote(){
 }
 function uploadPromptTxt(file){const fr=new FileReader(); fr.onload=()=>{const txt=String(fr.result||''); const t=$('promptTarget').value==='focused'?focusedField:({subject:'pb_subject',atmosphere:'pb_atmo',scenery:'pb_scenery',style:'pb_style',quality:'pb_quality'}[$('promptTarget').value]||'pb_subject'); $(t).value+=($(t).value?'\n':'')+txt; updatePrompt();}; fr.readAsText(file);}
 async function runCmd(){const d=await jfetch('/api/admin/commands',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:$('cmdSel').value})}); $('cmdOut').textContent=JSON.stringify(d,null,2);} 
+// ── NOTEPAD ──────────────────────────────────────────────────────────────────
+const NP_KEY='grid_notepad';
+let npState={notes:[],active:0};
+function npLoad(){try{npState=JSON.parse(localStorage.getItem(NP_KEY)||'null')||{notes:[],active:0};}catch{npState={notes:[],active:0};}if(!npState.notes.length)npState.notes=[{id:Date.now(),title:'Untitled',body:''}];}
+function npSave(){localStorage.setItem(NP_KEY,JSON.stringify(npState));}
+function npRender(){
+  npLoad();
+  const list=$('npList');list.innerHTML='';
+  npState.notes.forEach((n,i)=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='chip'+(i===npState.active?' active':'');
+    b.style.cssText='text-align:left;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+    b.textContent=n.title||'Untitled';
+    b.onclick=()=>{npState.active=i;npRender();};
+    list.appendChild(b);
+  });
+  const cur=npState.notes[npState.active]||{title:'',body:''};
+  $('npTitle').value=cur.title||'';
+  $('npBody').value=cur.body||'';
+}
+function npSaveCurrent(){
+  npLoad();
+  const cur=npState.notes[npState.active];
+  if(!cur)return;
+  cur.title=$('npTitle').value;
+  cur.body=$('npBody').value;
+  npSave();
+  // update list label without full re-render
+  const btns=$('npList').querySelectorAll('button');
+  if(btns[npState.active])btns[npState.active].textContent=cur.title||'Untitled';
+}
+function npNew(){npLoad();npState.notes.unshift({id:Date.now(),title:'Untitled',body:''});npState.active=0;npSave();npRender();}
+function npDelete(){npLoad();if(npState.notes.length<=1){npState.notes=[{id:Date.now(),title:'Untitled',body:''}];npState.active=0;}else{npState.notes.splice(npState.active,1);npState.active=Math.max(0,npState.active-1);}npSave();npRender();}
+
 function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>section(b.dataset.sec)); $('saveKey').onclick=()=>localStorage.setItem(KEY,$('adminKey').value.trim()||DEF);
   $('charForm').addEventListener('submit',e=>saveChar(e).catch(err=>stat('charStatus',err.message,false))); $('newChar').onclick=()=>fill({anchors:{}}); $('exportChar').onclick=exportChar; $('importChar').onclick=()=>$('importCharFile').click(); $('importCharFile').onchange=e=>e.target.files[0]&&importChar(e.target.files[0]); $('uploadPromptTxt').onclick=()=>$('promptTxtFile').click(); $('promptTxtFile').onchange=e=>e.target.files[0]&&uploadPromptTxt(e.target.files[0]);
   ['pb_subject','pb_atmo','pb_scenery','pb_style','pb_quality','pb_cast'].forEach(id=>{$(id).addEventListener('input',updatePrompt); $(id).addEventListener('focus',()=>focusedField=id);}); document.querySelectorAll('.atmo').forEach(b=>b.onclick=()=>{$('pb_atmo').value=b.dataset.v;updatePrompt();});
@@ -338,6 +390,30 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.qu
   $('deployToken').onchange=()=>localStorage.setItem(DEPLOY_TOKEN_KEY,$('deployToken').value.trim());
   $('deployBtn').onclick=()=>deployActive().catch(err=>stat('deployStatus',err.message,false));
   $('railwayCheck').onclick=()=>checkRailway();
+  // Watcher
+  $('watcherToggle').onclick=()=>toggleWatcher().catch(err=>stat('noteStatus',err.message,false));
+  checkWatcherStatus();
+  // Notepad
+  npRender();
+  $('npNew').onclick=npNew;
+  $('npDelete').onclick=npDelete;
+  $('npTitle').oninput=npSaveCurrent;
+  $('npBody').oninput=npSaveCurrent;
+}
+
+async function checkWatcherStatus(){
+  try{
+    const d=await jfetch('/api/admin/watcher/status');
+    $('watcherDot').style.background=d.running?'var(--ok)':'var(--bad)';
+    $('watcherLabel').textContent=d.running?`On — watching ${d.folder}`:'Off';
+    $('watcherToggle').textContent=d.running?'■ Stop watcher':'▶ Start watcher';
+  }catch{}
+}
+async function toggleWatcher(){
+  const d=await jfetch('/api/admin/watcher/status');
+  await jfetch(d.running?'/api/admin/watcher/stop':'/api/admin/watcher/start',{method:'POST'});
+  await checkWatcherStatus();
+  stat('noteStatus',d.running?'Watcher stopped':'Watcher started — take a screenshot to test');
 }
 
 function renderDeployList(){
