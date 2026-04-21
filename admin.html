@@ -22,6 +22,7 @@
     label{font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase}
     input,textarea,select,button{font:inherit}
     input,textarea,select{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:8px;transition:border-color 0.15s}
+    select option{background:#1a1a2e;color:#e8e8f0;}
     input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent2)}
     textarea{min-height:90px;resize:vertical}
     .btn{background:var(--accent);border:0;color:#fff;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:background 0.15s}
@@ -67,6 +68,7 @@
       <button data-sec="commands">Commands</button>
       <button data-sec="lore">Story / Lore</button>
       <button data-sec="prompt-preview">Prompt Preview</button>
+      <button data-sec="deploy">🚀 Deploy</button>
     </nav>
   </aside>
   <main class="content">
@@ -77,6 +79,7 @@
         <div class="row">
           <div class="field"><label>id</label><input id="c_id" required/></div><div class="field"><label>name</label><input id="c_name"/></div>
           <div class="field"><label>color</label><input id="c_color" type="color" value="#9f67ff"/></div><div class="field"><label>status</label><select id="c_status"><option>ONLINE</option><option>OBSERVANT</option><option>LISTENING</option><option>UNSTABLE</option></select></div>
+          <div class="field" style="display:flex;align-items:center;gap:10px;min-width:120px"><label style="margin:0">Active on site</label><input id="c_active" type="checkbox" style="width:18px;height:18px;cursor:pointer;" checked/></div>
           <div class="field full"><label>route</label><input id="c_route"/></div><div class="field full"><label>bio</label><textarea id="c_bio"></textarea></div>
           <div class="field full"><label>greeting</label><textarea id="c_greeting"></textarea></div><div class="field full"><label>identity</label><textarea id="c_identity"></textarea></div>
           <div class="field full"><label>camera_look</label><textarea id="c_camera_look"></textarea></div>
@@ -158,7 +161,7 @@
 
     <section id="snippets" class="section"><h2>Prompt Snippets</h2><div class="field"><label>add custom snippet</label><input id="newSnippet"/></div><button class="btn secondary" id="addSnippet" type="button">Add</button><div class="snips" id="snipList"></div></section>
 
-    <section id="notes" class="section"><h2>Smoke Test Log</h2><div class="field"><label>note</label><textarea id="noteText"></textarea></div><div class="field"><input id="noteImage" type="file" accept="image/*"/></div><img id="notePreview" class="thumb" style="display:none"/><div style="display:flex;gap:8px"><button class="btn" id="submitNote" type="button">Submit</button><button class="btn secondary" id="exportNotes" type="button">Export all notes .zip</button></div><div class="status" id="noteStatus"></div><div id="noteList"></div></section>
+    <section id="notes" class="section"><h2>Smoke Test Log</h2><div class="field"><label>note</label><textarea id="noteText"></textarea></div><div class="field"><input id="noteImage" type="file" accept="image/*"/></div><img id="notePreview" class="thumb" style="display:none"/><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="submitNote" type="button">Submit</button><button class="btn secondary" id="screenshotNote" type="button">📸 Screenshot</button><button class="btn secondary" id="exportNotes" type="button">Export all notes .zip</button></div><div class="status" id="noteStatus"></div><div id="noteList"></div></section>
 
     <section id="chat" class="section">
       <h2>Chat</h2>
@@ -212,6 +215,29 @@
       <div class="status" id="loreStatus"></div>
     </section>
 
+    <section id="deploy" class="section">
+      <h2>Deploy</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px">Push character changes to GitHub → Railway auto-deploys within ~30s.</p>
+      <div class="field" style="max-width:400px">
+        <label>GitHub Token</label>
+        <input id="deployToken" type="password" placeholder="ghp_…" autocomplete="off"/>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Stored in localStorage only. Never committed.</div>
+      </div>
+      <div id="deployCharList" style="margin:14px 0;display:flex;flex-direction:column;gap:8px"></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary" id="deployBtn" type="button">🚀 Deploy active characters</button>
+      </div>
+      <div class="status" id="deployStatus" style="margin-top:10px;white-space:pre-wrap"></div>
+      <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Railway deployment status</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="railwayDot" style="width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block"></span>
+          <span id="railwayText" style="font-size:13px;color:var(--muted)">—</span>
+          <button class="btn secondary" id="railwayCheck" type="button" style="padding:4px 10px;font-size:12px">Check</button>
+        </div>
+      </div>
+    </section>
+
     <section id="prompt-preview" class="section">
       <h2>Prompt Preview</h2>
       <div class="field" style="max-width:360px;margin-bottom:10px"><label>Character</label><select id="previewChar"></select></div>
@@ -236,13 +262,13 @@ function headers(h={}){return {'x-admin-key':localStorage.getItem(KEY)||DEF,...h
 async function jfetch(url,opt={}){const r=await fetch(url,{...opt,headers:headers(opt.headers||{})}); const d=await r.json(); if(!r.ok||d.ok===false) throw new Error(d.error||'request failed'); return d;}
 function stat(id,msg,ok=true){$(id).textContent=msg; $(id).style.color=ok?'var(--ok)':'var(--bad)';}
 function section(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));$(id).classList.add('active');document.querySelector(`[data-sec="${id}"]`).classList.add('active');}
-function fill(c={}){$('c_id').value=c.id||'';$('c_name').value=c.name||'';$('c_color').value=c.color||'#9f67ff';$('c_status').value=c.status||'ONLINE';$('c_route').value=c.route||'';$('c_bio').value=c.bio||'';$('c_greeting').value=c.greeting||'';$('c_identity').value=c.identity||'';$('c_camera_look').value=c.camera_look||'';
+function fill(c={}){$('c_id').value=c.id||'';$('c_name').value=c.name||'';$('c_color').value=c.color||'#9f67ff';$('c_status').value=c.status||'ONLINE';$('c_active').checked=c.active!==false;$('c_route').value=c.route||'';$('c_bio').value=c.bio||'';$('c_greeting').value=c.greeting||'';$('c_identity').value=c.identity||'';$('c_camera_look').value=c.camera_look||'';
   const a=c.anchors||{}; $('c_anch_contradiction').value=a.contradiction||''; $('c_anch_weakness').value=a.weakness||''; $('c_anch_rule').value=a.rule||'';
   $('c_typing_delay').value=c.typing_delay||''; $('c_response_length').value=c.response_length||''; $('c_warmth').value=c.warmth??5; $('c_openness').value=c.openness??5; $('c_voice_guide').value=c.voice_guide||'';
   syncLabFromChar();}
 function payload(){
   const anchors={contradiction:$('c_anch_contradiction').value.trim(),weakness:$('c_anch_weakness').value.trim(),rule:$('c_anch_rule').value.trim()};
-  const p={id:$('c_id').value.trim().toLowerCase(),name:$('c_name').value,color:$('c_color').value,status:$('c_status').value,route:$('c_route').value,bio:$('c_bio').value,greeting:$('c_greeting').value,identity:$('c_identity').value,anchors,camera_look:$('c_camera_look').value,voice_guide:$('c_voice_guide').value.trim()};
+  const p={id:$('c_id').value.trim().toLowerCase(),name:$('c_name').value,color:$('c_color').value,status:$('c_status').value,active:$('c_active').checked,route:$('c_route').value,bio:$('c_bio').value,greeting:$('c_greeting').value,identity:$('c_identity').value,anchors,camera_look:$('c_camera_look').value,voice_guide:$('c_voice_guide').value.trim()};
   if($('c_typing_delay').value) p.typing_delay=Number($('c_typing_delay').value);
   if($('c_response_length').value) p.response_length=$('c_response_length').value;
   p.warmth=Number($('c_warmth').value); p.openness=Number($('c_openness').value);
@@ -259,7 +285,7 @@ function renderAB(){const box=$('abShots'); box.innerHTML=''; state.shots.slice(
 function renderSnips(){const list=$('snipList');list.innerHTML=''; [...baseSnips,...state.snips].forEach((s,i)=>{const d=document.createElement('div');d.className='snip';d.textContent=s;d.onclick=()=>navigator.clipboard.writeText(s); if(i>=baseSnips.length){const x=document.createElement('button');x.className='btn secondary';x.type='button';x.textContent='Delete';x.onclick=(e)=>{e.stopPropagation();state.snips.splice(i-baseSnips.length,1);localStorage.setItem(SN,JSON.stringify(state.snips));renderSnips();};d.appendChild(document.createElement('br'));d.appendChild(x);} list.appendChild(d);});}
 function renderNotes(notes){const l=$('noteList');l.innerHTML='';notes.forEach(n=>{const d=document.createElement('div');d.className='snip';d.innerHTML=`<div style="color:var(--muted);font-size:12px">${n.timestamp}</div><div>${n.text||''}</div>${n.imagePath?`<img class="thumb" src="${n.imagePath}"/>`:''}`;l.appendChild(d);});}
 function renderChat(){const l=$('chatList');l.innerHTML='';state.chat.forEach(m=>{const d=document.createElement('div');d.className=`bubble ${m.role==='user'?'u':'a'}`;d.textContent=m.text;if(m.toneClass){const t=document.createElement('div');t.style.cssText='font-size:10px;opacity:0.5;margin-top:4px';t.textContent=m.toneClass;d.appendChild(t);}l.appendChild(d);}); l.scrollTop=l.scrollHeight;}
-async function loadChars(){const d=await jfetch('/api/admin/characters');state.chars=d.characters||[];renderChars(); if(state.chars[0]) fill(state.chars[0]); updateChatIdentity();}
+async function loadChars(){const d=await jfetch('/api/admin/characters');state.chars=d.characters||[];renderChars(); if(state.chars[0]) fill(state.chars[0]); updateChatIdentity(); if($('deployCharList')) renderDeployList();}
 async function saveChar(e){e.preventDefault();const p=payload();if(!/^[a-z0-9-]+$/.test(p.id)) return stat('charStatus','Invalid id',false);await jfetch(`/api/admin/characters/${p.id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});stat('charStatus',`Saved ${p.id}`);await loadChars();}
 async function gen(){const character=$('labCharacter').value; const preview=$('pb_preview').value; const falParams={model:document.querySelector('input[name="model"]:checked').value,num_inference_steps:Number($('fal_steps').value),guidance_scale:Number($('fal_gs').value),safety_tolerance:Number($('fal_safe').value),aspect_ratio:$('fal_aspect').value,output_format:$('fal_format').value}; if($('fal_seed').value) falParams.seed=Number($('fal_seed').value); const comfyParams={steps:Number($('comfy_steps').value),cfg:Number($('comfy_cfg').value),sampler_name:$('comfy_sampler').value,scheduler:$('comfy_scheduler').value,denoise:Number($('comfy_denoise').value),width:Number($('comfy_w').value),height:Number($('comfy_h').value)}; const d=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood:$('pb_atmo').value,customPrompt:preview,falParams,comfyParams})}).then(r=>r.json()); if(!d.ok) throw new Error(d.error||'generate failed'); state.shots.unshift({...d.shot,timestamp:new Date().toLocaleString()}); state.shots=state.shots.slice(0,2); renderAB(); stat('cameraStatus','Generated shot');}
 async function animateShot(i){const shot=state.shots[i]; if(!shot?.path) throw new Error('No generated shot available'); const d=await fetch('/api/camera/animate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imagePath:shot.path,duration:Number($('animDuration').value),motion_strength:Number($('animMotion').value)})}).then(r=>r.json()); if(!d.ok) throw new Error(d.error||'animate failed'); shot.videoPath=d.path||d.video?.path; renderAB(); stat('cameraStatus','Video generated');}
@@ -275,6 +301,22 @@ async function clearChat(){const id=$('chatChar').value; await fetch(`/api/chara
 function updateChatIdentity(){const id=$('chatChar').value; const c=state.chars.find(x=>x.id===id); $('chatIdentity').textContent=c?.identity||'';}
 function exportChar(){const p=payload(); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:'application/json'})); a.download=`${p.id||'character'}.json`; a.click();}
 function importChar(file){const fr=new FileReader(); fr.onload=()=>{try{fill(JSON.parse(String(fr.result||'{}')));stat('charStatus','Imported JSON');}catch{stat('charStatus','Invalid JSON',false);}}; fr.readAsText(file);}
+async function captureAndNote(){
+  function loadH2C(){return new Promise((res,rej)=>{if(window.html2canvas){res(window.html2canvas);return;}const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';s.onload=()=>res(window.html2canvas);s.onerror=()=>rej(new Error('Failed to load html2canvas'));document.head.appendChild(s);});}
+  stat('noteStatus','Capturing…');
+  const h2c=await loadH2C();
+  const canvas=await h2c(document.body,{useCORS:true,allowTaint:true,scale:1,logging:false});
+  const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
+  const fd=new FormData();
+  const note=`${new Date().toISOString()} — screenshot`;
+  fd.append('note',note);
+  fd.append('image',blob,`screenshot-${Date.now()}.png`);
+  const r=await fetch('/api/admin/notes',{method:'POST',headers:headers(),body:fd});
+  const d=await r.json();
+  if(!r.ok||d.ok===false) throw new Error(d.error||'failed');
+  stat('noteStatus','Screenshot saved ✓');
+  await loadNotes();
+}
 function uploadPromptTxt(file){const fr=new FileReader(); fr.onload=()=>{const txt=String(fr.result||''); const t=$('promptTarget').value==='focused'?focusedField:({subject:'pb_subject',atmosphere:'pb_atmo',scenery:'pb_scenery',style:'pb_style',quality:'pb_quality'}[$('promptTarget').value]||'pb_subject'); $(t).value+=($(t).value?'\n':'')+txt; updatePrompt();}; fr.readAsText(file);}
 async function runCmd(){const d=await jfetch('/api/admin/commands',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:$('cmdSel').value})}); $('cmdOut').textContent=JSON.stringify(d,null,2);} 
 function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>section(b.dataset.sec)); $('saveKey').onclick=()=>localStorage.setItem(KEY,$('adminKey').value.trim()||DEF);
@@ -285,13 +327,67 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.qu
   $('copyPrompt').onclick=()=>navigator.clipboard.writeText($('pb_preview').value); $('saveSnippet').onclick=()=>{const s=$('pb_preview').value.trim();if(s){state.snips.push(s);localStorage.setItem(SN,JSON.stringify(state.snips));renderSnips();}};
   $('generate').onclick=()=>gen().catch(err=>stat('cameraStatus',err.message,false)); $('saveLook').onclick=()=>saveLook().catch(err=>stat('cameraStatus',err.message,false)); $('runWorkflow').onclick=()=>comfyRun().catch(err=>stat('cameraStatus',err.message,false));
   $('addSnippet').onclick=()=>{const s=$('newSnippet').value.trim(); if(!s)return; state.snips.push(s); localStorage.setItem(SN,JSON.stringify(state.snips)); $('newSnippet').value=''; renderSnips();};
-  $('noteImage').onchange=()=>{const f=$('noteImage').files[0]; if(!f) return; $('notePreview').src=URL.createObjectURL(f); $('notePreview').style.display='block';}; $('submitNote').onclick=()=>sendNote().catch(err=>stat('noteStatus',err.message,false)); $('exportNotes').onclick=()=>window.open('/api/admin/notes/export','_blank');
+  $('noteImage').onchange=()=>{const f=$('noteImage').files[0]; if(!f) return; $('notePreview').src=URL.createObjectURL(f); $('notePreview').style.display='block';}; $('submitNote').onclick=()=>sendNote().catch(err=>stat('noteStatus',err.message,false)); $('exportNotes').onclick=async()=>{try{stat('noteStatus','Downloading…');const r=await fetch('/api/admin/notes/export',{headers:headers()});if(!r.ok)throw new Error('Server error '+r.status);const blob=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`admin_notes_${Date.now()}.zip`;a.click();stat('noteStatus','Downloaded ✓');}catch(e){stat('noteStatus',e.message,false);}};$('screenshotNote').onclick=()=>captureAndNote().catch(err=>stat('noteStatus',err.message,false));
   $('chatChar').onchange=updateChatIdentity; $('sendChat').onclick=()=>sendChat().catch(err=>stat('chatStatus',err.message,false)); $('clearChat').onclick=()=>clearChat().catch(err=>stat('chatStatus',err.message,false));
   $('runCmd').onclick=()=>runCmd().catch(err=>{$('cmdOut').textContent=err.message;});
   $('loreChar').onchange=e=>fillLore(e.target.value); $('saveLore').onclick=()=>saveLore().catch(err=>stat('loreStatus',err.message,false));
   $('buildPreview').onclick=()=>buildPromptPreview().catch(err=>stat('previewStatus',err.message,false)); $('copyPreview').onclick=()=>navigator.clipboard.writeText($('promptPreviewOut').value||'');
+  // Deploy
+  const DEPLOY_TOKEN_KEY='grid_deploy_token';
+  $('deployToken').value=localStorage.getItem(DEPLOY_TOKEN_KEY)||'';
+  $('deployToken').onchange=()=>localStorage.setItem(DEPLOY_TOKEN_KEY,$('deployToken').value.trim());
+  $('deployBtn').onclick=()=>deployActive().catch(err=>stat('deployStatus',err.message,false));
+  $('railwayCheck').onclick=()=>checkRailway();
 }
-bind(); renderSnips(); loadChars().then(()=>{if(state.chars[0]){const id=state.chars[0].id;$('loreChar').value=id;$('previewChar').value=id;fillLore(id);}}).catch(err=>stat('charStatus',err.message,false)); loadNotes().catch(err=>stat('noteStatus',err.message,false)); comfyHealth(); comfyImages();
+
+function renderDeployList(){
+  const box=$('deployCharList');
+  box.innerHTML='';
+  state.chars.forEach(c=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface-2);border-radius:8px;border:1px solid var(--border);';
+    const dot=document.createElement('span');
+    dot.style.cssText=`width:8px;height:8px;border-radius:50%;background:${c.active!==false?'var(--ok)':'var(--bad)'};flex-shrink:0;`;
+    const name=document.createElement('span');
+    name.style.cssText='flex:1;font-size:13px;';
+    name.textContent=`${c.name||c.id} — ${c.active!==false?'ACTIVE':'INACTIVE'}`;
+    const tog=document.createElement('button');
+    tog.className='btn secondary';
+    tog.style.cssText='padding:3px 10px;font-size:11px;';
+    tog.textContent=c.active!==false?'Deactivate':'Activate';
+    tog.onclick=async()=>{
+      const updated={...c,active:c.active===false};
+      await jfetch(`/api/admin/characters/${c.id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(updated)});
+      await loadChars();
+    };
+    row.appendChild(dot);row.appendChild(name);row.appendChild(tog);
+    box.appendChild(row);
+  });
+}
+
+async function deployActive(){
+  const token=$('deployToken').value.trim();
+  if(!token) throw new Error('Enter GitHub token first');
+  stat('deployStatus','Pushing to GitHub…');
+  $('deployBtn').disabled=true;
+  try{
+    const d=await jfetch('/api/admin/deploy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+    stat('deployStatus','✓ '+d.output);
+    checkRailway();
+  }finally{$('deployBtn').disabled=false;}
+}
+
+async function checkRailway(){
+  $('railwayText').textContent='Checking…';$('railwayDot').style.background='var(--muted)';
+  try{
+    const r=await fetch('https://the-grid-production-ce9c.up.railway.app/api/health',{signal:AbortSignal.timeout(8000)});
+    const d=await r.json();
+    $('railwayDot').style.background=d.ok?'var(--ok)':'var(--bad)';
+    $('railwayText').textContent=d.ok?`Live — uptime ${d.uptime_sec??'?'}s`:'Unhealthy';
+  }catch(e){$('railwayDot').style.background='var(--bad)';$('railwayText').textContent='Unreachable';}
+}
+
+bind(); renderSnips(); loadChars().then(()=>{if(state.chars[0]){const id=state.chars[0].id;$('loreChar').value=id;$('previewChar').value=id;fillLore(id);}renderDeployList();}).catch(err=>stat('charStatus',err.message,false)); loadNotes().catch(err=>stat('noteStatus',err.message,false)); comfyHealth(); comfyImages();
 </script>
 </body>
 </html>

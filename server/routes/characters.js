@@ -77,7 +77,7 @@ router.get('/', (_req, res) => {
       const id = f.replace('.json', '');
       try { return { id, ...JSON.parse(fs.readFileSync(path.join(CHARS_DIR, f), 'utf-8')) }; }
       catch { return null; }
-    }).filter(Boolean);
+    }).filter(Boolean).filter(c => c.active !== false);
     res.json({ ok: true, characters });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });

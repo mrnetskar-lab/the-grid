@@ -1,0 +1,26 @@
+[
+  {
+    "role": "user",
+    "content": "hi"
+  },
+  {
+    "role": "assistant",
+    "content": "*holds eye contact* Hey."
+  },
+  {
+    "role": "user",
+    "content": "how are you?"
+  },
+  {
+    "role": "assistant",
+    "content": "*holds your gaze, then looks away* Hey there.  I'm alright."
+  },
+  {
+    "role": "user",
+    "content": "__prompt_preview__"
+  },
+  {
+    "role": "assistant",
+    "content": "*holds your gaze* I'm here."
+  }
+]

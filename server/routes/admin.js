@@ -206,6 +206,26 @@ router.post('/comfy/run', async (req, res) => {
   }
 });
 
+router.post('/deploy', async (req, res) => {
+  const token = String(req.body?.token || '').trim();
+  if (!token) return res.status(400).json({ ok: false, error: 'GitHub token required' });
+  const { execFile } = await import('child_process');
+  const { promisify } = await import('util');
+  const execFileAsync = promisify(execFile);
+  try {
+    const remote = `https://mrnetskar-lab:${token}@github.com/mrnetskar-lab/the-grid.git`;
+    await execFileAsync('git', ['remote', 'set-url', 'origin', remote], { cwd: ROOT_DIR });
+    await execFileAsync('git', ['add', 'characters/'], { cwd: ROOT_DIR });
+    const { stdout: diff } = await execFileAsync('git', ['diff', '--cached', '--name-only'], { cwd: ROOT_DIR });
+    if (!diff.trim()) return res.json({ ok: true, output: 'Nothing to deploy — characters already up to date.' });
+    await execFileAsync('git', ['commit', '-m', 'deploy: update active characters'], { cwd: ROOT_DIR });
+    await execFileAsync('git', ['push', 'origin', 'master'], { cwd: ROOT_DIR });
+    return res.json({ ok: true, output: `Deployed.\n${diff.trim()}` });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message || 'Deploy failed' });
+  }
+});
+
 router.post('/commands', async (req, res) => {
   const command = String(req.body?.command || '').trim();
   const allowed = new Set(['clear-all-history', 'clear-images', 'list-images', 'ping-comfy', 'server-status']);

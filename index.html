@@ -939,8 +939,10 @@
               <div class="chat-input-wrap"><input id="chatInput" type="text" placeholder="Write a message…" autocomplete="off"/></div>
               <button class="send-btn" type="submit">➤</button>
             </div>
+            <input type="file" id="imgAttachInput" accept="image/*" style="display:none"/>
+            <div id="imgAttachPreview" style="display:none;padding:6px 12px 0;"><div style="position:relative;display:inline-block;"><img id="imgAttachThumb" style="height:54px;border-radius:8px;border:1px solid var(--border-2);display:block;" alt=""/><button type="button" id="imgAttachClear" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#333;color:#fff;font-size:10px;cursor:pointer;line-height:18px;text-align:center;padding:0;">✕</button></div></div>
             <div class="chat-actions-row">
-              <button type="button" class="chat-action-pill">
+              <button type="button" class="chat-action-pill" id="imgAttachBtn">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
                 Image
               </button>
@@ -1330,17 +1332,48 @@ document.querySelectorAll('.drawer-item').forEach(item=>{item.addEventListener('
     }).catch(()=>{}).finally(()=>{_showGreeting();});
 });});
 
+// Image attach
+const imgAttachInput=document.getElementById('imgAttachInput');
+const imgAttachPreview=document.getElementById('imgAttachPreview');
+const imgAttachThumb=document.getElementById('imgAttachThumb');
+let pendingImg=null;
+document.getElementById('imgAttachBtn').addEventListener('click',()=>imgAttachInput.click());
+document.getElementById('imgAttachClear').addEventListener('click',()=>{pendingImg=null;imgAttachInput.value='';imgAttachPreview.style.display='none';});
+imgAttachInput.addEventListener('change',()=>{
+  const f=imgAttachInput.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{pendingImg=ev.target.result;imgAttachThumb.src=pendingImg;imgAttachPreview.style.display='block';};
+  reader.readAsDataURL(f);
+});
+
+const IMG_REACTIONS=['…I see you.','That's a good look.','Sent me something. Noted.','*looks at it longer than expected*','Okay. That one stays with me.','You really sent that.','*saves it without saying why*'];
+
 document.getElementById('chatForm').addEventListener('submit',async e=>{
-  e.preventDefault();const txt=chatInput.value.trim();if(!txt)return;
+  e.preventDefault();
+  const txt=chatInput.value.trim();
+  const hasImg=!!pendingImg;
+  if(!txt&&!hasImg)return;
   gainSparks(2,'+2 sparks for chatting');
   if(!localStorage.getItem(`v_first_chat_${curThread}`)){localStorage.setItem(`v_first_chat_${curThread}`,'1');gainSparks(25,`+25 sparks first chat with ${profileData[curThread]?.name||curThread}`);}
-  chatInput.value='';sendBtn.disabled=true;addMsg('mine',txt);
-  rememberMessage(curThread,txt,'user');
+  chatInput.value='';sendBtn.disabled=true;
+  if(hasImg){
+    const imgEl=document.createElement('img');imgEl.src=pendingImg;imgEl.alt='';
+    addMsg('mine',null,null,imgEl);
+    pendingImg=null;imgAttachInput.value='';imgAttachPreview.style.display='none';
+  }
+  if(txt){addMsg('mine',txt);rememberMessage(curThread,txt,'user');}
   const tr=addTyping(curAvSrc);
   try{
-    const res=await fetch(`/api/characters/${curThread||'hazel'}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
-    const data=await res.json();
-    const reply=(data.reply||data.result||'…').trim();
+    let reply;
+    if(hasImg&&!txt){
+      await new Promise(r=>setTimeout(r,900+Math.random()*600));
+      reply=IMG_REACTIONS[Math.floor(Math.random()*IMG_REACTIONS.length)];
+    } else {
+      const msgText=hasImg?`[sent an image] ${txt}`:txt;
+      const res=await fetch(`/api/characters/${curThread||'hazel'}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:msgText})});
+      const data=await res.json();
+      reply=(data.reply||data.result||'…').trim();
+    }
     tr.remove();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');
   }catch{tr.remove();addMsg('theirs','One moment…',curAvSrc);rememberMessage(curThread,'One moment…','assistant');}
   sendBtn.disabled=false;chatInput.focus();
@@ -1518,6 +1551,187 @@ document.getElementById('chatInput').addEventListener('keydown',e=>{
 });
 if(devUnlocked)openDevPanel();
 
+// ── SCREENSHOT + ANNOTATE ────────────────────────────────────────────────────
+(function(){
+  const btn = document.getElementById('devScreenshot');
+  const status = document.getElementById('devSsStatus');
+  if(!btn) return;
+
+  function loadHtml2Canvas(){
+    return new Promise((resolve,reject)=>{
+      if(window.html2canvas){resolve(window.html2canvas);return;}
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload=()=>resolve(window.html2canvas);
+      s.onerror=()=>reject(new Error('Failed to load html2canvas'));
+      document.head.appendChild(s);
+    });
+  }
+
+  function buildCropOverlay(imgDataUrl, onCropped){
+    document.getElementById('ssOverlay')?.remove();
+    const overlay=document.createElement('div');
+    overlay.id='ssOverlay';
+    overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);display:flex;flex-direction:column;';
+    const hint=document.createElement('div');
+    hint.style.cssText='text-align:center;color:#aaa;font-size:12px;padding:8px;flex-shrink:0;';
+    hint.textContent='Drag to select a region to snip — or click Use Full to keep the whole screenshot';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;position:relative;';
+    const img=document.createElement('img');
+    img.src=imgDataUrl;
+    img.style.cssText='max-width:100%;max-height:100%;display:block;user-select:none;';
+    const sel=document.createElement('div');
+    sel.style.cssText='position:absolute;border:2px dashed #ff3366;pointer-events:none;display:none;box-sizing:border-box;';
+    wrap.appendChild(img);wrap.appendChild(sel);
+    const bar=document.createElement('div');
+    bar.style.cssText='display:flex;gap:8px;padding:8px 14px;background:#111;border-top:1px solid #333;flex-shrink:0;justify-content:flex-end;';
+    bar.innerHTML='<button class="btn btn-primary btn-sm" id="ssCropConfirm" style="padding:4px 12px;font-size:12px;">Crop & Annotate</button><button class="btn btn-sm" id="ssCropFull" style="padding:4px 10px;font-size:12px;background:#333;">Use Full</button><button class="btn btn-sm" id="ssCropDiscard" style="padding:4px 10px;font-size:12px;background:#222;">Discard</button>';
+    overlay.appendChild(hint);overlay.appendChild(wrap);overlay.appendChild(bar);
+    document.body.appendChild(overlay);
+
+    let sx=0,sy=0,ex=0,ey=0,dragging=false;
+    function toImgCoords(e){
+      const r=img.getBoundingClientRect();
+      return {x:Math.max(0,Math.min(e.clientX-r.left,r.width)),y:Math.max(0,Math.min(e.clientY-r.top,r.height))};
+    }
+    wrap.addEventListener('mousedown',e=>{const p=toImgCoords(e);sx=p.x;sy=p.y;ex=p.x;ey=p.y;dragging=true;sel.style.display='block';});
+    wrap.addEventListener('mousemove',e=>{
+      if(!dragging)return;
+      const p=toImgCoords(e);ex=p.x;ey=p.y;
+      const r=img.getBoundingClientRect(),wr=wrap.getBoundingClientRect();
+      const l=Math.min(sx,ex)+r.left-wr.left,t=Math.min(sy,ey)+r.top-wr.top;
+      sel.style.left=l+'px';sel.style.top=t+'px';sel.style.width=Math.abs(ex-sx)+'px';sel.style.height=Math.abs(ey-sy)+'px';
+    });
+    wrap.addEventListener('mouseup',()=>{dragging=false;});
+
+    function cropToDataUrl(){
+      const r=img.getBoundingClientRect();
+      const scaleX=img.naturalWidth/r.width,scaleY=img.naturalHeight/r.height;
+      const x=Math.round(Math.min(sx,ex)*scaleX),y=Math.round(Math.min(sy,ey)*scaleY);
+      const w=Math.round(Math.abs(ex-sx)*scaleX),h=Math.round(Math.abs(ey-sy)*scaleY);
+      if(w<10||h<10)return null;
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const ctx=c.getContext('2d');
+      const src=new Image();src.src=imgDataUrl;
+      ctx.drawImage(src,x,y,w,h,0,0,w,h);
+      return c.toDataURL('image/png');
+    }
+
+    document.getElementById('ssCropConfirm').addEventListener('click',()=>{
+      const cropped=cropToDataUrl();
+      overlay.remove();
+      onCropped(cropped||imgDataUrl);
+    });
+    document.getElementById('ssCropFull').addEventListener('click',()=>{overlay.remove();onCropped(imgDataUrl);});
+    document.getElementById('ssCropDiscard').addEventListener('click',()=>overlay.remove());
+  }
+
+  function buildAnnotateOverlay(imgDataUrl){
+    document.getElementById('ssOverlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id='ssOverlay';
+    overlay.className='ss-overlay';
+
+    overlay.innerHTML=`
+      <div class="ss-toolbar">
+        <label>Color</label><input type="color" id="ssPenColor" value="#ff3366">
+        <label>Size</label><input type="range" id="ssPenSize" min="1" max="20" value="3">
+        <button class="btn btn-sm" id="ssUndo" style="padding:4px 10px;font-size:12px;">Undo</button>
+        <button class="btn btn-sm" id="ssClear" style="padding:4px 10px;font-size:12px;">Clear</button>
+        <span style="flex:1"></span>
+        <button class="btn btn-primary btn-sm" id="ssSend" style="padding:4px 12px;font-size:12px;">Send to Notes</button>
+        <button class="btn btn-sm" id="ssDiscard" style="padding:4px 10px;font-size:12px;background:#333;">Discard</button>
+      </div>
+      <div class="ss-canvas-wrap"><canvas id="ssCanvas"></canvas></div>
+      <div class="ss-note">
+        <input type="text" id="ssNoteText" placeholder="Add a note (optional)…">
+      </div>`;
+
+    document.body.appendChild(overlay);
+
+    const canvas = document.getElementById('ssCanvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = ()=>{
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      ctx.drawImage(img,0,0);
+    };
+    img.src = imgDataUrl;
+
+    let drawing=false, strokes=[], curStroke=[];
+    const penColor=()=>document.getElementById('ssPenColor').value;
+    const penSize=()=>parseInt(document.getElementById('ssPenSize').value)||3;
+
+    function redraw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img,0,0);
+      strokes.forEach(stroke=>{
+        if(!stroke.length) return;
+        ctx.beginPath();ctx.strokeStyle=stroke[0].color;ctx.lineWidth=stroke[0].size;ctx.lineCap='round';ctx.lineJoin='round';
+        ctx.moveTo(stroke[0].x,stroke[0].y);stroke.forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();
+      });
+    }
+
+    function getPos(e){
+      const r=canvas.getBoundingClientRect();
+      const scaleX=canvas.width/r.width,scaleY=canvas.height/r.height;
+      const src=e.touches?e.touches[0]:e;
+      return {x:(src.clientX-r.left)*scaleX,y:(src.clientY-r.top)*scaleY};
+    }
+
+    canvas.addEventListener('mousedown',e=>{drawing=true;curStroke=[];curStroke.push({...getPos(e),color:penColor(),size:penSize()});});
+    canvas.addEventListener('mousemove',e=>{
+      if(!drawing)return;
+      const p={...getPos(e),color:penColor(),size:penSize()};curStroke.push(p);
+      ctx.beginPath();ctx.strokeStyle=p.color;ctx.lineWidth=p.size;ctx.lineCap='round';ctx.lineJoin='round';
+      const prev=curStroke[curStroke.length-2]||p;ctx.moveTo(prev.x,prev.y);ctx.lineTo(p.x,p.y);ctx.stroke();
+    });
+    canvas.addEventListener('mouseup',()=>{if(drawing&&curStroke.length){strokes.push(curStroke);curStroke=[];}drawing=false;});
+    canvas.addEventListener('mouseleave',()=>{if(drawing&&curStroke.length){strokes.push(curStroke);curStroke=[];}drawing=false;});
+
+    document.getElementById('ssUndo').addEventListener('click',()=>{strokes.pop();redraw();});
+    document.getElementById('ssClear').addEventListener('click',()=>{strokes=[];redraw();});
+    document.getElementById('ssDiscard').addEventListener('click',()=>overlay.remove());
+
+    document.getElementById('ssSend').addEventListener('click',async()=>{
+      const noteText=document.getElementById('ssNoteText').value.trim()||'Screenshot annotation';
+      document.getElementById('ssSend').disabled=true;
+      document.getElementById('ssSend').textContent='Sending…';
+      try{
+        const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
+        const fd=new FormData();
+        const ts=new Date().toISOString().replace(/[:.]/g,'-');
+        fd.append('image',blob,`screenshot-${ts}.png`);
+        fd.append('note',noteText);
+        const r=await fetch('/api/admin/notes',{method:'POST',headers:{'x-admin-key':'velora-admin-2025'},body:fd});
+        const data=await r.json();
+        if(data.ok){overlay.remove();status.textContent='Saved ✓';setTimeout(()=>status.textContent='',3000);}
+        else{document.getElementById('ssSend').textContent='Retry';document.getElementById('ssSend').disabled=false;status.textContent='Error: '+(data.error||'unknown');}
+      }catch(err){document.getElementById('ssSend').textContent='Retry';document.getElementById('ssSend').disabled=false;status.textContent='Error: '+err.message;}
+    });
+  }
+
+  btn.addEventListener('click', async()=>{
+    btn.disabled=true;
+    status.textContent='Capturing…';
+    const devPanel=document.getElementById('devPanel');
+    const wasVisible=devPanel&&devPanel.style.display!=='none';
+    if(wasVisible) devPanel.style.display='none';
+    try{
+      const h2c=await loadHtml2Canvas();
+      const canvas=await h2c(document.body,{useCORS:true,allowTaint:true,scale:1,logging:false});
+      if(wasVisible) devPanel.style.display='';
+      buildCropOverlay(canvas.toDataURL('image/png'), buildAnnotateOverlay);
+      status.textContent='';
+    }catch(err){
+      if(wasVisible) devPanel.style.display='';
+      status.textContent='Error: '+err.message;
+    }
+    btn.disabled=false;
+  });
+})();
 // ── DEV MODE END ──────────────────────────────────────────────────────────────
 
 // Toast helper
