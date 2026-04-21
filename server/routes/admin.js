@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import http from 'http';
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import multer from 'multer';
 import archiver from 'archiver';
 import { fileURLToPath } from 'url';
@@ -19,6 +19,18 @@ const COMFY_PORT = 8188;
 const COMFYUI_OUTPUT_DIR = process.env.COMFYUI_OUTPUT_DIR || 'C:/Users/mn/ComfyUI_windows_portable/ComfyUI/output';
 const ADMIN_KEY = process.env.ADMIN_KEY || (process.env.NODE_ENV === 'production' ? null : 'velora-admin-2025');
 if (!ADMIN_KEY) console.error('[admin] WARNING: ADMIN_KEY env var not set — admin routes are disabled');
+const SERVER_STARTED_AT = new Date().toISOString();
+
+let APP_VERSION = 'unknown';
+try {
+  const pkgPath = path.join(ROOT_DIR, 'package.json');
+  APP_VERSION = JSON.parse(fs.readFileSync(pkgPath, 'utf-8')).version || 'unknown';
+} catch {}
+
+let GIT_HASH = 'unknown';
+try {
+  GIT_HASH = execSync('git rev-parse --short HEAD', { cwd: ROOT_DIR, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() || 'unknown';
+} catch {}
 
 if (!fs.existsSync(NOTES_DIR)) fs.mkdirSync(NOTES_DIR, { recursive: true });
 if (!fs.existsSync(NOTES_JSON)) fs.writeFileSync(NOTES_JSON, '[]', 'utf-8');
@@ -26,6 +38,7 @@ if (!fs.existsSync(NOTES_JSON)) fs.writeFileSync(NOTES_JSON, '[]', 'utf-8');
 const SCREENSHOTS_DIR = 'C:/Users/mn/OneDrive/Bilder/Skjermbilder';
 let screenshotWatcher = null;
 let watcherSeen = new Set();
+const COMFYUI_BAT = 'C:\\Users\\mn\\ComfyUI_windows_portable\\run_nvidia_gpu.bat';
 
 function saveNote(text, mediaPath, mediaType) {
   let notes = [];
@@ -64,6 +77,23 @@ function stopScreenshotWatcher() {
   screenshotWatcher = null;
   watcherSeen = new Set();
   return { ok: true, status: 'stopped' };
+}
+
+function launchComfyUI() {
+  if (!fs.existsSync(COMFYUI_BAT)) {
+    return { status: 404, body: { ok: false, error: 'ComfyUI bat not found: ' + COMFYUI_BAT } };
+  }
+  try {
+    const child = spawn('cmd.exe', ['/c', 'start', '', COMFYUI_BAT], {
+      detached: true,
+      stdio: 'ignore',
+      cwd: path.dirname(COMFYUI_BAT),
+    });
+    child.unref();
+    return { status: 200, body: { ok: true, message: 'ComfyUI launching...' } };
+  } catch (err) {
+    return { status: 500, body: { ok: false, error: err.message } };
+  }
 }
 
 const storage = multer.diskStorage({
@@ -120,6 +150,16 @@ function comfyRequest(method, urlPath, body) {
 }
 
 router.use(auth);
+
+router.get('/meta', (_req, res) => {
+  return res.json({
+    ok: true,
+    version: APP_VERSION,
+    gitHash: GIT_HASH,
+    startedAt: SERVER_STARTED_AT,
+    pid: process.pid,
+  });
+});
 
 router.get('/characters', (_req, res) => {
   try {
@@ -275,7 +315,7 @@ router.post('/deploy', async (req, res) => {
 
 router.post('/commands', async (req, res) => {
   const command = String(req.body?.command || '').trim();
-  const allowed = new Set(['clear-all-history', 'clear-images', 'list-images', 'ping-comfy', 'server-status']);
+  const allowed = new Set(['clear-all-history', 'clear-images', 'list-images', 'ping-comfy', 'server-status', 'launch-comfy']);
   if (!allowed.has(command)) return res.status(400).json({ ok: false, error: 'Command not allowed' });
 
   try {
@@ -326,6 +366,11 @@ router.post('/commands', async (req, res) => {
       return res.json({ ok: true, output, uptime_sec: Math.floor(process.uptime()), memory: mem, providers, push_count: pushCount, push_seed: pushSeed, char_seeds: charSeeds });
     }
 
+    if (command === 'launch-comfy') {
+      const out = launchComfyUI();
+      return res.status(out.status).json(out.body);
+    }
+
     return res.status(400).json({ ok: false, error: 'Unhandled command' });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
@@ -335,6 +380,25 @@ router.post('/commands', async (req, res) => {
 router.post('/watcher/start', (_req, res) => res.json(startScreenshotWatcher()));
 router.post('/watcher/stop', (_req, res) => res.json(stopScreenshotWatcher()));
 router.get('/watcher/status', (_req, res) => res.json({ ok: true, running: !!screenshotWatcher, folder: SCREENSHOTS_DIR }));
+
+router.post('/sync-notes', (req, res) => {
+  const syncAll = Boolean(req.body?.all);
+  const scriptPath = path.join(ROOT_DIR, 'sync_admin_notes.ps1');
+  if (!fs.existsSync(scriptPath)) return res.status(404).json({ ok: false, error: 'sync_admin_notes.ps1 not found in project root' });
+  const args = ['-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', scriptPath];
+  if (syncAll) args.push('-All');
+  const child = spawn('powershell.exe', args, { cwd: ROOT_DIR, stdio: ['ignore', 'pipe', 'pipe'] });
+  let stdout = '';
+  let stderr = '';
+  child.stdout.on('data', (d) => { stdout += d.toString(); });
+  child.stderr.on('data', (d) => { stderr += d.toString(); });
+  child.on('close', (code) => {
+    const output = (stdout + (stderr ? '\nSTDERR: ' + stderr : '')).trim();
+    if (code === 0) return res.json({ ok: true, output });
+    return res.status(500).json({ ok: false, error: `Exit ${code}`, output });
+  });
+  child.on('error', (err) => res.status(500).json({ ok: false, error: err.message }));
+});
 
 router.get('/backend-status', async (_req, res) => {
   let comfyAvailable = false;
@@ -353,21 +417,9 @@ router.get('/backend-status', async (_req, res) => {
     falConfigured: Boolean(process.env.FAL_API_KEY),
   });
 });
-
-const COMFYUI_BAT = 'C:\\Users\\mn\\ComfyUI_windows_portable\\run_nvidia_gpu.bat';
 router.post('/launch-comfy', (req, res) => {
-  if (!fs.existsSync(COMFYUI_BAT)) return res.status(404).json({ ok: false, error: 'ComfyUI bat not found: ' + COMFYUI_BAT });
-  try {
-    const child = spawn('cmd.exe', ['/c', 'start', '', COMFYUI_BAT], {
-      detached: true,
-      stdio: 'ignore',
-      cwd: path.dirname(COMFYUI_BAT)
-    });
-    child.unref();
-    return res.json({ ok: true, message: 'ComfyUI launching…' });
-  } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
-  }
+  const out = launchComfyUI();
+  return res.status(out.status).json(out.body);
 });
 
 export default router;

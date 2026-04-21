@@ -155,11 +155,14 @@
       <div class="ab" id="abShots"></div>
       <h3>ComfyUI</h3>
       <div><span class="dot" id="comfyDot"></span><span id="comfyText">checking...</span></div>
+      <div style="margin-top:6px;font-size:12px;color:var(--muted)"><span id="metaText">Build: checking...</span></div>
       <div style="margin:8px 0 10px;display:grid;gap:6px">
         <div><span class="dot" id="routeDot"></span><span id="routeText">Launch route: checking...</span></div>
         <div><span class="dot" id="falDot"></span><span id="falText">FAL key: checking...</span></div>
         <div style="display:flex;gap:8px;align-items:center"><button class="btn secondary" id="backendRefresh" type="button">Refresh backend status</button><span id="backendStatusText" style="font-size:12px;color:var(--muted)"></span></div>
       </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><button class="btn secondary" id="runHealthCheck" type="button">Run health check</button><span id="healthCheckStatus" style="font-size:12px;color:var(--muted)"></span></div>
+      <pre class="mono" id="healthCheckOut" style="min-height:90px;color:var(--text)">Health checks not run yet.</pre>
       <div class="field"><label>Workflow JSON</label><textarea id="workflowJson">{}</textarea></div>
       <button class="btn secondary" id="runWorkflow" type="button">Run workflow</button>
       <div class="thumbs" id="comfyThumbs"></div>
@@ -172,7 +175,7 @@
 
     <section id="snippets" class="section"><h2>Prompt Snippets</h2><div class="field"><label>add custom snippet</label><input id="newSnippet"/></div><button class="btn secondary" id="addSnippet" type="button">Add</button><div class="snips" id="snipList"></div></section>
 
-    <section id="notes" class="section"><h2>Smoke Test Log</h2><div class="field"><label>note</label><textarea id="noteText"></textarea></div><div class="field"><input id="noteImage" type="file" accept="image/*,video/mp4,video/webm,video/quicktime"/></div><img id="notePreview" class="thumb" style="display:none"/><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="submitNote" type="button">Submit</button><button class="btn secondary" id="screenshotNote" type="button">📸 Screenshot</button><button class="btn secondary" id="exportNotes" type="button">Export all notes .zip</button></div><div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--muted)">Auto-import from Screenshots folder:</span><button class="btn secondary" id="watcherToggle" type="button">▶ Start watcher</button><span id="watcherDot" style="width:8px;height:8px;border-radius:50%;background:var(--bad);display:inline-block"></span><span id="watcherLabel" style="font-size:12px;color:var(--muted)">Off</span></div><div class="status" id="noteStatus"></div><div id="noteList"></div></section>
+    <section id="notes" class="section"><h2>Smoke Test Log</h2><div class="field"><label>note</label><textarea id="noteText"></textarea></div><div class="field"><input id="noteImage" type="file" accept="image/*,video/mp4,video/webm,video/quicktime"/></div><img id="notePreview" class="thumb" style="display:none"/><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="submitNote" type="button">Submit</button><button class="btn secondary" id="screenshotNote" type="button">📸 Screenshot</button><button class="btn secondary" id="exportNotes" type="button">Export all notes .zip</button><button class="btn secondary" id="syncNotes" type="button">☁️ Export + Sync</button></div><div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--muted)">Auto-import from Screenshots folder:</span><button class="btn secondary" id="watcherToggle" type="button">▶ Start watcher</button><span id="watcherDot" style="width:8px;height:8px;border-radius:50%;background:var(--bad);display:inline-block"></span><span id="watcherLabel" style="font-size:12px;color:var(--muted)">Off</span></div><div class="status" id="noteStatus"></div><div id="noteList"></div></section>
 
     <section id="chat" class="section">
       <h2>Chat</h2>
@@ -298,6 +301,17 @@ async function readApiResponse(r){
   const preview=(raw||'').replace(/\s+/g,' ').slice(0,120);
   return {ok:false,error:`${hint}${preview?` Response starts with: ${preview}`:''}`};
 }
+async function tryLaunchComfy(){
+  const primary=await fetch('/api/admin/launch-comfy',{method:'POST',headers:headers()});
+  const primaryData=await readApiResponse(primary);
+  if(primary.ok&&primaryData.ok) return {ok:true,message:primaryData.message||'ComfyUI launched'};
+
+  const fallback=await fetch('/api/admin/commands',{method:'POST',headers:headers({'Content-Type':'application/json'}),body:JSON.stringify({command:'launch-comfy'})});
+  const fallbackData=await readApiResponse(fallback);
+  if(fallback.ok&&fallbackData.ok) return {ok:true,message:fallbackData.message||'ComfyUI launched (legacy command)'};
+
+  return {ok:false,error:fallbackData.error||primaryData.error||`Server error ${primary.status}`};
+}
 function stat(id,msg,ok=true){$(id).textContent=msg; $(id).style.color=ok?'var(--ok)':'var(--bad)';}
 function section(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));$(id).classList.add('active');document.querySelector(`[data-sec="${id}"]`).classList.add('active');}
 function fill(c={}){$('c_id').value=c.id||'';$('c_name').value=c.name||'';$('c_color').value=c.color||'#9f67ff';$('c_status').value=c.status||'ONLINE';$('c_active').checked=c.active!==false;$('c_route').value=c.route||'';$('c_bio').value=c.bio||'';$('c_greeting').value=c.greeting||'';$('c_identity').value=c.identity||'';$('c_camera_look').value=c.camera_look||'';
@@ -332,6 +346,51 @@ async function loadNotes(){const d=await jfetch('/api/admin/notes');renderNotes(
 async function sendNote(){const fd=new FormData(); fd.append('note',`${new Date().toISOString()} — ${$('noteText').value.trim()}`); const f=$('noteImage').files[0]; if(f) fd.append('image',f); const r=await fetch('/api/admin/notes',{method:'POST',headers:headers(),body:fd}); const d=await r.json(); if(!r.ok||d.ok===false) throw new Error(d.error||'failed'); stat('noteStatus','Note saved'); $('noteText').value=''; $('noteImage').value=''; $('notePreview').style.display='none'; await loadNotes();}
 async function comfyHealth(){const d=await jfetch('/api/admin/comfy/health'); $('comfyDot').style.background=d.available?'var(--ok)':'var(--bad)'; $('comfyText').textContent=d.available?`Available ${d.version||''}`:'Unavailable';}
 async function comfyImages(){const d=await jfetch('/api/admin/comfy/images'); const box=$('comfyThumbs'); box.innerHTML=''; d.images.forEach(f=>{const img=document.createElement('img');img.className='thumb';img.src=`/api/admin/comfy/image/${encodeURIComponent(f)}`;img.onclick=()=>window.open(img.src,'_blank');box.appendChild(img);});}
+async function loadMeta(){
+  const m=$('metaText');
+  try{
+    const d=await jfetch('/api/admin/meta');
+    m.textContent=`Build v${d.version||'?'} · ${d.gitHash||'unknown'} · started ${new Date(d.startedAt).toLocaleString()} · pid ${d.pid||'?'}`;
+  }catch{
+    m.textContent='Build: unavailable (legacy server or wrong origin)';
+  }
+}
+async function runHealthCheck(){
+  const status=$('healthCheckStatus');
+  const out=$('healthCheckOut');
+  status.textContent='Running...';
+  status.style.color='var(--muted)';
+
+  const checks=[
+    {name:'GET /api/health',url:'/api/health'},
+    {name:'GET /api/admin/meta',url:'/api/admin/meta',auth:true},
+    {name:'GET /api/admin/backend-status',url:'/api/admin/backend-status',auth:true},
+    {name:'GET /api/admin/comfy/health',url:'/api/admin/comfy/health',auth:true},
+    {name:'GET /api/admin/notes',url:'/api/admin/notes',auth:true},
+    {name:'GET /api/admin/characters',url:'/api/admin/characters',auth:true},
+  ];
+
+  const lines=[];
+  let pass=0;
+  for(const c of checks){
+    try{
+      const r=await fetch(c.url,{headers:c.auth?headers():{}});
+      const ct=(r.headers.get('content-type')||'').toLowerCase();
+      const isJson=ct.includes('application/json');
+      const mark=(r.ok&&isJson)?'PASS':'FAIL';
+      if(mark==='PASS') pass++;
+      lines.push(`[${mark}] ${c.name} -> ${r.status}${isJson?' json':' non-json'}`);
+    }catch(e){
+      lines.push(`[FAIL] ${c.name} -> ${e.message}`);
+    }
+  }
+
+  out.textContent=lines.join('\n');
+  const total=checks.length;
+  const okAll=pass===total;
+  status.textContent=`${pass}/${total} passed`;
+  status.style.color=okAll?'var(--ok)':'var(--bad)';
+}
 async function backendStatus(){
   const s=$('backendStatusText');
   s.textContent='Checking...';
@@ -344,11 +403,19 @@ async function backendStatus(){
     $('falText').textContent=d.falConfigured?'FAL key: configured':'FAL key: missing (ComfyUI only mode)';
     s.textContent=`Updated ${new Date().toLocaleTimeString()}`;
     s.style.color='var(--ok)';
-  }catch(e){
-    $('routeDot').style.background='var(--bad)';
-    $('falDot').style.background='var(--bad)';
-    s.textContent='Status check failed: '+e.message;
-    s.style.color='var(--bad)';
+  }catch(_e){
+    // Legacy fallback: keep Comfy check working and avoid noisy hard-fail state.
+    try{
+      const h=await jfetch('/api/admin/comfy/health');
+      $('comfyDot').style.background=h.available?'var(--ok)':'var(--bad)';
+      $('comfyText').textContent=h.available?`Available ${h.version||''}`:'Unavailable';
+    }catch{}
+    $('routeDot').style.background='var(--muted)';
+    $('routeText').textContent='Launch route: legacy server (restart to enable full status checks)';
+    $('falDot').style.background='var(--muted)';
+    $('falText').textContent='FAL key: unknown on legacy server';
+    s.textContent='Partial status only';
+    s.style.color='var(--muted)';
   }
 }
 async function comfyRun(){let wf={}; try{wf=JSON.parse($('workflowJson').value||'{}')}catch{throw new Error('Invalid workflow JSON');} const d=await jfetch('/api/admin/comfy/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow:wf})}); stat('cameraStatus',`Comfy prompt_id: ${d.prompt_id||'n/a'}`);}
@@ -410,6 +477,20 @@ function npSaveCurrent(){
 function npNew(){npLoad();npState.notes.unshift({id:Date.now(),title:'Untitled',body:''});npState.active=0;npSave();npRender();}
 function npDelete(){npLoad();if(npState.notes.length<=1){npState.notes=[{id:Date.now(),title:'Untitled',body:''}];npState.active=0;}else{npState.notes.splice(npState.active,1);npState.active=Math.max(0,npState.active-1);}npSave();npRender();}
 
+async function syncAndExport(){
+  stat('noteStatus','Exporting zip…');
+  const r=await fetch('/api/admin/notes/export',{headers:headers()});
+  if(!r.ok) throw new Error('Export failed: '+r.status);
+  const blob=await r.blob();
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`admin_notes_${Date.now()}.zip`;
+  a.click();
+  stat('noteStatus','Zip downloaded — syncing to archive…');
+  const d=await jfetch('/api/admin/sync-notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({all:false})});
+  stat('noteStatus','Synced ✓  '+d.output.split('\n').pop());
+}
+
 function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>section(b.dataset.sec)); $('saveKey').onclick=()=>localStorage.setItem(KEY,$('adminKey').value.trim()||DEF);
   $('charForm').addEventListener('submit',e=>saveChar(e).catch(err=>stat('charStatus',err.message,false))); $('newChar').onclick=()=>fill({anchors:{}}); $('exportChar').onclick=exportChar; $('importChar').onclick=()=>$('importCharFile').click(); $('importCharFile').onchange=e=>e.target.files[0]&&importChar(e.target.files[0]); $('uploadPromptTxt').onclick=()=>$('promptTxtFile').click(); $('promptTxtFile').onchange=e=>e.target.files[0]&&uploadPromptTxt(e.target.files[0]);
   ['pb_subject','pb_atmo','pb_scenery','pb_style','pb_quality','pb_cast'].forEach(id=>{$(id).addEventListener('input',updatePrompt); $(id).addEventListener('focus',()=>focusedField=id);}); document.querySelectorAll('.atmo').forEach(b=>b.onclick=()=>{$('pb_atmo').value=b.dataset.v;updatePrompt();});
@@ -417,8 +498,9 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.qu
   $('animMotion').oninput=()=>$('animMotionV').textContent=$('animMotion').value;
   $('copyPrompt').onclick=()=>navigator.clipboard.writeText($('pb_preview').value); $('saveSnippet').onclick=()=>{const s=$('pb_preview').value.trim();if(s){state.snips.push(s);localStorage.setItem(SN,JSON.stringify(state.snips));renderSnips();}};
   $('generate').onclick=()=>gen().catch(err=>stat('cameraStatus',err.message,false)); $('saveLook').onclick=()=>saveLook().catch(err=>stat('cameraStatus',err.message,false)); $('runWorkflow').onclick=()=>comfyRun().catch(err=>stat('cameraStatus',err.message,false));
-  $('launchComfy').onclick=async()=>{const st=$('launchComfyStatus');st.textContent='Launching...';st.style.color='var(--muted)';try{const r=await fetch('/api/admin/launch-comfy',{method:'POST',headers:headers()});const d=await readApiResponse(r);if(r.ok&&d.ok){st.textContent='OK '+(d.message||'ComfyUI launched');st.style.color='var(--ok)';}else{st.textContent='Error: '+(d.error||('Server error '+r.status));st.style.color='var(--bad)';}}catch(e){st.textContent='Error: '+e.message;st.style.color='var(--bad)';}await backendStatus().catch(()=>{});setTimeout(()=>{st.textContent='';},7000);};
+  $('launchComfy').onclick=async()=>{const st=$('launchComfyStatus');st.textContent='Launching...';st.style.color='var(--muted)';try{const r=await tryLaunchComfy();if(r.ok){st.textContent='OK '+r.message;st.style.color='var(--ok)';}else{st.textContent='Error: '+r.error;st.style.color='var(--bad)';}}catch(e){st.textContent='Error: '+e.message;st.style.color='var(--bad)';}await backendStatus().catch(()=>{});setTimeout(()=>{st.textContent='';},7000);};
   $('backendRefresh').onclick=()=>backendStatus().catch(err=>stat('cameraStatus',err.message,false));
+  $('runHealthCheck').onclick=()=>runHealthCheck().catch(err=>stat('cameraStatus',err.message,false));
   $('addSnippet').onclick=()=>{const s=$('newSnippet').value.trim(); if(!s)return; state.snips.push(s); localStorage.setItem(SN,JSON.stringify(state.snips)); $('newSnippet').value=''; renderSnips();};
   $('noteImage').onchange=()=>{const f=$('noteImage').files[0]; if(!f) return; $('notePreview').src=URL.createObjectURL(f); $('notePreview').style.display='block';}; $('submitNote').onclick=()=>sendNote().catch(err=>stat('noteStatus',err.message,false)); $('exportNotes').onclick=async()=>{try{stat('noteStatus','Downloading…');const r=await fetch('/api/admin/notes/export',{headers:headers()});if(!r.ok)throw new Error('Server error '+r.status);const blob=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`admin_notes_${Date.now()}.zip`;a.click();stat('noteStatus','Downloaded ✓');}catch(e){stat('noteStatus',e.message,false);}};$('screenshotNote').onclick=()=>captureAndNote().catch(err=>stat('noteStatus',err.message,false));
   $('chatChar').onchange=updateChatIdentity; $('sendChat').onclick=()=>sendChat().catch(err=>stat('chatStatus',err.message,false)); $('clearChat').onclick=()=>clearChat().catch(err=>stat('chatStatus',err.message,false));
@@ -433,6 +515,7 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.qu
   $('railwayCheck').onclick=()=>checkRailway();
   // Watcher
   $('watcherToggle').onclick=()=>toggleWatcher().catch(err=>stat('noteStatus',err.message,false));
+  $('syncNotes').onclick=()=>syncAndExport().catch(err=>stat('noteStatus',err.message,false));
   checkWatcherStatus();
   // Notepad
   npRender();
@@ -504,7 +587,7 @@ async function checkRailway(){
   }catch(e){$('railwayDot').style.background='var(--bad)';$('railwayText').textContent='Unreachable';}
 }
 
-bind(); renderSnips(); loadChars().then(()=>{if(state.chars[0]){const id=state.chars[0].id;$('loreChar').value=id;$('previewChar').value=id;fillLore(id);}renderDeployList();}).catch(err=>stat('charStatus',err.message,false)); loadNotes().catch(err=>stat('noteStatus',err.message,false)); comfyHealth(); comfyImages(); backendStatus();
+bind(); renderSnips(); loadChars().then(()=>{if(state.chars[0]){const id=state.chars[0].id;$('loreChar').value=id;$('previewChar').value=id;fillLore(id);}renderDeployList();}).catch(err=>stat('charStatus',err.message,false)); loadNotes().catch(err=>stat('noteStatus',err.message,false)); comfyHealth(); comfyImages(); loadMeta(); backendStatus();
 </script>
 </body>
 </html>

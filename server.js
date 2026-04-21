@@ -16,6 +16,11 @@ app.use(express.json());
 app.use(express.static(__dirname));
 app.use('/admin_notes', express.static(__dirname + '/admin_notes'));
 
+// Health check
+app.get('/api/health', (_req, res) => {
+  res.json({ ok: true, status: 'online', uptime_sec: Math.floor(process.uptime()) });
+});
+
 // API routes
 app.use('/api/characters', characterRoutes);
 app.use('/api/camera', cameraRoutes);
@@ -33,11 +38,6 @@ app.post('/api', (req, res) => {
 // Always return JSON for unknown API routes/methods.
 app.use('/api', (_req, res) => {
   return res.status(404).json({ ok: false, error: 'Not found' });
-});
-
-// Health check
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, status: 'online' });
 });
 
 // SPA fallback
