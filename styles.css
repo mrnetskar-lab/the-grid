@@ -149,8 +149,8 @@ img{display:block;}
 .fpill.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--text);}
 
 .discover-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:4px 2px;}
-.discover-card{border-radius:36px;overflow:hidden;position:relative;aspect-ratio:9/19.5;background:var(--surface);border:3px solid rgba(255,255,255,0.12);cursor:pointer;transition:opacity .28s ease,transform .3s ease,border-color .22s,box-shadow .22s;box-shadow:0 0 0 1px rgba(0,0,0,0.6),0 8px 32px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.07);}
-.discover-card::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:52px;height:5px;border-radius:3px;background:rgba(0,0,0,0.7);z-index:10;pointer-events:none;}
+.discover-card{border-radius:24px;overflow:hidden;position:relative;aspect-ratio:2/3;background:var(--surface);border:3px solid rgba(255,255,255,0.12);cursor:pointer;transition:opacity .28s ease,transform .3s ease,border-color .22s,box-shadow .22s;box-shadow:0 0 0 1px rgba(0,0,0,0.6),0 8px 32px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.07);}
+.discover-card::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:40px;height:4px;border-radius:3px;background:rgba(0,0,0,0.6);z-index:10;pointer-events:none;}
 .discover-card:hover{transform:translateY(-6px) scale(1.01);border-color:rgba(184,52,104,0.5);box-shadow:0 0 0 1px rgba(184,52,104,0.2),0 20px 60px rgba(0,0,0,0.7),0 0 40px rgba(184,52,104,0.12),inset 0 1px 0 rgba(255,255,255,0.1);}
 .discover-card.hidden{opacity:0;pointer-events:none;transform:scale(.96) translateY(5px);}
 .discover-card:hover .d-photo img{transform:scale(1.05);}
