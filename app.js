@@ -249,7 +249,7 @@ reader.onload=ev=>{pendingImg=ev.target.result;imgAttachThumb.src=pendingImg;img
 reader.readAsDataURL(f);
 });
 
-const IMG_REACTIONS=['…I see you.',"That's a good look.",'Sent me something. Noted.','*looks at it longer than expected*','Okay. That one stays with me.','You really sent that.','*saves it without saying why*'];
+const IMG_REACTIONS=['...I see you.','That\'s a good look.','Sent me something. Noted.','*looks at it longer than expected*','Okay. That one stays with me.','You really sent that.','*saves it without saying why*'];
 
 document.getElementById('chatForm').addEventListener('submit',async e=>{
 e.preventDefault();
