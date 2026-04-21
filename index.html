@@ -1087,9 +1087,9 @@ document.getElementById('gateEnter').addEventListener('click',()=>{localStorage.
 const onboard=document.getElementById('onboard');
 function _dismissOnboard(){if(onboard){onboard.style.transition='opacity .35s';onboard.style.opacity='0';setTimeout(()=>onboard.classList.add('hidden'),380);}localStorage.setItem('v_onboarded','1');}
 function skipOnboard(){_dismissOnboard();}
-function obSelect(el){document.querySelectorAll('.ob-char').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');const btn=document.getElementById('obPickBtn');if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';}const step3title=document.getElementById('obStep3Title');if(step3title){const n=el.querySelector('.ob-char-name');if(n)step3title.textContent=n.textContent+' is waiting.';}}
+function obSelect(el){document.querySelectorAll('.ob-char').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');const btn=document.getElementById('obPickBtn');if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';}const id=el.dataset.thread;const n=el.querySelector('.ob-char-name');const imgEl=el.querySelector('img');const step3title=document.getElementById('obStep3Title');if(step3title&&n)step3title.textContent=n.textContent+' is waiting.';const avatar=document.getElementById('obAvatarImg');if(avatar&&imgEl)avatar.src=imgEl.src;const obGreeting=document.getElementById('obGreeting');if(obGreeting)obGreeting.textContent='"'+(apiCharGreetings[id]||'…')+'"';}
 function finishOnboard(){const sel=document.querySelector('.ob-char.selected');if(sel){const t=sel.dataset.thread;if(t){const item=document.querySelector(`.drawer-item[data-thread="${t}"]`);if(item)item.click();}}_dismissOnboard();goTo('chat');}
-function obNext(step){document.querySelectorAll('.ob-screen').forEach((s,i)=>s.classList.toggle('active',i===step-1));}
+function obNext(step){document.querySelectorAll('.ob-step').forEach((s,i)=>s.classList.toggle('active',i===step-1));}
 if(localStorage.getItem('v_onboarded')){_dismissOnboard();}
 // clear stale message limit lock
 localStorage.removeItem('v_free_msgs');
@@ -1108,6 +1108,7 @@ const characterDirectory={
 };
 const relationshipState={hazel:42,nina:56,iris:33,vale:61};
 const messageState=JSON.parse(localStorage.getItem('v_message_state')||'{}');
+const apiCharGreetings={};
 const tierPerks={free:{name:'Free',daily:3,monthly:0,gallery:false},pulse:{name:'Pulse',daily:0,monthly:50,gallery:true},signal:{name:'Signal',daily:0,monthly:Infinity,gallery:true}};
 const tierState={tier:localStorage.getItem('v_tier')||'free'};
 const currency={sparks:parseInt(localStorage.getItem('v_sparks')||'120',10),pulses:parseInt(localStorage.getItem('v_pulses')||'0',10),save(){localStorage.setItem('v_sparks',this.sparks);localStorage.setItem('v_pulses',this.pulses);}};
@@ -1290,10 +1291,22 @@ document.querySelectorAll('.drawer-item').forEach(item=>{item.addEventListener('
   applyCharAccent(thread);
   chatMsgs.innerHTML='';updateCharPanel(thread);
   goTo('chat');
-  const tr=addTyping(curAvSrc);
-  fetch(`/api/characters/${curThread}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__greeting__'})})
-    .then(r=>r.json()).then(d=>{tr.remove();const reply=(d.reply||greetings[curThread]||'…').trim();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');})
-    .catch(()=>{tr.remove();const fallback=(greetings[curThread]||'…');addMsg('theirs',fallback,curAvSrc);rememberMessage(curThread,fallback,'assistant');});
+  function _showGreeting(){
+    const tr=addTyping(curAvSrc);
+    fetch(`/api/characters/${curThread}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__greeting__'})})
+      .then(r=>r.json()).then(d=>{tr.remove();const reply=(d.reply||greetings[curThread]||'…').trim();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');})
+      .catch(()=>{tr.remove();const fallback=(greetings[curThread]||'…');addMsg('theirs',fallback,curAvSrc);rememberMessage(curThread,fallback,'assistant');});
+  }
+  fetch(`/api/characters/${thread}/history`)
+    .then(r=>r.json()).then(d=>{
+      if(d.ok&&d.messages&&d.messages.length){
+        d.messages.forEach(m=>{addMsg(m.role==='user'?'mine':'theirs',String(m.content||''),m.role==='user'?'':curAvSrc);});
+        if(!(messageState[thread]?.lastAt)){
+          const last=d.messages[d.messages.length-1];
+          if(last){const slot={messages:[{text:String(last.content||''),role:last.role,ts:Date.now()}],lastAt:Date.now()};messageState[thread]=slot;localStorage.setItem('v_message_state',JSON.stringify(messageState));renderInboxes();}
+        }
+      }
+    }).catch(()=>{}).finally(()=>{_showGreeting();});
 });});
 
 document.getElementById('chatForm').addEventListener('submit',async e=>{
@@ -1629,6 +1642,7 @@ Object.keys(PRESENCE_POOLS).forEach(id=>{setPresence(id,randPresence(id));functi
 updateCurrencyUI();
 trackLoginBonuses();
 renderInboxes();
+fetch('/api/characters').then(r=>r.json()).then(d=>{if(d.ok&&d.characters)d.characters.forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});}).catch(()=>{});
 
 </script>
 </body>

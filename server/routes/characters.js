@@ -166,6 +166,14 @@ router.post('/:id/chat', async (req, res) => {
   }
 });
 
+// GET /api/characters/:id/history
+router.get('/:id/history', (req, res) => {
+  const char = loadCharacter(req.params.id);
+  if (!char) return res.status(404).json({ ok: false, error: 'Character not found' });
+  const history = loadHistory(req.params.id);
+  res.json({ ok: true, messages: history.slice(-20) });
+});
+
 // DELETE /api/characters/:id/history
 router.delete('/:id/history', (req, res) => {
   saveHistory(req.params.id, []);
