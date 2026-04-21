@@ -319,8 +319,7 @@ async function generateShot() {
   const steps = els('labSteps').value;
   const guidance_scale = els('labGuidance').value;
   const cfg = els('labCfg').value;
-  const decoratedPrompt = `${customPrompt}\nModel: ${model}. Steps: ${steps}. Guidance scale: ${guidance_scale}. Cfg: ${cfg}.`;
-  const data = await fetch('/api/camera/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ character, mood, customPrompt: decoratedPrompt }) }).then(r => r.json());
+  const data = await fetch('/api/camera/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ character, mood, customPrompt: customPrompt || undefined }) }).then(r => r.json());
   if (!data.ok) throw new Error(data.error || 'generate failed');
   state.shots.unshift(data.shot);
   state.shots = state.shots.slice(0, 2);
