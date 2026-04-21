@@ -143,7 +143,7 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function generateViaFal(prompt, character) {
+async function generateViaFal(prompt, character, falParams = {}) {
   const key = process.env.FAL_API_KEY;
   if (!key) throw new Error('FAL_API_KEY not set');
   const retryDelaysMs = [1000, 2000, 4000];
@@ -153,7 +153,8 @@ async function generateViaFal(prompt, character) {
     for (let attempt = 1; attempt <= retryDelaysMs.length; attempt += 1) {
       try {
         console.log(`[Camera] Trying ${model.id} (attempt ${attempt}/${retryDelaysMs.length})`);
-        const data = await falRequest(model.id, model.body(prompt), key);
+        const mergedBody = { ...model.body(prompt), ...(falParams || {}) };
+        const data = await falRequest(model.id, mergedBody, key);
         const imageUrl = data.images?.[0]?.url;
         if (!imageUrl) throw new Error(`No image URL from ${model.id}`);
         const filename = `shot_${Date.now()}.jpg`;
@@ -209,12 +210,13 @@ async function pollComfy(promptId, maxWaitMs = 120000) {
   throw new Error('ComfyUI timed out');
 }
 
-async function generateViaComfy(prompt, character, seedOffset = 0) {
-  const seed = getSeed(character, seedOffset);
+async function generateViaComfy(prompt, character, seedOffset = 0, comfyParams = {}) {
+  const mergedComfy = comfyParams || {};
+  const seed = Number.isFinite(Number(mergedComfy.seed)) ? Number(mergedComfy.seed) : getSeed(character, seedOffset);
   const workflow = {
-    "3": { inputs: { seed, steps: 35, cfg: 7, sampler_name: 'dpm_2m', scheduler: 'karras', denoise: 1, model: ['4', 0], positive: ['6', 0], negative: ['7', 0], latent_image: ['5', 0] }, class_type: 'KSampler' },
+    "3": { inputs: { seed, steps: Number(mergedComfy.steps ?? 35), cfg: Number(mergedComfy.cfg ?? 7), sampler_name: String(mergedComfy.sampler_name || 'dpm_2m'), scheduler: String(mergedComfy.scheduler || 'karras'), denoise: Number(mergedComfy.denoise ?? 1), model: ['4', 0], positive: ['6', 0], negative: ['7', 0], latent_image: ['5', 0] }, class_type: 'KSampler' },
     "4": { inputs: { ckpt_name: SD_MODEL }, class_type: 'CheckpointLoaderSimple' },
-    "5": { inputs: { width: 512, height: 768, batch_size: 1 }, class_type: 'EmptyLatentImage' },
+    "5": { inputs: { width: Number(mergedComfy.width ?? 512), height: Number(mergedComfy.height ?? 768), batch_size: 1 }, class_type: 'EmptyLatentImage' },
     "6": { inputs: { text: prompt, clip: ['4', 1] }, class_type: 'CLIPTextEncode' },
     "7": { inputs: { text: SD_NEGATIVE, clip: ['4', 1] }, class_type: 'CLIPTextEncode' },
     "8": { inputs: { samples: ['3', 0], vae: ['4', 2] }, class_type: 'VAEDecode' },
@@ -238,16 +240,16 @@ async function generateViaComfy(prompt, character, seedOffset = 0) {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
-export async function generateCameraShot({ character = 'elara', mood = 'warm', customPrompt } = {}) {
+export async function generateCameraShot({ character = 'elara', mood = 'warm', customPrompt, falParams = null, comfyParams = null } = {}) {
   const prompt = customPrompt || buildPrompt(character, mood);
 
   if (!customPrompt && await isComfyAvailable()) {
-    try { return await generateViaComfy(prompt, character); }
+    try { return await generateViaComfy(prompt, character, 0, comfyParams || {}); }
     catch (err) { console.warn('[Camera] ComfyUI failed, falling back:', err.message); }
   }
 
   if (process.env.FAL_API_KEY) {
-    try { return await generateViaFal(prompt, character); }
+    try { return await generateViaFal(prompt, character, falParams || {}); }
     catch (err) { console.warn('[Camera] FAL failed, falling back:', err.message); }
   }
 

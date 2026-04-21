@@ -10,13 +10,15 @@ const IMAGES_DIR = path.resolve(__dirname, '../../images');
 const router = express.Router();
 
 // POST /api/camera/generate
-// Body: { character?: string, mood?: string, prompt?: string }
+// Body: { character?: string, mood?: string, customPrompt?: string, falParams?: object, comfyParams?: object }
 router.post('/generate', async (req, res) => {
   try {
     const character = req.body?.character || 'elara';
     const mood = req.body?.mood || 'warm';
-    const customPrompt = req.body?.prompt || null;
-    const shot = await generateCameraShot({ character, mood, customPrompt });
+    const customPrompt = req.body?.customPrompt || req.body?.prompt || null;
+    const falParams = req.body?.falParams || null;
+    const comfyParams = req.body?.comfyParams || null;
+    const shot = await generateCameraShot({ character, mood, customPrompt, falParams, comfyParams });
     return res.json({ ok: true, shot });
   } catch (err) {
     console.error('[Camera] generate error:', err);
