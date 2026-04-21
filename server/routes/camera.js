@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { generateCameraShot, listShots, getLooks, setLook } from '../services/CameraService.js';
+import { generateCameraShot, animateCameraShot, listShots, getLooks, setLook } from '../services/CameraService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const IMAGES_DIR = path.resolve(__dirname, '../../images');
@@ -22,6 +22,20 @@ router.post('/generate', async (req, res) => {
     return res.json({ ok: true, shot });
   } catch (err) {
     console.error('[Camera] generate error:', err);
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/camera/animate
+// Body: { imagePath: '/images/shot_xxx.jpg', duration?: 5|10, motion_strength?: number }
+router.post('/animate', async (req, res) => {
+  try {
+    const imagePath = req.body?.imagePath;
+    const duration = req.body?.duration;
+    const motion_strength = req.body?.motion_strength;
+    const video = await animateCameraShot({ imagePath, duration, motion_strength });
+    return res.json({ ok: true, path: video.path, video });
+  } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }
 });

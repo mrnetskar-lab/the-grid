@@ -256,6 +256,35 @@ export async function generateCameraShot({ character = 'elara', mood = 'warm', c
   throw new Error('No image generation backend available. Set FAL_API_KEY in environment.');
 }
 
+export async function animateCameraShot({ imagePath, duration = 5, motion_strength = 0.5 } = {}) {
+  const key = process.env.FAL_API_KEY;
+  if (!key) throw new Error('FAL_API_KEY not set');
+  if (!imagePath || typeof imagePath !== 'string') throw new Error('imagePath is required');
+
+  const safeName = path.basename(imagePath);
+  const localPath = path.resolve(IMAGES_DIR, safeName);
+  if (!localPath.startsWith(IMAGES_DIR + path.sep) || !fs.existsSync(localPath)) {
+    throw new Error('Source image not found');
+  }
+
+  const sourceUrl = await uploadToFalStorage(localPath, key);
+  const payload = {
+    image_url: sourceUrl,
+    duration: Number(duration) === 10 ? 10 : 5,
+    motion_strength: Math.max(0, Math.min(1, Number(motion_strength) || 0.5)),
+  };
+
+  const data = await falRequest('fal-ai/kling-video/v1.6/image-to-video', payload, key);
+  const videoUrl = data.video?.url || data.videos?.[0]?.url || data.output?.video?.url || data.url;
+  if (!videoUrl) {
+    throw new Error('No video URL returned from kling-video');
+  }
+
+  const filename = `video_${Date.now()}.mp4`;
+  await downloadFile(videoUrl, path.join(IMAGES_DIR, filename));
+  return { filename, path: `/images/${filename}`, backend: 'fal-ai/kling-video/v1.6/image-to-video' };
+}
+
 export function listShots() {
   if (!fs.existsSync(IMAGES_DIR)) return [];
   return fs.readdirSync(IMAGES_DIR)
@@ -271,5 +300,48 @@ function downloadFile(url, destPath) {
     const file = fs.createWriteStream(destPath);
     https.get(url, res => { res.pipe(file); file.on('finish', () => file.close(resolve)); })
       .on('error', err => { fs.unlink(destPath, () => {}); reject(err); });
+  });
+}
+
+function uploadToFalStorage(filePath, key) {
+  return new Promise((resolve, reject) => {
+    const file = fs.readFileSync(filePath);
+    const boundary = `----grid${Date.now().toString(16)}`;
+    const filename = path.basename(filePath);
+    const head = Buffer.from(
+      `--${boundary}\r\n` +
+      `Content-Disposition: form-data; name="file"; filename="${filename}"\r\n` +
+      'Content-Type: application/octet-stream\r\n\r\n'
+    );
+    const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+    const body = Buffer.concat([head, file, tail]);
+
+    const req = https.request({
+      hostname: 'fal.run',
+      path: '/storage/upload',
+      method: 'POST',
+      headers: {
+        Authorization: `Key ${key}`,
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+        'Content-Length': body.length,
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 400) return reject(new Error(`FAL storage upload failed: ${res.statusCode}`));
+        try {
+          const parsed = JSON.parse(data);
+          const url = parsed.url || parsed.file_url || parsed.data?.url;
+          if (!url) return reject(new Error('FAL storage response missing url'));
+          return resolve(url);
+        } catch (err) {
+          return reject(err);
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
   });
 }
