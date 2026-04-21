@@ -332,6 +332,21 @@ export async function generateCameraShot({ character = 'elara', mood = 'warm', c
   throw new Error('No image generation backend available. Start ComfyUI (Launch ComfyUI button) or set FAL_API_KEY in environment.');
 }
 
+export async function generateTextToVideo({ prompt, duration = 5, aspect_ratio = '9:16' } = {}) {
+  const key = process.env.FAL_API_KEY;
+  if (!key) throw new Error('FAL_API_KEY not set');
+  if (!prompt) throw new Error('prompt is required');
+
+  const body = { prompt, duration: Number(duration) === 10 ? 10 : 5, aspect_ratio };
+  const data = await falRequest('fal-ai/kling-video/v1.6/standard/text-to-video', body, key);
+  const videoUrl = data.video?.url || data.videos?.[0]?.url || data.output?.video?.url;
+  if (!videoUrl) throw new Error('No video URL returned from kling text-to-video');
+
+  const filename = `video_${Date.now()}.mp4`;
+  await downloadFile(videoUrl, path.join(IMAGES_DIR, filename));
+  return { filename, path: `/images/${filename}`, backend: 'fal-ai/kling-video/v1.6/text-to-video' };
+}
+
 export async function animateCameraShot({ imagePath, duration = 5, motion_strength = 0.5 } = {}) {
   const key = process.env.FAL_API_KEY;
   if (!key) throw new Error('FAL_API_KEY not set');

@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { generateCameraShot, animateCameraShot, listShots, getLooks, setLook } from '../services/CameraService.js';
+import { generateCameraShot, animateCameraShot, generateTextToVideo, listShots, getLooks, setLook } from '../services/CameraService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const IMAGES_DIR = path.resolve(__dirname, '../../images');
@@ -35,6 +35,20 @@ router.post('/animate', async (req, res) => {
     const motion_strength = req.body?.motion_strength;
     const video = await animateCameraShot({ imagePath, duration, motion_strength });
     return res.json({ ok: true, path: video.path, video });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /api/camera/text-to-video
+router.post('/text-to-video', async (req, res) => {
+  try {
+    const prompt = req.body?.prompt;
+    const duration = req.body?.duration;
+    const aspect_ratio = req.body?.aspect_ratio || '9:16';
+    if (!prompt) return res.status(400).json({ ok: false, error: 'prompt required' });
+    const result = await generateTextToVideo({ prompt, duration, aspect_ratio });
+    return res.json({ ok: true, ...result });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }

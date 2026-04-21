@@ -177,6 +177,16 @@
         <input id="animMotion" type="range" min="0" max="1" step="0.1" value="0.5" style="width:180px"/>
       </div>
       <div class="ab" id="abShots"></div>
+      <h3>Text to Video</h3>
+      <div class="field"><label>Prompt</label><textarea id="t2v_prompt" style="min-height:70px" placeholder="A young woman on a rooftop at night, city lights behind her, wind in her hair, cinematic slow motion…"></textarea></div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+        <div class="field"><label>Duration</label><select id="t2v_duration"><option value="5">5 sec</option><option value="10">10 sec</option></select></div>
+        <div class="field"><label>Aspect ratio</label><select id="t2v_aspect"><option value="9:16">9:16 (portrait)</option><option value="16:9">16:9 (landscape)</option><option value="1:1">1:1 (square)</option></select></div>
+        <button class="btn" id="t2vGenerate" type="button" style="align-self:flex-end">Generate video</button>
+      </div>
+      <div class="status" id="t2vStatus"></div>
+      <div id="t2vResult" style="margin-top:8px"></div>
+
       <h3>ComfyUI</h3>
       <div><span class="dot" id="comfyDot"></span><span id="comfyText">checking...</span></div>
       <div style="margin-top:6px;font-size:12px;color:var(--muted)"><span id="metaText">Build: checking...</span></div>
@@ -188,7 +198,11 @@
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><button class="btn secondary" id="runHealthCheck" type="button">Run health check</button><span id="healthCheckStatus" style="font-size:12px;color:var(--muted)"></span></div>
       <pre class="mono" id="healthCheckOut" style="min-height:90px;color:var(--text)">Health checks not run yet.</pre>
       <div class="field"><label>Workflow JSON</label><textarea id="workflowJson">{}</textarea></div>
-      <button class="btn secondary" id="runWorkflow" type="button">Run workflow</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="runWorkflow" type="button">Run workflow</button>
+        <button class="btn secondary" id="saveWorkflow" type="button">💾 Save</button>
+        <button class="btn secondary" id="loadWorkflow" type="button">↓ Load</button>
+      </div>
       <div class="thumbs" id="comfyThumbs"></div>
       <div class="sep"></div>
       <div style="display:flex;align-items:center;gap:12px">
@@ -445,6 +459,7 @@ async function backendStatus(){
 async function comfyRun(){
   let wf={};
   try{wf=JSON.parse($('workflowJson').value||'{}')}catch{throw new Error('Invalid workflow JSON');}
+  localStorage.setItem('grid_workflow_json',$('workflowJson').value);
   stat('cameraStatus','Running…');
   const d=await jfetch('/api/admin/comfy/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow:wf})});
   if(d.backend==='fal-ai/comfy'&&d.shot?.path){
@@ -541,7 +556,22 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF;
   $('labCharacter').onchange=syncLabFromChar; ['fal_steps','fal_gs','fal_safe'].forEach(id=>$(id).oninput=()=>$(id+'_v').textContent=$(id).value);
   $('animMotion').oninput=()=>$('animMotionV').textContent=$('animMotion').value;
   $('copyPrompt').onclick=()=>navigator.clipboard.writeText($('pb_preview').value); $('saveSnippet').onclick=()=>{const s=$('pb_preview').value.trim();if(s){state.snips.push(s);localStorage.setItem(SN,JSON.stringify(state.snips));renderSnips();}};
-  $('generate').onclick=()=>gen().catch(err=>stat('cameraStatus',err.message,false)); $('saveLook').onclick=()=>saveLook().catch(err=>stat('cameraStatus',err.message,false)); $('runWorkflow').onclick=()=>comfyRun().catch(err=>stat('cameraStatus',err.message,false));
+  $('generate').onclick=()=>gen().catch(err=>stat('cameraStatus',err.message,false));
+  $('t2vGenerate').onclick=async()=>{
+    const prompt=$('t2v_prompt').value.trim();
+    if(!prompt){stat('t2vStatus','Enter a prompt first',false);return;}
+    stat('t2vStatus','Generating… (this takes ~2 min)');
+    $('t2vGenerate').disabled=true;
+    try{
+      const d=await jfetch('/api/camera/text-to-video',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt,duration:Number($('t2v_duration').value),aspect_ratio:$('t2v_aspect').value})});
+      $('t2vResult').innerHTML=`<video src="${d.path}" controls autoplay loop muted style="max-width:100%;border-radius:8px;border:1px solid var(--border);margin-top:4px"></video><div style="font-size:11px;color:var(--muted);margin-top:4px">${d.filename}</div>`;
+      stat('t2vStatus','Done ✓');
+    }catch(e){stat('t2vStatus',e.message,false);}
+    $('t2vGenerate').disabled=false;
+  }; $('saveLook').onclick=()=>saveLook().catch(err=>stat('cameraStatus',err.message,false)); $('runWorkflow').onclick=()=>comfyRun().catch(err=>stat('cameraStatus',err.message,false));
+  $('saveWorkflow').onclick=async()=>{try{await jfetch('/api/admin/workflow',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow:$('workflowJson').value})});stat('cameraStatus','Workflow saved ✓');}catch(e){stat('cameraStatus',e.message,false);}};
+  $('loadWorkflow').onclick=async()=>{try{const d=await jfetch('/api/admin/workflow');$('workflowJson').value=d.workflow;localStorage.setItem('grid_workflow_json',d.workflow);stat('cameraStatus','Workflow loaded ✓');}catch(e){stat('cameraStatus',e.message,false);}};
+  jfetch('/api/admin/workflow').then(d=>{if(d.workflow&&d.workflow!=='{}'){$('workflowJson').value=d.workflow;localStorage.setItem('grid_workflow_json',d.workflow);}}).catch(()=>{});
   $('launchComfy').onclick=async()=>{const st=$('launchComfyStatus');st.textContent='Launching...';st.style.color='var(--muted)';try{const r=await tryLaunchComfy();if(r.ok){st.textContent='OK '+r.message;st.style.color='var(--ok)';}else{st.textContent='Error: '+r.error;st.style.color='var(--bad)';}}catch(e){st.textContent='Error: '+e.message;st.style.color='var(--bad)';}await backendStatus().catch(()=>{});setTimeout(()=>{st.textContent='';},7000);};
   $('backendRefresh').onclick=()=>backendStatus().catch(err=>stat('cameraStatus',err.message,false));
   $('runHealthCheck').onclick=()=>runHealthCheck().catch(err=>stat('cameraStatus',err.message,false));
@@ -562,6 +592,8 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF;
   $('syncNotes').onclick=()=>syncAndExport().catch(err=>stat('noteStatus',err.message,false));
   checkWatcherStatus();
   // Notepad
+  const savedWf=localStorage.getItem('grid_workflow_json');if(savedWf)$('workflowJson').value=savedWf;
+  $('workflowJson').oninput=()=>localStorage.setItem('grid_workflow_json',$('workflowJson').value);
   npRender();
   $('npNew').onclick=npNew;
   $('npDelete').onclick=npDelete;

@@ -386,6 +386,22 @@ router.post('/commands', async (req, res) => {
   }
 });
 
+const WORKFLOW_PATH = path.join(NOTES_DIR, 'workflow.json');
+router.get('/workflow', (_req, res) => {
+  try {
+    const raw = fs.existsSync(WORKFLOW_PATH) ? fs.readFileSync(WORKFLOW_PATH, 'utf-8') : '{}';
+    return res.json({ ok: true, workflow: raw });
+  } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
+});
+router.post('/workflow', (req, res) => {
+  try {
+    const raw = typeof req.body?.workflow === 'string' ? req.body.workflow : JSON.stringify(req.body?.workflow || {});
+    JSON.parse(raw); // validate
+    fs.writeFileSync(WORKFLOW_PATH, raw, 'utf-8');
+    return res.json({ ok: true });
+  } catch (err) { return res.status(400).json({ ok: false, error: err.message }); }
+});
+
 router.post('/watcher/start', (_req, res) => res.json(startScreenshotWatcher()));
 router.post('/watcher/stop', (_req, res) => res.json(stopScreenshotWatcher()));
 router.get('/watcher/status', (_req, res) => res.json({ ok: true, running: !!screenshotWatcher, folder: SCREENSHOTS_DIR }));
