@@ -38,9 +38,9 @@
     .brand-name{font-size:1.15rem;font-weight:800;letter-spacing:-.04em;}
     .brand-name span{color:var(--accent);}
 
-    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);border:1px solid transparent;background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;text-align:left;width:100%;font-size:.88rem;font-weight:500;}
-    .nav-item:hover{color:var(--text);background:rgba(255,255,255,0.04);}
-    .nav-item.active{color:var(--text);background:transparent;border-color:rgba(184,52,104,0.5);}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);border:none;background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;text-align:left;width:100%;font-size:.88rem;font-weight:500;}
+    .nav-item:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+    .nav-item.active{color:var(--text);background:rgba(184,52,104,0.11);}
     .nav-icon{width:17px;height:17px;flex:0 0 17px;opacity:.7;font-size:.85rem;display:grid;place-items:center;}
     .nav-item.active .nav-icon{opacity:1;color:var(--accent);}
     .nav-arrow{font-size:.62rem;margin-left:auto;color:var(--text-3);transition:transform .22s;}
@@ -48,9 +48,9 @@
 
     .thread-drawer{overflow:hidden;max-height:0;opacity:0;transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .22s;display:flex;flex-direction:column;gap:2px;padding-left:8px;}
     .thread-drawer.open{max-height:320px;opacity:1;}
-    .drawer-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r-sm);border:1px solid transparent;background:transparent;color:var(--text);cursor:pointer;transition:.14s;text-align:left;width:100%;}
+    .drawer-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r-sm);border:none;background:transparent;color:var(--text);cursor:pointer;transition:.14s;text-align:left;width:100%;}
     .drawer-item:hover{background:rgba(255,255,255,0.05);}
-    .drawer-item.active{background:transparent;border-color:rgba(184,52,104,0.5);}
+    .drawer-item.active{background:rgba(184,52,104,0.11);}
     .drawer-item.active .d-name{color:var(--accent);text-shadow:0 0 20px rgba(184,52,104,0.4);}
     .d-av{width:28px;height:28px;border-radius:50%;flex:0 0 28px;border:none;overflow:hidden;object-fit:cover;}
     .d-name{font-size:.82rem;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -106,11 +106,13 @@
     /* ── AVATAR RAIL ── */
     .avatar-rail{display:flex;gap:16px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
     .avatar-rail::-webkit-scrollbar{display:none;}
-    .av-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex:0 0 auto;}
-    .av-ring{width:64px;height:64px;border-radius:50%;padding:2.5px;background:linear-gradient(135deg,#b83468,#8a0f48);}
-    .av-ring.offline{background:var(--surface-3);}
-    .av-inner{width:100%;height:100%;border-radius:50%;border:2px solid var(--bg);overflow:hidden;}
-    .av-inner img{width:100%;height:100%;object-fit:cover;}
+    .av-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;flex:0 0 auto;}
+    .av-ring{position:relative;width:64px;height:64px;border-radius:14px;overflow:hidden;}
+    .av-ring img{width:100%;height:100%;object-fit:cover;display:block;border-radius:14px;transition:filter .2s;}
+    .av-item:hover .av-ring img{filter:brightness(1.08);}
+    .av-status{position:absolute;bottom:5px;right:5px;width:9px;height:9px;border-radius:50%;background:#22c55e;border:2px solid var(--bg);}
+    .av-ring.offline .av-status{background:#6b7280;}
+    .av-inner{display:none;}
     .av-name{font-size:.74rem;font-weight:700;color:var(--text);}
     .av-mood{font-size:.64rem;color:var(--text-3);}
 
@@ -343,7 +345,8 @@
     /* ── PATCH 2: MICRO FEATURES ── */
 
     /* 1. Unread badge on Chat nav */
-    .nav-item .nav-badge{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:auto;box-shadow:0 0 0 2px var(--surface),0 0 8px rgba(184,52,104,0.5);animation:pulseAccent 2s ease-out infinite;display:none;}
+    .nav-label{flex:1;}
+    .nav-item .nav-badge{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface),0 0 8px rgba(184,52,104,0.5);animation:pulseAccent 2s ease-out infinite;display:none;}
     .nav-item .nav-badge.show{display:block;}
     @keyframes pulseAccent{0%{box-shadow:0 0 0 2px var(--surface),0 0 0 0 rgba(184,52,104,0.5)}70%{box-shadow:0 0 0 2px var(--surface),0 0 0 6px rgba(184,52,104,0)}100%{box-shadow:0 0 0 2px var(--surface),0 0 0 0 rgba(184,52,104,0)}}
 
@@ -688,7 +691,7 @@
     <button class="nav-item active" data-to="home"><span class="nav-icon">⌂</span>Home</button>
     <button class="nav-item" data-to="discover"><span class="nav-icon">◈</span>Discover</button>
     <button class="nav-item" data-to="chat" id="chatNav">
-      <span class="nav-icon">◔</span>Chat<span class="nav-badge" id="chatBadge"></span><span class="nav-arrow">›</span>
+      <span class="nav-icon">◔</span><span class="nav-label">Chat</span><span class="nav-badge" id="chatBadge"></span><span class="nav-arrow">›</span>
     </button>
     <div class="thread-drawer" id="threadDrawer">
       <button class="drawer-item active" data-thread="hazel" data-name="Hazel" data-status="Online now" data-p="You are Hazel, warm but withholding. You notice everything but give nothing for free. Speak with quiet precision and subtle warmth. Max 2 sentences.">
@@ -752,10 +755,10 @@
         <div>
           <div class="sh"><h2>Active now</h2><button class="sh-link" data-to="discover">See all</button></div>
           <div class="avatar-rail">
-            <div class="av-item" data-to="chat"><div class="av-ring"><div class="av-inner"><img src="/profile_pictures/hazel.png" alt="Hazel"/></div></div><span class="av-name">Hazel</span><span class="av-mood">Observant</span></div>
-            <div class="av-item" data-to="chat"><div class="av-ring"><div class="av-inner"><img src="/profile_pictures/nina.png" alt="Nina"/></div></div><span class="av-name">Nina</span><span class="av-mood">Familiar</span></div>
-            <div class="av-item" data-to="chat"><div class="av-ring"><div class="av-inner"><img src="/profile_pictures/iris.png" alt="Iris"/></div></div><span class="av-name">Iris</span><span class="av-mood">Listening</span></div>
-            <div class="av-item" data-to="chat"><div class="av-ring offline"><div class="av-inner"><img src="/profile_pictures/vale_profile.png" alt="Vale"/></div></div><span class="av-name">Vale</span><span class="av-mood">Unstable</span></div>
+            <div class="av-item" data-to="chat"><div class="av-ring"><img src="/profile_pictures/hazel.png" alt="Hazel"/><span class="av-status"></span></div><span class="av-name">Hazel</span><span class="av-mood">Observant</span></div>
+            <div class="av-item" data-to="chat"><div class="av-ring"><img src="/profile_pictures/nina.png" alt="Nina"/><span class="av-status"></span></div><span class="av-name">Nina</span><span class="av-mood">Familiar</span></div>
+            <div class="av-item" data-to="chat"><div class="av-ring"><img src="/profile_pictures/iris.png" alt="Iris"/><span class="av-status"></span></div><span class="av-name">Iris</span><span class="av-mood">Listening</span></div>
+            <div class="av-item" data-to="chat"><div class="av-ring offline"><img src="/profile_pictures/vale_profile.png" alt="Vale"/><span class="av-status"></span></div><span class="av-name">Vale</span><span class="av-mood">Unstable</span></div>
           </div>
         </div>
 
