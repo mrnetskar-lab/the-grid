@@ -336,6 +336,24 @@ router.post('/watcher/start', (_req, res) => res.json(startScreenshotWatcher()))
 router.post('/watcher/stop', (_req, res) => res.json(stopScreenshotWatcher()));
 router.get('/watcher/status', (_req, res) => res.json({ ok: true, running: !!screenshotWatcher, folder: SCREENSHOTS_DIR }));
 
+router.get('/backend-status', async (_req, res) => {
+  let comfyAvailable = false;
+  let comfyVersion = null;
+  try {
+    const out = await comfyRequest('GET', '/system_stats');
+    comfyAvailable = out.status < 400;
+    comfyVersion = out.data?.system?.comfyui_version || null;
+  } catch {}
+
+  return res.json({
+    ok: true,
+    launchRoute: true,
+    comfyAvailable,
+    comfyVersion,
+    falConfigured: Boolean(process.env.FAL_API_KEY),
+  });
+});
+
 const COMFYUI_BAT = 'C:\\Users\\mn\\ComfyUI_windows_portable\\run_nvidia_gpu.bat';
 router.post('/launch-comfy', (req, res) => {
   if (!fs.existsSync(COMFYUI_BAT)) return res.status(404).json({ ok: false, error: 'ComfyUI bat not found: ' + COMFYUI_BAT });

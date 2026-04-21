@@ -155,6 +155,11 @@
       <div class="ab" id="abShots"></div>
       <h3>ComfyUI</h3>
       <div><span class="dot" id="comfyDot"></span><span id="comfyText">checking...</span></div>
+      <div style="margin:8px 0 10px;display:grid;gap:6px">
+        <div><span class="dot" id="routeDot"></span><span id="routeText">Launch route: checking...</span></div>
+        <div><span class="dot" id="falDot"></span><span id="falText">FAL key: checking...</span></div>
+        <div style="display:flex;gap:8px;align-items:center"><button class="btn secondary" id="backendRefresh" type="button">Refresh backend status</button><span id="backendStatusText" style="font-size:12px;color:var(--muted)"></span></div>
+      </div>
       <div class="field"><label>Workflow JSON</label><textarea id="workflowJson">{}</textarea></div>
       <button class="btn secondary" id="runWorkflow" type="button">Run workflow</button>
       <div class="thumbs" id="comfyThumbs"></div>
@@ -283,6 +288,16 @@ const baseSnips=['Photorealistic portrait, ultra-detailed skin texture','35mm le
 let focusedField='pb_subject';
 function headers(h={}){return {'x-admin-key':localStorage.getItem(KEY)||DEF,...h};}
 async function jfetch(url,opt={}){const r=await fetch(url,{...opt,headers:headers(opt.headers||{})}); const d=await r.json(); if(!r.ok||d.ok===false) throw new Error(d.error||'request failed'); return d;}
+async function readApiResponse(r){
+  const ct=(r.headers.get('content-type')||'').toLowerCase();
+  const raw=await r.text();
+  if(ct.includes('application/json')){
+    try{return JSON.parse(raw);}catch{return {ok:false,error:'Invalid JSON from server'};}
+  }
+  const hint='Unexpected non-JSON response. Open the admin tool from http://localhost:3001/admin.html and restart server after route changes.';
+  const preview=(raw||'').replace(/\s+/g,' ').slice(0,120);
+  return {ok:false,error:`${hint}${preview?` Response starts with: ${preview}`:''}`};
+}
 function stat(id,msg,ok=true){$(id).textContent=msg; $(id).style.color=ok?'var(--ok)':'var(--bad)';}
 function section(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));$(id).classList.add('active');document.querySelector(`[data-sec="${id}"]`).classList.add('active');}
 function fill(c={}){$('c_id').value=c.id||'';$('c_name').value=c.name||'';$('c_color').value=c.color||'#9f67ff';$('c_status').value=c.status||'ONLINE';$('c_active').checked=c.active!==false;$('c_route').value=c.route||'';$('c_bio').value=c.bio||'';$('c_greeting').value=c.greeting||'';$('c_identity').value=c.identity||'';$('c_camera_look').value=c.camera_look||'';
@@ -317,6 +332,25 @@ async function loadNotes(){const d=await jfetch('/api/admin/notes');renderNotes(
 async function sendNote(){const fd=new FormData(); fd.append('note',`${new Date().toISOString()} — ${$('noteText').value.trim()}`); const f=$('noteImage').files[0]; if(f) fd.append('image',f); const r=await fetch('/api/admin/notes',{method:'POST',headers:headers(),body:fd}); const d=await r.json(); if(!r.ok||d.ok===false) throw new Error(d.error||'failed'); stat('noteStatus','Note saved'); $('noteText').value=''; $('noteImage').value=''; $('notePreview').style.display='none'; await loadNotes();}
 async function comfyHealth(){const d=await jfetch('/api/admin/comfy/health'); $('comfyDot').style.background=d.available?'var(--ok)':'var(--bad)'; $('comfyText').textContent=d.available?`Available ${d.version||''}`:'Unavailable';}
 async function comfyImages(){const d=await jfetch('/api/admin/comfy/images'); const box=$('comfyThumbs'); box.innerHTML=''; d.images.forEach(f=>{const img=document.createElement('img');img.className='thumb';img.src=`/api/admin/comfy/image/${encodeURIComponent(f)}`;img.onclick=()=>window.open(img.src,'_blank');box.appendChild(img);});}
+async function backendStatus(){
+  const s=$('backendStatusText');
+  s.textContent='Checking...';
+  s.style.color='var(--muted)';
+  try{
+    const d=await jfetch('/api/admin/backend-status');
+    $('routeDot').style.background=d.launchRoute?'var(--ok)':'var(--bad)';
+    $('routeText').textContent=d.launchRoute?'Launch route: OK':'Launch route: missing';
+    $('falDot').style.background=d.falConfigured?'var(--ok)':'var(--bad)';
+    $('falText').textContent=d.falConfigured?'FAL key: configured':'FAL key: missing (ComfyUI only mode)';
+    s.textContent=`Updated ${new Date().toLocaleTimeString()}`;
+    s.style.color='var(--ok)';
+  }catch(e){
+    $('routeDot').style.background='var(--bad)';
+    $('falDot').style.background='var(--bad)';
+    s.textContent='Status check failed: '+e.message;
+    s.style.color='var(--bad)';
+  }
+}
 async function comfyRun(){let wf={}; try{wf=JSON.parse($('workflowJson').value||'{}')}catch{throw new Error('Invalid workflow JSON');} const d=await jfetch('/api/admin/comfy/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow:wf})}); stat('cameraStatus',`Comfy prompt_id: ${d.prompt_id||'n/a'}`);}
 function chatRelationship(){return{trust:Number($('rs_trust').value),attraction:Number($('rs_attraction').value),comfort:Number($('rs_comfort').value),hurt:Number($('rs_hurt').value),jealousy:Number($('rs_jealousy').value),attachment:Number($('rs_attachment').value),intimacyReadiness:Number($('rs_intimacyReadiness').value)};}
 async function sendChat(){const id=$('chatChar').value; const text=$('chatInput').value.trim(); if(!text) return; state.chat.push({role:'user',text}); renderChat(); $('chatInput').value=''; stat('chatStatus','…'); const r=await fetch(`/api/characters/${id}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,emotionalBeat:$('chatBeat').value,relationship:chatRelationship()})}); const d=await r.json(); if(!r.ok||d.ok===false){stat('chatStatus',d.error||'chat failed',false); return;} state.chat.push({role:'assistant',text:d.reply||'...',toneClass:d.meta?.toneClass}); renderChat(); stat('chatStatus',`tone: ${d.meta?.toneClass||'?'} · subtext: ${d.meta?.subtextStrength??'?'}`);}
@@ -383,7 +417,8 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.qu
   $('animMotion').oninput=()=>$('animMotionV').textContent=$('animMotion').value;
   $('copyPrompt').onclick=()=>navigator.clipboard.writeText($('pb_preview').value); $('saveSnippet').onclick=()=>{const s=$('pb_preview').value.trim();if(s){state.snips.push(s);localStorage.setItem(SN,JSON.stringify(state.snips));renderSnips();}};
   $('generate').onclick=()=>gen().catch(err=>stat('cameraStatus',err.message,false)); $('saveLook').onclick=()=>saveLook().catch(err=>stat('cameraStatus',err.message,false)); $('runWorkflow').onclick=()=>comfyRun().catch(err=>stat('cameraStatus',err.message,false));
-  $('launchComfy').onclick=async()=>{const st=$('launchComfyStatus');st.textContent='Launching…';st.style.color='var(--muted)';try{const r=await fetch('/api/admin/launch-comfy',{method:'POST',headers:headers()});const d=await r.json();if(d.ok){st.textContent='✓ '+d.message;st.style.color='var(--ok)';}else{st.textContent='✗ '+d.error;st.style.color='var(--bad)';}}catch(e){st.textContent='✗ '+e.message;st.style.color='var(--bad)';}setTimeout(()=>{st.textContent='';},4000);};
+  $('launchComfy').onclick=async()=>{const st=$('launchComfyStatus');st.textContent='Launching...';st.style.color='var(--muted)';try{const r=await fetch('/api/admin/launch-comfy',{method:'POST',headers:headers()});const d=await readApiResponse(r);if(r.ok&&d.ok){st.textContent='OK '+(d.message||'ComfyUI launched');st.style.color='var(--ok)';}else{st.textContent='Error: '+(d.error||('Server error '+r.status));st.style.color='var(--bad)';}}catch(e){st.textContent='Error: '+e.message;st.style.color='var(--bad)';}await backendStatus().catch(()=>{});setTimeout(()=>{st.textContent='';},7000);};
+  $('backendRefresh').onclick=()=>backendStatus().catch(err=>stat('cameraStatus',err.message,false));
   $('addSnippet').onclick=()=>{const s=$('newSnippet').value.trim(); if(!s)return; state.snips.push(s); localStorage.setItem(SN,JSON.stringify(state.snips)); $('newSnippet').value=''; renderSnips();};
   $('noteImage').onchange=()=>{const f=$('noteImage').files[0]; if(!f) return; $('notePreview').src=URL.createObjectURL(f); $('notePreview').style.display='block';}; $('submitNote').onclick=()=>sendNote().catch(err=>stat('noteStatus',err.message,false)); $('exportNotes').onclick=async()=>{try{stat('noteStatus','Downloading…');const r=await fetch('/api/admin/notes/export',{headers:headers()});if(!r.ok)throw new Error('Server error '+r.status);const blob=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`admin_notes_${Date.now()}.zip`;a.click();stat('noteStatus','Downloaded ✓');}catch(e){stat('noteStatus',e.message,false);}};$('screenshotNote').onclick=()=>captureAndNote().catch(err=>stat('noteStatus',err.message,false));
   $('chatChar').onchange=updateChatIdentity; $('sendChat').onclick=()=>sendChat().catch(err=>stat('chatStatus',err.message,false)); $('clearChat').onclick=()=>clearChat().catch(err=>stat('chatStatus',err.message,false));
@@ -469,7 +504,7 @@ async function checkRailway(){
   }catch(e){$('railwayDot').style.background='var(--bad)';$('railwayText').textContent='Unreachable';}
 }
 
-bind(); renderSnips(); loadChars().then(()=>{if(state.chars[0]){const id=state.chars[0].id;$('loreChar').value=id;$('previewChar').value=id;fillLore(id);}renderDeployList();}).catch(err=>stat('charStatus',err.message,false)); loadNotes().catch(err=>stat('noteStatus',err.message,false)); comfyHealth(); comfyImages();
+bind(); renderSnips(); loadChars().then(()=>{if(state.chars[0]){const id=state.chars[0].id;$('loreChar').value=id;$('previewChar').value=id;fillLore(id);}renderDeployList();}).catch(err=>stat('charStatus',err.message,false)); loadNotes().catch(err=>stat('noteStatus',err.message,false)); comfyHealth(); comfyImages(); backendStatus();
 </script>
 </body>
 </html>

@@ -243,7 +243,8 @@ async function generateViaComfy(prompt, character, seedOffset = 0, comfyParams =
 export async function generateCameraShot({ character = 'elara', mood = 'warm', customPrompt, falParams = null, comfyParams = null } = {}) {
   const prompt = customPrompt || buildPrompt(character, mood);
 
-  if (!customPrompt && await isComfyAvailable()) {
+  // ComfyUI should work for both default prompts and custom prompt previews.
+  if (await isComfyAvailable()) {
     try { return await generateViaComfy(prompt, character, 0, comfyParams || {}); }
     catch (err) { console.warn('[Camera] ComfyUI failed, falling back:', err.message); }
   }
@@ -253,7 +254,7 @@ export async function generateCameraShot({ character = 'elara', mood = 'warm', c
     catch (err) { console.warn('[Camera] FAL failed, falling back:', err.message); }
   }
 
-  throw new Error('No image generation backend available. Set FAL_API_KEY in environment.');
+  throw new Error('No image generation backend available. Start ComfyUI (Launch ComfyUI button) or set FAL_API_KEY in environment.');
 }
 
 export async function animateCameraShot({ imagePath, duration = 5, motion_strength = 0.5 } = {}) {

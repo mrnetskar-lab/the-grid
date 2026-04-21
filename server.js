@@ -21,6 +21,20 @@ app.use('/api/characters', characterRoutes);
 app.use('/api/camera', cameraRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Compatibility shim for older admin tool calls that POST to /api.
+app.post('/api', (req, res) => {
+  const action = String(req.body?.action || req.body?.command || '').trim().toLowerCase();
+  if (['launch-comfy', 'launch_comfy', 'launch comfyui', 'launch-comfyui'].includes(action)) {
+    return res.redirect(307, '/api/admin/launch-comfy');
+  }
+  return res.status(404).json({ ok: false, error: 'API endpoint not found. Use /api/admin/* routes.' });
+});
+
+// Always return JSON for unknown API routes/methods.
+app.use('/api', (_req, res) => {
+  return res.status(404).json({ ok: false, error: 'Not found' });
+});
+
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, status: 'online' });
@@ -28,9 +42,6 @@ app.get('/api/health', (_req, res) => {
 
 // SPA fallback
 app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ ok: false, error: 'Not found' });
-  }
   res.sendFile(__dirname + '/index.html');
 });
 
