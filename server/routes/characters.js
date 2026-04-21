@@ -68,45 +68,6 @@ function saveHistory(id, history) {
   fs.writeFileSync(p, JSON.stringify(history.slice(-200), null, 2), 'utf-8');
 }
 
-function mapResponseLengthToMode(value) {
-  if (value === 'short') return 'brief';
-  if (value === 'medium') return 'normal';
-  if (value === 'long') return 'cinematic';
-  return 'brief';
-}
-
-function buildPromptPreviewText({ characterName, char, personality, emotionalBeat, relationship, memory, responseMode }) {
-  const sections = [
-    `Character: ${characterName}`,
-    '',
-    'Identity:',
-    String(char.identity || '').trim() || '(none)',
-    '',
-    'Greeting:',
-    String(char.greeting || '').trim() || '(none)',
-    '',
-    'Lore:',
-    `- backstory: ${String(char.backstory || '').trim() || '(none)'}`,
-    `- shared_history: ${String(char.shared_history || '').trim() || '(none)'}`,
-    `- world_notes: ${String(char.world_notes || '').trim() || '(none)'}`,
-    '',
-    'Voice / Personality:',
-    `- voice_guide: ${String(char.voice_guide || '').trim() || '(none)'}`,
-    `- warmth: ${personality.warmth ?? 'n/a'}`,
-    `- openness: ${personality.openness ?? 'n/a'}`,
-    `- responseMode: ${responseMode}`,
-    `- response_length: ${char.response_length || '(default)'}`,
-    '',
-    'Conversation Context:',
-    `- emotionalBeat: ${emotionalBeat}`,
-    `- relationship: ${JSON.stringify(relationship || {})}`,
-    '',
-    'Recent Memory (last 10):',
-    ...memory.map((m) => `- ${m.role}: ${m.text}`),
-  ];
-  return sections.join('\n').trim();
-}
-
 // GET /api/characters
 router.get('/', (_req, res) => {
   try {
@@ -146,6 +107,7 @@ router.post('/:id/chat', async (req, res) => {
 
     const history = loadHistory(req.params.id);
     const characterName = CHARACTER_NAME_BY_ID[req.params.id] || char.name || req.params.id;
+    const personality   = CHARACTER_PROFILES[characterName] || {};
     const memory = history.slice(-10).map((h) => ({
       role: h.role === 'assistant' ? characterName : 'user',
       text: String(h.content || ''),
@@ -153,25 +115,6 @@ router.post('/:id/chat', async (req, res) => {
 
     const emotionalBeat = req.body?.emotionalBeat || 'neutral';
     const relationship  = req.body?.relationship  || {};
-    const responseMode = mapResponseLengthToMode(char.response_length);
-    const personality = {
-      ...(CHARACTER_PROFILES[characterName] || {}),
-      ...(char.warmth !== undefined ? { warmth: Number(char.warmth) } : {}),
-      ...(char.openness !== undefined ? { openness: Number(char.openness) } : {}),
-    };
-
-    if (text === '__prompt_preview__') {
-      const preview = buildPromptPreviewText({
-        characterName,
-        char,
-        personality,
-        emotionalBeat,
-        relationship,
-        memory,
-        responseMode,
-      });
-      return res.type('text/plain').send(preview);
-    }
 
     let ai;
     try {
@@ -183,12 +126,7 @@ router.post('/:id/chat', async (req, res) => {
           temperature: 0.88,
           context: {
             active_app: { type: 'messages', mode: 'dm', visibility: 'private' },
-            conversation: {
-              responseMode,
-              topic: 'direct-message',
-              emotionalBeat,
-              responseLengthInstruction: char.response_length || undefined,
-            },
+            conversation: { responseMode: 'brief', topic: 'direct-message', emotionalBeat },
             sceneFlow: {
               role: 'primary',
               mainSpeaker: characterName,
@@ -196,12 +134,6 @@ router.post('/:id/chat', async (req, res) => {
             },
             relationship,
             memory,
-            voice_guide: char.voice_guide || undefined,
-            lore: {
-              backstory: char.backstory || undefined,
-              shared_history: char.shared_history || undefined,
-              world_notes: char.world_notes || undefined,
-            },
           },
         }),
         20000
@@ -226,13 +158,20 @@ router.post('/:id/chat', async (req, res) => {
       meta: {
         toneClass: ai?.meta?.toneClass || 'neutral',
         subtextStrength: ai?.meta?.subtextStrength ?? 0,
-        typingDelay: char.typing_delay ?? null,
       },
     });
   } catch (error) {
     console.error('Character chat error:', error);
     return res.status(500).json({ ok: false, error: error.message || 'Character chat failed' });
   }
+});
+
+// GET /api/characters/:id/history
+router.get('/:id/history', (req, res) => {
+  const char = loadCharacter(req.params.id);
+  if (!char) return res.status(404).json({ ok: false, error: 'Character not found' });
+  const history = loadHistory(req.params.id);
+  res.json({ ok: true, messages: history.slice(-20) });
 });
 
 // DELETE /api/characters/:id/history
