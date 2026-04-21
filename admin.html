@@ -65,6 +65,8 @@
       <button data-sec="chat">Chat</button>
       <button data-sec="notes">Smoke Test Log</button>
       <button data-sec="commands">Commands</button>
+      <button data-sec="lore">Story / Lore</button>
+      <button data-sec="prompt-preview">Prompt Preview</button>
     </nav>
   </aside>
   <main class="content">
@@ -197,6 +199,32 @@
     </section>
 
     <section id="commands" class="section"><h2>Commands</h2><div style="display:flex;gap:8px"><select id="cmdSel"><option>clear-all-history</option><option>clear-images</option><option>list-images</option><option>ping-comfy</option><option>server-status</option></select><button class="btn" id="runCmd" type="button">Run</button></div><pre class="mono" id="cmdOut"></pre></section>
+
+    <section id="lore" class="section">
+      <h2>Story / Lore</h2>
+      <div class="field" style="max-width:360px;margin-bottom:12px"><label>Character</label><select id="loreChar"></select></div>
+      <div class="row">
+        <div class="field full"><label>backstory</label><textarea id="l_backstory" style="min-height:120px"></textarea></div>
+        <div class="field full"><label>shared_history</label><textarea id="l_shared_history" style="min-height:120px"></textarea></div>
+        <div class="field full"><label>world_notes</label><textarea id="l_world_notes" style="min-height:120px"></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" id="saveLore" type="button">Save lore</button></div>
+      <div class="status" id="loreStatus"></div>
+    </section>
+
+    <section id="prompt-preview" class="section">
+      <h2>Prompt Preview</h2>
+      <div class="field" style="max-width:360px;margin-bottom:10px"><label>Character</label><select id="previewChar"></select></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn" id="buildPreview" type="button">Build preview</button>
+        <button class="btn secondary" id="copyPreview" type="button">Copy</button>
+      </div>
+      <div class="field">
+        <label>Assembled system prompt</label>
+        <textarea id="promptPreviewOut" class="mono" readonly style="min-height:380px;color:var(--text)"></textarea>
+      </div>
+      <div class="status" id="previewStatus"></div>
+    </section>
   </main>
 </div>
 <script>
@@ -220,9 +248,13 @@ function payload(){
   p.warmth=Number($('c_warmth').value); p.openness=Number($('c_openness').value);
   return p;}
 const CHAR_SEEDS={nina:3847291650,hazel:9182736450,iris:5647382910,vale:7291836450};
-function renderChars(){const l=$('charList');l.innerHTML=''; state.chars.forEach(c=>{const seed=CHAR_SEEDS[c.id]||'—';const b=document.createElement('button');b.className='chip';b.type='button';b.innerHTML=`${c.name||c.id} <span style="color:var(--muted);font-size:10px">#${seed}</span>`;b.onclick=()=>fill(c);l.appendChild(b);});['labCharacter','chatChar'].forEach(id=>$(id).innerHTML=state.chars.map(c=>`<option value="${c.id}">${c.name||c.id} [${CHAR_SEEDS[c.id]||'?'}]</option>`).join(''));}
+function renderChars(){const l=$('charList');l.innerHTML=''; state.chars.forEach(c=>{const seed=CHAR_SEEDS[c.id]||'—';const b=document.createElement('button');b.className='chip';b.type='button';b.innerHTML=`${c.name||c.id} <span style="color:var(--muted);font-size:10px">#${seed}</span>`;b.onclick=()=>fill(c);l.appendChild(b);});const opts=state.chars.map(c=>`<option value="${c.id}">${c.name||c.id} [${CHAR_SEEDS[c.id]||'?'}]</option>`).join('');['labCharacter','chatChar','loreChar','previewChar'].forEach(id=>{if($(id)) $(id).innerHTML=opts;});}
 function syncLabFromChar(){const id=$('c_id').value||$('labCharacter').value; if(id) $('labCharacter').value=id; const c=state.chars.find(x=>x.id===$('labCharacter').value); $('pb_subject').value=(c?.camera_look)||$('c_camera_look').value||''; updatePrompt();}
 function updatePrompt(){const txt=[$('pb_subject').value,$('pb_atmo').value,$('pb_scenery').value,$('pb_style').value,$('pb_quality').value,$('pb_cast').value].filter(Boolean).join('. '); $('pb_preview').value=txt;}
+function lorePayload(){return{backstory:$('l_backstory').value.trim(),shared_history:$('l_shared_history').value.trim(),world_notes:$('l_world_notes').value.trim()};}
+function fillLore(id){const c=state.chars.find(x=>x.id===id)||{};$('l_backstory').value=c.backstory||'';$('l_shared_history').value=c.shared_history||'';$('l_world_notes').value=c.world_notes||'';}
+async function saveLore(){const id=$('loreChar').value; if(!id) throw new Error('No character selected'); const c=state.chars.find(x=>x.id===id)||{id}; const merged={...c,...lorePayload(),id}; await jfetch(`/api/admin/characters/${id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(merged)}); stat('loreStatus',`Saved lore for ${id}`); await loadChars(); if($('loreChar').querySelector(`option[value="${id}"]`)) $('loreChar').value=id; fillLore(id);}
+async function buildPromptPreview(){const id=$('previewChar').value; if(!id) throw new Error('No character selected'); const r=await fetch(`/api/characters/${id}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__prompt_preview__'})}); const ct=r.headers.get('content-type')||''; const raw=ct.includes('application/json')?JSON.stringify(await r.json(),null,2):await r.text(); if(!r.ok){throw new Error(raw||'preview failed');} $('promptPreviewOut').value=raw; stat('previewStatus',`Built preview for ${id}`);}
 function renderAB(){const box=$('abShots'); box.innerHTML=''; state.shots.slice(0,2).forEach((s,idx)=>{const d=document.createElement('div'); d.innerHTML=`<div style="color:var(--muted);font-size:12px">${s.timestamp} — ${s.backend||'unknown'}</div><img src="${s.path}"/><div style="display:flex;gap:8px;margin-top:8px"><button class="btn secondary" type="button" data-anim="${idx}">Animate</button>${s.videoPath?`<a class="btn secondary" href="${s.videoPath}" download>Save video</a>`:''}</div>${s.videoPath?`<video src="${s.videoPath}" controls autoplay loop muted style="width:100%;margin-top:8px;border:1px solid var(--border);border-radius:8px"></video>`:''}`; box.appendChild(d);}); box.querySelectorAll('[data-anim]').forEach(btn=>btn.onclick=()=>animateShot(Number(btn.dataset.anim)).catch(err=>stat('cameraStatus',err.message,false)));}
 function renderSnips(){const list=$('snipList');list.innerHTML=''; [...baseSnips,...state.snips].forEach((s,i)=>{const d=document.createElement('div');d.className='snip';d.textContent=s;d.onclick=()=>navigator.clipboard.writeText(s); if(i>=baseSnips.length){const x=document.createElement('button');x.className='btn secondary';x.type='button';x.textContent='Delete';x.onclick=(e)=>{e.stopPropagation();state.snips.splice(i-baseSnips.length,1);localStorage.setItem(SN,JSON.stringify(state.snips));renderSnips();};d.appendChild(document.createElement('br'));d.appendChild(x);} list.appendChild(d);});}
 function renderNotes(notes){const l=$('noteList');l.innerHTML='';notes.forEach(n=>{const d=document.createElement('div');d.className='snip';d.innerHTML=`<div style="color:var(--muted);font-size:12px">${n.timestamp}</div><div>${n.text||''}</div>${n.imagePath?`<img class="thumb" src="${n.imagePath}"/>`:''}`;l.appendChild(d);});}
@@ -256,8 +288,10 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF; document.qu
   $('noteImage').onchange=()=>{const f=$('noteImage').files[0]; if(!f) return; $('notePreview').src=URL.createObjectURL(f); $('notePreview').style.display='block';}; $('submitNote').onclick=()=>sendNote().catch(err=>stat('noteStatus',err.message,false)); $('exportNotes').onclick=()=>window.open('/api/admin/notes/export','_blank');
   $('chatChar').onchange=updateChatIdentity; $('sendChat').onclick=()=>sendChat().catch(err=>stat('chatStatus',err.message,false)); $('clearChat').onclick=()=>clearChat().catch(err=>stat('chatStatus',err.message,false));
   $('runCmd').onclick=()=>runCmd().catch(err=>{$('cmdOut').textContent=err.message;});
+  $('loreChar').onchange=e=>fillLore(e.target.value); $('saveLore').onclick=()=>saveLore().catch(err=>stat('loreStatus',err.message,false));
+  $('buildPreview').onclick=()=>buildPromptPreview().catch(err=>stat('previewStatus',err.message,false)); $('copyPreview').onclick=()=>navigator.clipboard.writeText($('promptPreviewOut').value||'');
 }
-bind(); renderSnips(); loadChars().catch(err=>stat('charStatus',err.message,false)); loadNotes().catch(err=>stat('noteStatus',err.message,false)); comfyHealth(); comfyImages();
+bind(); renderSnips(); loadChars().then(()=>{if(state.chars[0]){const id=state.chars[0].id;$('loreChar').value=id;$('previewChar').value=id;fillLore(id);}}).catch(err=>stat('charStatus',err.message,false)); loadNotes().catch(err=>stat('noteStatus',err.message,false)); comfyHealth(); comfyImages();
 </script>
 </body>
 </html>
