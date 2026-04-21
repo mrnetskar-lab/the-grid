@@ -5,37 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>THE GRID — Admin Dev Tool</title>
   <style>
-    :root{--bg:#0a0a0f;--panel:#12121b;--panel-2:#171723;--border:#28283a;--text:#eef0ff;--muted:#9ea3bf;--accent:#f0308a;--ok:#6dde9d;--bad:#ff7c7c}
+    :root{--bg:#0a0a0f;--panel:#12121b;--panel-2:#171723;--border:#2e2e42;--text:#eef0ff;--muted:#9ea3bf;--accent:#f0308a;--accent2:#9f67ff;--ok:#6dde9d;--bad:#ff7c7c}
     *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
-    .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}.sidebar{padding:16px;background:var(--panel);border-right:1px solid var(--border)}
-    .nav{display:grid;gap:8px;margin-top:10px}.nav button{border:1px solid var(--border);background:var(--panel-2);color:var(--text);padding:10px;border-radius:8px;text-align:left;cursor:pointer}.nav button.active{border-color:var(--accent)}
-    .content{padding:20px}.section{display:none}.section.active{display:block}.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.full{grid-column:1/-1}
-    .field{display:flex;flex-direction:column;gap:6px}label{font-size:12px;color:var(--muted)}input,textarea,select,button{font:inherit}
-    input,textarea,select{background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:8px}textarea{min-height:90px;resize:vertical}
-    .btn{background:var(--accent);border:0;color:#fff;padding:10px 12px;border-radius:8px;cursor:pointer}.btn.secondary{background:#2b3252}
-    .status{margin-top:8px;font-size:13px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.chip{padding:6px 10px;border:1px solid var(--border);background:var(--panel-2);border-radius:999px;cursor:pointer}
-    .char-list,.shortcut-row{display:flex;gap:8px;flex-wrap:wrap}.bubble-wrap{border:1px solid var(--border);background:var(--panel-2);border-radius:8px;padding:10px;height:420px;overflow:auto;display:flex;flex-direction:column;gap:8px}
-    .bubble{max-width:75%;padding:8px 10px;border-radius:12px}.u{background:#2a2f4a;align-self:flex-end}.a{background:#3a1c2c;align-self:flex-start}
-    .system{border:1px solid var(--border);background:var(--panel-2);padding:10px;border-radius:8px;white-space:pre-wrap}.ab{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ab img{width:100%;border:1px solid var(--border);border-radius:8px}
-    .snip{border:1px solid var(--border);background:var(--panel-2);border-radius:8px;padding:8px;cursor:pointer}.snips{display:grid;gap:8px;margin-top:8px}
-    .mono{background:#09090d;border:1px solid var(--border);padding:10px;border-radius:8px;white-space:pre-wrap;min-height:120px;font-family:ui-monospace,Menlo,monospace}
-    .thumb{max-width:180px;border:1px solid var(--border);border-radius:8px}.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-    details{border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--panel-2)} .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:#666}
+    .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+    .sidebar{padding:16px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;gap:4px}
+    .sidebar-title{font-size:13px;font-weight:700;letter-spacing:0.12em;color:var(--accent2);text-transform:uppercase;margin-bottom:4px}
+    .nav{display:grid;gap:6px;margin-top:8px}
+    .nav button{border:1px solid var(--border);background:transparent;color:var(--muted);padding:9px 12px;border-radius:8px;text-align:left;cursor:pointer;font-size:13px;transition:all 0.15s}
+    .nav button:hover{color:var(--text);border-color:var(--accent2)}
+    .nav button.active{background:rgba(159,103,255,0.12);border-color:var(--accent2);color:var(--text)}
+    .content{padding:24px;overflow-y:auto}.section{display:none}.section.active{display:block}
+    h2{font-size:14px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    h3{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin:20px 0 10px}
+    .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}
+    .field{display:flex;flex-direction:column;gap:5px}
+    label{font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase}
+    input,textarea,select,button{font:inherit}
+    input,textarea,select{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:8px;transition:border-color 0.15s}
+    input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent2)}
+    textarea{min-height:90px;resize:vertical}
+    .btn{background:var(--accent);border:0;color:#fff;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:background 0.15s}
+    .btn:hover{filter:brightness(1.15)}
+    .btn.secondary{background:rgba(255,255,255,0.07);color:var(--text);border:1px solid var(--border)}
+    .btn.secondary:hover{border-color:var(--accent2);color:var(--accent2)}
+    .status{margin-top:8px;font-size:12px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .chip{padding:7px 12px;border:1px solid var(--border);background:rgba(159,103,255,0.08);color:var(--text);border-radius:999px;cursor:pointer;font-size:13px;transition:all 0.15s}
+    .chip:hover{border-color:var(--accent2);background:rgba(159,103,255,0.18)}
+    .char-list,.shortcut-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .bubble-wrap{border:1px solid var(--border);background:rgba(0,0,0,0.3);border-radius:10px;padding:12px;height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+    .bubble{max-width:78%;padding:9px 12px;border-radius:12px;font-size:14px;line-height:1.5}
+    .u{background:rgba(240,48,138,0.18);border:1px solid rgba(240,48,138,0.25);align-self:flex-end;color:#f5eef4}
+    .a{background:rgba(159,103,255,0.12);border:1px solid rgba(159,103,255,0.2);align-self:flex-start;color:#ede8f4}
+    .system{border:1px solid var(--border);background:rgba(0,0,0,0.25);padding:12px;border-radius:8px;white-space:pre-wrap;font-size:13px;color:var(--muted);max-height:400px;overflow-y:auto}
+    .ab{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ab img{width:100%;border:1px solid var(--border);border-radius:8px}
+    .snip{border:1px solid var(--border);background:rgba(255,255,255,0.03);border-radius:8px;padding:9px 12px;cursor:pointer;font-size:13px;transition:border-color 0.15s}
+    .snip:hover{border-color:var(--accent2)}
+    .snips{display:grid;gap:6px;margin-top:8px}
+    .mono{background:#060609;border:1px solid var(--border);padding:12px;border-radius:8px;white-space:pre-wrap;min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ok)}
+    .thumb{max-width:180px;border:1px solid var(--border);border-radius:8px}
+    .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+    details{border:1px solid var(--border);border-radius:8px;padding:10px;background:rgba(255,255,255,0.02);margin-top:8px}
+    summary{cursor:pointer;color:var(--muted);font-size:12px;letter-spacing:0.08em;text-transform:uppercase}
+    .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:#444}
+    .sep{height:1px;background:var(--border);margin:16px 0}
+    .anchor-grid{display:grid;grid-template-columns:1fr;gap:8px}
   </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div><b>Admin Dev Tool</b></div>
-    <div style="font-size:12px;color:var(--muted)">Key stored in localStorage</div>
-    <div style="display:flex;gap:6px;margin-top:8px"><input id="adminKey" placeholder="x-admin-key"/><button class="btn secondary" id="saveKey">Save</button></div>
+    <div class="sidebar-title">The Grid</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Character Studio</div>
+    <div style="display:flex;gap:6px"><input id="adminKey" placeholder="admin key" style="font-size:12px"/><button class="btn secondary" id="saveKey" style="padding:6px 10px;font-size:12px">Save</button></div>
     <nav class="nav">
-      <button class="active" data-sec="characters">1) Characters</button>
-      <button data-sec="camera">2) Camera Lab</button>
-      <button data-sec="snippets">3) Prompt Snippets</button>
-      <button data-sec="notes">4) Smoke Test Log</button>
-      <button data-sec="chat">5) Chat</button>
-      <button data-sec="commands">6) Commands</button>
+      <button class="active" data-sec="characters">Characters</button>
+      <button data-sec="camera">Camera Lab</button>
+      <button data-sec="snippets">Prompt Snippets</button>
+      <button data-sec="chat">Chat</button>
+      <button data-sec="notes">Smoke Test Log</button>
+      <button data-sec="commands">Commands</button>
     </nav>
   </aside>
   <main class="content">
@@ -48,7 +77,21 @@
           <div class="field"><label>color</label><input id="c_color" type="color" value="#9f67ff"/></div><div class="field"><label>status</label><select id="c_status"><option>ONLINE</option><option>OBSERVANT</option><option>LISTENING</option><option>UNSTABLE</option></select></div>
           <div class="field full"><label>route</label><input id="c_route"/></div><div class="field full"><label>bio</label><textarea id="c_bio"></textarea></div>
           <div class="field full"><label>greeting</label><textarea id="c_greeting"></textarea></div><div class="field full"><label>identity</label><textarea id="c_identity"></textarea></div>
-          <div class="field full"><label>anchors (JSON)</label><textarea id="c_anchors">{}</textarea></div><div class="field full"><label>camera_look</label><textarea id="c_camera_look"></textarea></div>
+          <div class="field full"><label>camera_look</label><textarea id="c_camera_look"></textarea></div>
+          <div class="sep"></div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px">Personality Anchors</div>
+          <div class="field full"><label>Contradiction — the core tension</label><textarea id="c_anch_contradiction" style="min-height:60px"></textarea></div>
+          <div class="field full"><label>Weakness — what she can't hide</label><textarea id="c_anch_weakness" style="min-height:60px"></textarea></div>
+          <div class="field full"><label>Rule — what she will never do</label><textarea id="c_anch_rule" style="min-height:60px"></textarea></div>
+          <div class="sep"></div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px">AI Behaviour Parameters</div>
+          <div class="row">
+            <div class="field"><label>Typing delay (ms)</label><input id="c_typing_delay" type="number" placeholder="1400" min="100" max="10000"/></div>
+            <div class="field"><label>Response length</label><select id="c_response_length"><option value="">default</option><option value="short">short (1-2 sentences)</option><option value="medium">medium (2-4 sentences)</option><option value="long">long (4-6 sentences)</option></select></div>
+            <div class="field"><label>Warmth (0=cold, 10=warm)</label><input id="c_warmth" type="range" min="0" max="10" step="1" value="5"/></div>
+            <div class="field"><label>Openness (0=guarded, 10=open)</label><input id="c_openness" type="range" min="0" max="10" step="1" value="5"/></div>
+            <div class="field full"><label>Voice guide (tone instructions for AI)</label><textarea id="c_voice_guide" style="min-height:80px" placeholder="e.g. Speak in short sentences. Never explain yourself. Use silence as punctuation."></textarea></div>
+          </div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
           <button class="btn" type="submit">Save character</button>
@@ -129,8 +172,17 @@ function headers(h={}){return {'x-admin-key':localStorage.getItem(KEY)||DEF,...h
 async function jfetch(url,opt={}){const r=await fetch(url,{...opt,headers:headers(opt.headers||{})}); const d=await r.json(); if(!r.ok||d.ok===false) throw new Error(d.error||'request failed'); return d;}
 function stat(id,msg,ok=true){$(id).textContent=msg; $(id).style.color=ok?'var(--ok)':'var(--bad)';}
 function section(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));$(id).classList.add('active');document.querySelector(`[data-sec="${id}"]`).classList.add('active');}
-function fill(c={}){$('c_id').value=c.id||'';$('c_name').value=c.name||'';$('c_color').value=c.color||'#9f67ff';$('c_status').value=c.status||'ONLINE';$('c_route').value=c.route||'';$('c_bio').value=c.bio||'';$('c_greeting').value=c.greeting||'';$('c_identity').value=c.identity||'';$('c_anchors').value=JSON.stringify(c.anchors||{},null,2);$('c_camera_look').value=c.camera_look||'';syncLabFromChar();}
-function payload(){let anchors={};try{anchors=JSON.parse($('c_anchors').value||'{}')}catch{} return{id:$('c_id').value.trim().toLowerCase(),name:$('c_name').value,color:$('c_color').value,status:$('c_status').value,route:$('c_route').value,bio:$('c_bio').value,greeting:$('c_greeting').value,identity:$('c_identity').value,anchors,camera_look:$('c_camera_look').value};}
+function fill(c={}){$('c_id').value=c.id||'';$('c_name').value=c.name||'';$('c_color').value=c.color||'#9f67ff';$('c_status').value=c.status||'ONLINE';$('c_route').value=c.route||'';$('c_bio').value=c.bio||'';$('c_greeting').value=c.greeting||'';$('c_identity').value=c.identity||'';$('c_camera_look').value=c.camera_look||'';
+  const a=c.anchors||{}; $('c_anch_contradiction').value=a.contradiction||''; $('c_anch_weakness').value=a.weakness||''; $('c_anch_rule').value=a.rule||'';
+  $('c_typing_delay').value=c.typing_delay||''; $('c_response_length').value=c.response_length||''; $('c_warmth').value=c.warmth??5; $('c_openness').value=c.openness??5; $('c_voice_guide').value=c.voice_guide||'';
+  syncLabFromChar();}
+function payload(){
+  const anchors={contradiction:$('c_anch_contradiction').value.trim(),weakness:$('c_anch_weakness').value.trim(),rule:$('c_anch_rule').value.trim()};
+  const p={id:$('c_id').value.trim().toLowerCase(),name:$('c_name').value,color:$('c_color').value,status:$('c_status').value,route:$('c_route').value,bio:$('c_bio').value,greeting:$('c_greeting').value,identity:$('c_identity').value,anchors,camera_look:$('c_camera_look').value,voice_guide:$('c_voice_guide').value.trim()};
+  if($('c_typing_delay').value) p.typing_delay=Number($('c_typing_delay').value);
+  if($('c_response_length').value) p.response_length=$('c_response_length').value;
+  p.warmth=Number($('c_warmth').value); p.openness=Number($('c_openness').value);
+  return p;}
 const CHAR_SEEDS={nina:3847291650,hazel:9182736450,iris:5647382910,vale:7291836450};
 function renderChars(){const l=$('charList');l.innerHTML=''; state.chars.forEach(c=>{const seed=CHAR_SEEDS[c.id]||'—';const b=document.createElement('button');b.className='chip';b.type='button';b.innerHTML=`${c.name||c.id} <span style="color:var(--muted);font-size:10px">#${seed}</span>`;b.onclick=()=>fill(c);l.appendChild(b);});['labCharacter','chatChar'].forEach(id=>$(id).innerHTML=state.chars.map(c=>`<option value="${c.id}">${c.name||c.id} [${CHAR_SEEDS[c.id]||'?'}]</option>`).join(''));}
 function syncLabFromChar(){const id=$('c_id').value||$('labCharacter').value; if(id) $('labCharacter').value=id; const c=state.chars.find(x=>x.id===$('labCharacter').value); $('pb_subject').value=(c?.camera_look)||$('c_camera_look').value||''; updatePrompt();}
