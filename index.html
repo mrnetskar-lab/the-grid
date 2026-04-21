@@ -329,9 +329,22 @@
     .gate-fine{font-size:.68rem;color:var(--text-3);margin-top:10px;line-height:1.5;}
 
     /* ── MOBILE NAV ── */
-    .mob-nav{position:fixed;left:8px;right:8px;bottom:8px;z-index:40;display:none;grid-template-columns:repeat(4,1fr);gap:5px;padding:6px;border-radius:14px;background:rgba(10,10,15,0.96);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:0 12px 32px rgba(0,0,0,0.4);padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));}
+    .mob-nav{position:fixed;left:8px;right:8px;bottom:8px;z-index:40;display:none;grid-template-columns:repeat(5,1fr);gap:5px;padding:6px;border-radius:14px;background:rgba(10,10,15,0.96);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:0 12px 32px rgba(0,0,0,0.4);padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));}
     .mob-tab{border:0;background:transparent;color:var(--text-3);border-radius:10px;padding:10px 6px;display:grid;place-items:center;gap:3px;cursor:pointer;font-size:.68rem;font-weight:600;}
     .mob-tab.active{background:transparent;border:1px solid rgba(184,52,104,0.45);color:var(--text);}
+    .flash-spend{animation:flashSpend .35s ease;}
+    @keyframes flashSpend{0%{transform:scale(1)}50%{transform:scale(1.08);border-color:var(--accent-border);background:var(--accent-dim)}100%{transform:scale(1)}}
+    .streak-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);font-size:.78rem;color:var(--text-2);}
+    .discover-profile-wrap{border:1px solid var(--border);background:var(--surface);border-radius:var(--r);padding:14px;}
+    .discover-profile-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .discover-profile-main{display:grid;grid-template-columns:280px 1fr;gap:16px;}
+    .discover-profile-main img{width:100%;border-radius:12px;aspect-ratio:3/4;object-fit:cover}
+    .rel-bar{height:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;overflow:hidden}
+    .rel-fill{height:100%;background:linear-gradient(90deg,var(--accent),#de6f9b);}
+    .tile-lock-btn{position:absolute;inset:0;display:grid;place-items:center;background:rgba(5,5,8,.72);color:#fff;font-size:.75rem;font-weight:700;border:1px solid var(--border);cursor:pointer}
+    .tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+    .tier-card{border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--surface-2);}
+    .tier-card.active{border-color:var(--accent-border);background:var(--accent-dim)}
     .sidebar-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:55;opacity:0;pointer-events:none;transition:opacity .2s;border:0;}
 
     /* Typography contrast + spacing rhythm */
@@ -597,18 +610,13 @@
     </div>
     <div class="paywall-body">
       <div class="paywall-headline">Unlock the full experience</div>
-      <div class="paywall-sub">You've reached a private moment. Upgrade to continue the conversation and access exclusive content.</div>
-      <div class="paywall-perks">
-        <div class="paywall-perk"><div class="paywall-perk-icon">💬</div><div class="paywall-perk-label">Unlimited chat</div><div class="paywall-perk-desc">No message limits</div></div>
-        <div class="paywall-perk"><div class="paywall-perk-icon">🖼️</div><div class="paywall-perk-label">Private galleries</div><div class="paywall-perk-desc">Exclusive content drops</div></div>
-        <div class="paywall-perk"><div class="paywall-perk-icon">⚡</div><div class="paywall-perk-label">All personas</div><div class="paywall-perk-desc">Full access, all 4+</div></div>
-        <div class="paywall-perk"><div class="paywall-perk-icon">✨</div><div class="paywall-perk-label">AI image gen</div><div class="paywall-perk-desc">Request custom scenes</div></div>
+      <div class="paywall-sub">Choose a plan. Billing is mocked for now — we store your tier locally.</div>
+      <div class="tier-grid">
+        <div class="tier-card" data-tier="free"><div class="paywall-perk-label">Free</div><div class="paywall-perk-desc">$0/mo · 3 scenes/day</div></div>
+        <div class="tier-card" data-tier="pulse"><div class="paywall-perk-label">Pulse</div><div class="paywall-perk-desc">$9/mo · 50 scenes/month + gallery</div></div>
+        <div class="tier-card" data-tier="signal"><div class="paywall-perk-label">Signal</div><div class="paywall-perk-desc">$24/mo · Unlimited + video</div></div>
       </div>
-      <div class="paywall-price">
-        <div class="paywall-amount">$24 <span>/ month</span></div>
-        <div class="paywall-trial">✓ 3-day free trial — cancel anytime</div>
-      </div>
-      <button class="paywall-cta">Start free trial</button>
+      <button class="paywall-cta" id="paywallChoose">Start free trial</button>
       <button class="paywall-restore">Restore purchase</button>
     </div>
   </div>
@@ -690,6 +698,7 @@
     </div>
     <button class="nav-item active" data-to="home"><span class="nav-icon">⌂</span>Home</button>
     <button class="nav-item" data-to="discover"><span class="nav-icon">◈</span>Discover</button>
+    <button class="nav-item" data-to="inbox"><span class="nav-icon">✉</span>Inbox</button>
     <button class="nav-item" data-to="chat" id="chatNav">
       <span class="nav-icon">◔</span><span class="nav-label">Chat</span><span class="nav-badge" id="chatBadge"></span><span class="nav-arrow">›</span>
     </button>
@@ -724,6 +733,8 @@
     <header class="topbar">
       <div class="topbar-left">
         <button class="menu-btn" id="menuBtn">☰</button>
+        <div class="tokens-pill" id="sparkCounter">⚡ <span id="sparkCount">0</span></div>
+        <div class="tokens-pill" id="planBadge">Current plan: Free</div>
       </div>
       <div class="topbar-right">
         <div class="tokens-pill"><span class="token-icon"></span>41.4 tokens</div>
@@ -749,6 +760,7 @@
               <button class="btn btn-primary" data-to="discover">Find a persona</button>
               <button class="btn" data-to="chat">Open chat</button>
             </div>
+            <div style="margin-top:10px"><span class="streak-badge" id="streakBadge">🔥 1 day streak</span></div>
           </div>
         </div>
 
@@ -798,12 +810,7 @@
 
         <div>
           <div class="sh"><h2>Messages</h2><button class="sh-link" data-to="chat">Open chat</button></div>
-          <div class="inbox-card">
-            <div class="inbox-row" data-to="chat"><img src="/profile_pictures/hazel.png" class="inbox-av" alt="Hazel"/><div class="inbox-body"><div class="inbox-name"><span class="inbox-unread"></span>Hazel</div><div class="inbox-preview">I notice things. You've been quiet lately.</div></div><span class="inbox-meta">2m</span></div>
-            <div class="inbox-row" data-to="chat"><img src="/profile_pictures/nina.png" class="inbox-av" alt="Nina"/><div class="inbox-body"><div class="inbox-name">Nina</div><div class="inbox-preview">It's strange how familiar this still feels.</div></div><span class="inbox-meta">9m</span></div>
-            <div class="inbox-row" data-to="chat"><img src="/profile_pictures/iris.png" class="inbox-av" alt="Iris"/><div class="inbox-body"><div class="inbox-name">Iris</div><div class="inbox-preview">…</div></div><span class="inbox-meta">18m</span></div>
-            <div class="inbox-row" data-to="chat"><img src="/profile_pictures/vale_profile.png" class="inbox-av" alt="Vale"/><div class="inbox-body"><div class="inbox-name">Vale</div><div class="inbox-preview">Still here. For now.</div></div><span class="inbox-meta">1h</span></div>
-          </div>
+          <div class="inbox-card" id="homeInboxList"></div>
         </div>
       </section>
 
@@ -869,19 +876,26 @@
       <!-- DISCOVER -->
       <section class="view" id="view-discover">
         <div class="sh"><h2>Discover</h2></div>
-        <div class="filter-bar">
+        <div class="filter-bar" id="discoverFilters">
           <button class="fpill active" data-f="all">All</button>
           <button class="fpill" data-f="romantic">Romantic</button>
           <button class="fpill" data-f="mystery">Mystery</button>
           <button class="fpill" data-f="volatile">Volatile</button>
           <button class="fpill" data-f="silent">Silent</button>
         </div>
-        <div class="discover-grid">
+        <div class="discover-grid" id="discoverGrid">
           <article class="discover-card" data-tags="romantic mystery" data-thread="hazel"><div class="d-photo"><img src="/profile_pictures/hazel.png" alt="Hazel"/></div><div class="d-overlay"></div><span class="d-tag">Observant</span><div class="d-footer"><h3>Hazel</h3><p>She notices before she speaks.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
           <article class="discover-card" data-tags="romantic" data-thread="nina"><div class="d-photo"><img src="/profile_pictures/nina.png" alt="Nina"/></div><div class="d-overlay"></div><span class="d-tag">Familiar</span><div class="d-footer"><h3>Nina</h3><p>Warm, easy, and quietly funny.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
           <article class="discover-card" data-tags="silent mystery" data-thread="iris"><div class="d-photo"><img src="/profile_pictures/iris.png" alt="Iris"/></div><div class="d-overlay"></div><span class="d-tag">Watcher</span><div class="d-footer"><h3>Iris</h3><p>When she speaks, it lands.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
           <article class="discover-card" data-tags="volatile mystery" data-thread="vale"><div class="d-photo"><img src="/profile_pictures/vale_profile.png" alt="Vale"/></div><div class="d-overlay"></div><span class="d-tag">Unstable</span><div class="d-footer"><h3>Vale</h3><p>Electric when present. Gone fast.</p><button class="d-btn" data-to="chat">Chat now</button></div></article>
         </div>
+        <div id="discoverProfile" style="display:none"></div>
+      </section>
+
+      <!-- INBOX -->
+      <section class="view" id="view-inbox">
+        <div class="sh"><h2>Inbox</h2></div>
+        <div class="inbox-card" id="inboxList"></div>
       </section>
 
       <!-- CHAT -->
@@ -1054,6 +1068,7 @@
 <nav class="mob-nav">
   <button class="mob-tab active" data-to="home"><span>⌂</span><span>Home</span></button>
   <button class="mob-tab" data-to="discover"><span>◈</span><span>Discover</span></button>
+  <button class="mob-tab" data-to="inbox"><span>✉</span><span>Inbox</span></button>
   <button class="mob-tab" data-to="chat"><span>◔</span><span>Chat</span></button>
   <button class="mob-tab" data-to="gallery"><span>▣</span><span>Gallery</span></button>
 </nav>
@@ -1077,9 +1092,21 @@ localStorage.removeItem('v_free_msgs');
 
 // Nav
 const sidebar=document.getElementById('sidebar'),menuBtn=document.getElementById('menuBtn'),sbg=document.getElementById('sidebarBg');
-const views={home:document.getElementById('view-home'),discover:document.getElementById('view-discover'),chat:document.getElementById('view-chat'),gallery:document.getElementById('view-gallery'),profile:document.getElementById('view-profile')};
+const views={home:document.getElementById('view-home'),discover:document.getElementById('view-discover'),inbox:document.getElementById('view-inbox'),chat:document.getElementById('view-chat'),gallery:document.getElementById('view-gallery'),profile:document.getElementById('view-profile')};
 const chatNav=document.getElementById('chatNav'),drawer=document.getElementById('threadDrawer');
 let chatOpen=false;
+
+const characterDirectory={
+  hazel:{id:'hazel',name:'Hazel',status:'OBSERVANT',color:'#b83468',route:'After the pause',bio:'Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.',photo:'/profile_pictures/hazel.png',tags:['Observant','Late night']},
+  nina:{id:'nina',name:'Nina',status:'ONLINE',color:'#ca5f8a',route:'The return',bio:'Warm, easy, and quietly funny. You knew each other before.',photo:'/profile_pictures/nina.png',tags:['Familiar','Romantic']},
+  iris:{id:'iris',name:'Iris',status:'LISTENING',color:'#7982cc',route:'Low signal',bio:'Deeply attentive yet almost impossible to reach.',photo:'/profile_pictures/iris.png',tags:['Silent','Watcher']},
+  vale:{id:'vale',name:'Vale',status:'UNSTABLE',color:'#d83b72',route:'Brief window',bio:'Unpredictable and brief. Electric when present.',photo:'/profile_pictures/vale_profile.png',tags:['Volatile','Electric']}
+};
+const relationshipState={hazel:42,nina:56,iris:33,vale:61};
+const messageState=JSON.parse(localStorage.getItem('v_message_state')||'{}');
+const tierPerks={free:{name:'Free',daily:3,monthly:0,gallery:false},pulse:{name:'Pulse',daily:0,monthly:50,gallery:true},signal:{name:'Signal',daily:0,monthly:Infinity,gallery:true}};
+const tierState={tier:localStorage.getItem('v_tier')||'free'};
+const currency={sparks:parseInt(localStorage.getItem('v_sparks')||'120',10),pulses:parseInt(localStorage.getItem('v_pulses')||'0',10),save(){localStorage.setItem('v_sparks',this.sparks);localStorage.setItem('v_pulses',this.pulses);}};
 
 function closeSb(){sidebar.classList.remove('open');document.body.classList.remove('sb-open');}
 function toggleDrawer(f){chatOpen=f!==undefined?f:!chatOpen;drawer.classList.toggle('open',chatOpen);chatNav.classList.toggle('open',chatOpen);}
@@ -1089,7 +1116,100 @@ function goTo(name){
   document.querySelectorAll('.nav-item').forEach(b=>{if(b!==chatNav)b.classList.toggle('active',b.dataset.to===name);});
   document.querySelectorAll('.mob-tab').forEach(b=>b.classList.toggle('active',b.dataset.to===name));
   if(name==='chat'){toggleDrawer(true);chatNav.classList.add('active');}else{chatNav.classList.remove('active');}
+  if(name==='inbox'){markInboxReadAll();}
   closeSb();window.scrollTo({top:0,behavior:'smooth'});localStorage.setItem('v_view',name);
+}
+
+function updateCurrencyUI(flash=false){
+  const sparkCount=document.getElementById('sparkCount');
+  const sparkCounter=document.getElementById('sparkCounter');
+  const planBadge=document.getElementById('planBadge');
+  if(sparkCount)sparkCount.textContent=String(currency.sparks);
+  if(planBadge)planBadge.textContent=`Current plan: ${tierPerks[tierState.tier]?.name||'Free'}`;
+  if(flash&&sparkCounter){sparkCounter.classList.remove('flash-spend');void sparkCounter.offsetWidth;sparkCounter.classList.add('flash-spend');}
+  currency.save();
+}
+function gainSparks(amount,msg){
+  currency.sparks+=amount;updateCurrencyUI();
+  if(msg)showToast(msg);
+}
+function spendForScene(sparkCost,pulseCost){
+  if(currency.sparks>=sparkCost){currency.sparks-=sparkCost;updateCurrencyUI(true);return true;}
+  if(currency.pulses>=pulseCost){currency.pulses-=pulseCost;updateCurrencyUI(true);return true;}
+  showToast('Not enough sparks — earn more by chatting');
+  return false;
+}
+function todayKey(){return new Date().toISOString().slice(0,10);}
+function yesterdayKey(){const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);}
+function trackLoginBonuses(){
+  const today=todayKey();
+  const last=localStorage.getItem('v_last_login');
+  if(last!==today){gainSparks(10,'+10 sparks daily login bonus');localStorage.setItem('v_last_login',today);}
+  const streakLast=localStorage.getItem('v_streak_last');
+  let streak=Number(localStorage.getItem('v_streak_count')||'0');
+  if(streakLast===today){} else if(streakLast===yesterdayKey()){streak+=1;} else {streak=1;}
+  localStorage.setItem('v_streak_last',today);localStorage.setItem('v_streak_count',String(streak));
+  document.getElementById('streakBadge').textContent=`🔥 ${streak} day streak`;
+  const milestone={3:50,7:150,30:500}[streak];
+  if(milestone){gainSparks(milestone,`Streak bonus +${milestone} sparks`);}
+}
+function monthKey(){const d=new Date();return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;}
+function sceneUsage(){return JSON.parse(localStorage.getItem('v_scene_usage')||'{}');}
+function canGenerateScene(){
+  const tier=tierState.tier;
+  if(tier==='signal') return true;
+  const usage=sceneUsage();
+  if(tier==='free'){
+    const k=todayKey();const n=usage[`d_${k}`]||0;if(n>=3){openPaywall(curThread);return false;}
+  }
+  if(tier==='pulse'){
+    const mk=monthKey();const n=usage[`m_${mk}`]||0;if(n>=50){showToast('Pulse monthly limit reached');return false;}
+  }
+  return spendForScene(15,1);
+}
+function markSceneUsed(){
+  const usage=sceneUsage();
+  usage[`d_${todayKey()}`]=(usage[`d_${todayKey()}`]||0)+1;
+  usage[`m_${monthKey()}`]=(usage[`m_${monthKey()}`]||0)+1;
+  localStorage.setItem('v_scene_usage',JSON.stringify(usage));
+}
+function rememberMessage(character,text,role='assistant'){
+  const now=Date.now();
+  const slot=messageState[character]||{messages:[],lastAt:0};
+  slot.messages.push({text,role,ts:now});
+  slot.lastAt=now;
+  messageState[character]=slot;
+  localStorage.setItem('v_message_state',JSON.stringify(messageState));
+  renderInboxes();
+}
+function relative(ts){if(!ts)return '';const diff=Math.max(1,Math.floor((Date.now()-ts)/60000));if(diff<60)return `${diff}m`;const h=Math.floor(diff/60);if(h<24)return `${h}h`;return `${Math.floor(h/24)}d`;}
+function markInboxReadAll(){Object.keys(characterDirectory).forEach(id=>localStorage.setItem(`v_read_${id}`,String(Date.now())));renderInboxes();}
+function renderInboxes(){
+  const rows=Object.keys(characterDirectory).map(id=>{const entry=messageState[id]||{messages:[]};const last=entry.messages[entry.messages.length-1];return{id,last,lastAt:entry.lastAt||0};}).sort((a,b)=>b.lastAt-a.lastAt);
+  const markup=rows.filter(r=>r.last).map(r=>{const c=characterDirectory[r.id];const readTs=Number(localStorage.getItem(`v_read_${r.id}`)||'0');const unread=r.lastAt>readTs;const preview=(r.last?.text||'').slice(0,60);return `<div class="inbox-row" data-thread="${r.id}" data-to="chat"><img src="${c.photo}" class="inbox-av" alt="${c.name}"/><div class="inbox-body"><div class="inbox-name">${unread?'<span class="inbox-unread"></span>':''}${c.name}</div><div class="inbox-preview">${preview||'...'}</div></div><span class="inbox-meta">${relative(r.lastAt)}</span></div>`;}).join('');
+  const empty='<div style="padding:18px;color:var(--text-2)">No messages yet — start a conversation</div>';
+  const home=document.getElementById('homeInboxList');const inbox=document.getElementById('inboxList');
+  if(home)home.innerHTML=markup||empty;
+  if(inbox)inbox.innerHTML=markup||empty;
+  document.querySelectorAll('#homeInboxList .inbox-row,#inboxList .inbox-row').forEach(row=>row.addEventListener('click',()=>startChat(row.dataset.thread)));
+}
+function openDiscoverProfile(id){
+  const c=characterDirectory[id]; if(!c) return;
+  const grid=document.getElementById('discoverGrid'); const detail=document.getElementById('discoverProfile');
+  grid.style.display='none'; detail.style.display='block';
+  const rel=Math.max(0,Math.min(100,relationshipState[id]||0));
+  const unlocked=tierState.tier==='pulse'||tierState.tier==='signal';
+  detail.innerHTML=`<div class="discover-profile-wrap" id="profile-${id}" style="border-color:${c.color}">
+    <div class="discover-profile-head"><button class="btn" id="discoverBack">← Back</button><button class="btn btn-primary" id="discoverChat">Start chatting</button></div>
+    <div class="discover-profile-main"><img src="${c.photo}" alt="${c.name}"/><div>
+      <h2>${c.name} ${id==='vale'?'<span style="display:inline-block;width:8px;height:8px;background:var(--accent);border-radius:50%;animation:glow 1.2s infinite"></span>':''}</h2>
+      <div style="color:var(--text-2);margin-bottom:8px">${c.route}</div><p style="margin-bottom:10px">${c.bio}</p>
+      <div style="margin-bottom:4px;font-size:.78rem;color:var(--text-2)">Relationship status</div><div class="rel-bar"><div class="rel-fill" style="width:${rel}%"></div></div>
+      <div class="profile-gallery-grid" style="margin-top:14px">${Array.from({length:6}).map((_,i)=>`<div class="profile-gallery-tile unlocked"><img src="${c.photo}" alt="${c.name}"/>${i===0||unlocked?'':`<button class="tile-lock-btn" data-unlock="${id}">Unlock (50⚡ / 3💠)</button>`}</div>`).join('')}</div>
+    </div></div></div>`;
+  document.getElementById('discoverBack').onclick=()=>{detail.style.display='none';grid.style.display='grid';};
+  document.getElementById('discoverChat').onclick=()=>startChat(id);
+  detail.querySelectorAll('[data-unlock]').forEach(btn=>btn.onclick=()=>{if(tierState.tier==='pulse'||tierState.tier==='signal'){btn.remove();return;} if(spendForScene(50,3)){btn.remove();}});
 }
 
 chatNav.addEventListener('click',()=>{if(!views.chat.classList.contains('active'))goTo('chat');else toggleDrawer();});
@@ -1162,19 +1282,23 @@ document.querySelectorAll('.drawer-item').forEach(item=>{item.addEventListener('
   goTo('chat');
   const tr=addTyping(curAvSrc);
   fetch(`/api/characters/${curThread}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__greeting__'})})
-    .then(r=>r.json()).then(d=>{tr.remove();addMsg('theirs',(d.reply||greetings[curThread]||'…').trim(),curAvSrc);})
-    .catch(()=>{tr.remove();addMsg('theirs',greetings[curThread]||'…',curAvSrc);});
+    .then(r=>r.json()).then(d=>{tr.remove();const reply=(d.reply||greetings[curThread]||'…').trim();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');})
+    .catch(()=>{tr.remove();const fallback=(greetings[curThread]||'…');addMsg('theirs',fallback,curAvSrc);rememberMessage(curThread,fallback,'assistant');});
 });});
 
 document.getElementById('chatForm').addEventListener('submit',async e=>{
   e.preventDefault();const txt=chatInput.value.trim();if(!txt)return;
+  gainSparks(2,'+2 sparks for chatting');
+  if(!localStorage.getItem(`v_first_chat_${curThread}`)){localStorage.setItem(`v_first_chat_${curThread}`,'1');gainSparks(25,`+25 sparks first chat with ${profileData[curThread]?.name||curThread}`);}
   chatInput.value='';sendBtn.disabled=true;addMsg('mine',txt);
+  rememberMessage(curThread,txt,'user');
   const tr=addTyping(curAvSrc);
   try{
     const res=await fetch(`/api/characters/${curThread||'hazel'}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
     const data=await res.json();
-    tr.remove();addMsg('theirs',(data.reply||data.result||'…').trim(),curAvSrc);
-  }catch{tr.remove();addMsg('theirs','One moment…',curAvSrc);}
+    const reply=(data.reply||data.result||'…').trim();
+    tr.remove();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');
+  }catch{tr.remove();addMsg('theirs','One moment…',curAvSrc);rememberMessage(curThread,'One moment…','assistant');}
   sendBtn.disabled=false;chatInput.focus();
 });
 
@@ -1213,7 +1337,9 @@ function openProfile(id){
 
 function startChat(thread){
   const item=document.querySelector(`.drawer-item[data-thread="${thread}"]`);
+  localStorage.setItem(`v_read_${thread}`,String(Date.now()));
   if(item) item.click(); else goTo('chat');
+  renderInboxes();
 }
 
 document.getElementById('profileBack').addEventListener('click',()=>goTo(window._profileFrom||'discover'));
@@ -1223,7 +1349,7 @@ document.querySelectorAll('.discover-card').forEach(card=>{
   card.addEventListener('click',e=>{
     if(e.target.closest('.d-btn'))return; // let chat button through
     const thread=card.dataset.thread;
-    if(thread) openProfile(thread);
+    if(thread) openDiscoverProfile(thread);
   });
 });
 
@@ -1273,6 +1399,8 @@ function openDevPanel(){
   panel.style.display='block';
   loadDevLooks();
   goTo('gallery');
+  const status=document.getElementById('devNewStatus');
+  if(status) status.textContent=`Dev status — v_sparks:${currency.sparks}, v_pulses:${currency.pulses}, tier:${tierState.tier}`;
   showToast('Dev mode active');
 }
 
@@ -1360,8 +1488,22 @@ function openPaywall(thread){
   const name=document.getElementById('paywallName');
   if(img&&d)img.src=d.photo;
   if(name&&d)name.textContent=d.name;
+  const active=tierState.tier;
+  document.querySelectorAll('.tier-card').forEach(card=>card.classList.toggle('active',card.dataset.tier===active));
+  const cta=document.getElementById('paywallChoose');
+  if(cta)cta.textContent=active==='free'?'Start free trial':`Switch to ${active}`;
   pw?.classList.add('open');
 }
+document.querySelectorAll('.tier-card').forEach(card=>card.addEventListener('click',()=>{
+  tierState.tier=card.dataset.tier||'free';
+  localStorage.setItem('v_tier',tierState.tier);
+  document.querySelectorAll('.tier-card').forEach(c=>c.classList.toggle('active',c===card));
+  updateCurrencyUI();
+}));
+document.getElementById('paywallChoose')?.addEventListener('click',()=>{
+  showToast(`Plan updated: ${tierPerks[tierState.tier].name}`);
+  document.getElementById('paywall')?.classList.remove('open');
+});
 document.getElementById('paywallClose')?.addEventListener('click',()=>document.getElementById('paywall')?.classList.remove('open'));
 document.getElementById('paywall')?.addEventListener('click',e=>{if(e.target===document.getElementById('paywall'))document.getElementById('paywall').classList.remove('open');});
 
@@ -1429,6 +1571,7 @@ document.getElementById('sceneGenerate')?.addEventListener('click',async()=>{
   const character=curThread||'hazel';
   const charName=(profileData[character]?.name)||character;
   const prompt=`${style} portrait photo, ${mood} mood, ${setting} setting${detail?', '+detail:''}, ${charName} character, cinematic lighting, photorealistic, 4k, shallow depth of field`;
+  if(!canGenerateScene()) return;
   btn.disabled=true;btn.textContent='Generating…';status.textContent='This may take 20–40 seconds…';
   try{
     const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood,customPrompt:prompt})});
@@ -1439,6 +1582,7 @@ document.getElementById('sceneGenerate')?.addEventListener('click',async()=>{
     img.style.cssText='max-width:260px;border-radius:10px;display:block;margin-top:4px';
     document.getElementById('sceneSheet')?.classList.remove('open');
     addMsg('theirs','',curAvSrc,img);
+    markSceneUsed();
     status.textContent='';
   }catch(err){status.textContent='Error: '+err.message;}
   btn.disabled=false;btn.textContent='Generate scene';
@@ -1450,6 +1594,7 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
   const status=document.getElementById('genStatus');
   const character=document.getElementById('genCharSelect').value;
   const mood=document.getElementById('genMoodSelect').value;
+  if(!canGenerateScene()) return;
   btn.disabled=true;btn.textContent='Generating…';status.textContent='This may take 10–30 seconds…';
   try{
     const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood})});
@@ -1460,6 +1605,7 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
     tile.className='g-tile';
     tile.innerHTML=`<img src="${data.shot.path}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy"><div class="g-overlay"></div><div class="g-caption"><div class="g-name">${character.charAt(0).toUpperCase()+character.slice(1)}</div><div class="g-mood">AI Generated · ${mood}</div></div>`;
     grid.prepend(tile);
+    markSceneUsed();
     status.textContent='Done!';btn.textContent='Generate photo';
   }catch(err){status.textContent='Error: '+err.message;btn.textContent='Generate photo';}
   btn.disabled=false;
@@ -1470,6 +1616,10 @@ const PRESENCE_POOLS={nina:['online','online','typing…','just opened this'],ha
 function setPresence(id,text){const el=document.getElementById('pres-'+id);if(el)el.textContent=text;}
 function randPresence(id){const p=PRESENCE_POOLS[id]||['online'];return p[Math.floor(Math.random()*p.length)];}
 Object.keys(PRESENCE_POOLS).forEach(id=>{setPresence(id,randPresence(id));function sched(){setTimeout(()=>{setPresence(id,randPresence(id));sched();},45000+Math.random()*45000);}sched();});
+
+updateCurrencyUI();
+trackLoginBonuses();
+renderInboxes();
 
 </script>
 </body>
