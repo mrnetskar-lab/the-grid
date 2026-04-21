@@ -242,14 +242,21 @@ router.post('/commands', async (req, res) => {
         groq: Boolean(process.env.GROQ_API_KEY),
         together: Boolean(process.env.TOGETHER_API_KEY),
       };
-      return res.json({
-        ok: true,
-        output: 'Server status ready',
-        uptime_sec: Math.floor(process.uptime()),
-        memory: mem,
-        providers,
-        cwd: ROOT_DIR,
-      });
+      let pushCount = 0;
+      try {
+        const countPath = path.join(ROOT_DIR, 'commit_count.txt');
+        if (fs.existsSync(countPath)) pushCount = parseInt(fs.readFileSync(countPath, 'utf-8').trim()) || 0;
+      } catch {}
+      const pushSeed = 6174829301 + pushCount * 1000;
+      const charSeeds = { nina: 3847291650, hazel: 9182736450, iris: 5647382910, vale: 7291836450 };
+      const output = [
+        `Uptime: ${Math.floor(process.uptime())}s`,
+        `Memory: ${Math.round(mem.rss/1024/1024)}MB`,
+        `Providers: ${Object.entries(providers).filter(([,v])=>v).map(([k])=>k).join(', ')||'none'}`,
+        `Push count: #${pushCount} | Push seed: ${pushSeed}`,
+        `Char seeds: ${Object.entries(charSeeds).map(([k,v])=>`${k}:${v}`).join(' | ')}`,
+      ].join('\n');
+      return res.json({ ok: true, output, uptime_sec: Math.floor(process.uptime()), memory: mem, providers, push_count: pushCount, push_seed: pushSeed, char_seeds: charSeeds });
     }
 
     return res.status(400).json({ ok: false, error: 'Unhandled command' });

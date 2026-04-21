@@ -4,3 +4,4 @@ codex-setup.sh
 .env
 
 admin_notes/
+commit_count.txt
