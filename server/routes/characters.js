@@ -113,6 +113,9 @@ router.post('/:id/chat', async (req, res) => {
       text: String(h.content || ''),
     }));
 
+    const emotionalBeat = req.body?.emotionalBeat || 'neutral';
+    const relationship  = req.body?.relationship  || {};
+
     let ai;
     try {
       ai = await withTimeout(
@@ -123,12 +126,13 @@ router.post('/:id/chat', async (req, res) => {
           temperature: 0.88,
           context: {
             active_app: { type: 'messages', mode: 'dm', visibility: 'private' },
-            conversation: { responseMode: 'brief', topic: 'direct-message' },
+            conversation: { responseMode: 'brief', topic: 'direct-message', emotionalBeat },
             sceneFlow: {
               role: 'primary',
               mainSpeaker: characterName,
               instruction: 'Answer as a private DM.',
             },
+            relationship,
             memory,
           },
         }),

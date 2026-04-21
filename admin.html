@@ -158,7 +158,43 @@
 
     <section id="notes" class="section"><h2>Smoke Test Log</h2><div class="field"><label>note</label><textarea id="noteText"></textarea></div><div class="field"><input id="noteImage" type="file" accept="image/*"/></div><img id="notePreview" class="thumb" style="display:none"/><div style="display:flex;gap:8px"><button class="btn" id="submitNote" type="button">Submit</button><button class="btn secondary" id="exportNotes" type="button">Export all notes .zip</button></div><div class="status" id="noteStatus"></div><div id="noteList"></div></section>
 
-    <section id="chat" class="section"><h2>Chat</h2><div class="grid2"><div><div class="field"><label>character</label><select id="chatChar"></select></div><div class="bubble-wrap" id="chatList"></div><div style="display:flex;gap:8px;margin-top:8px"><input id="chatInput" placeholder="Say something"/><button class="btn" id="sendChat" type="button">Send</button><button class="btn secondary" id="clearChat" type="button">Clear history</button></div></div><div><label>System prompt (identity)</label><div class="system" id="chatIdentity"></div></div></div><div class="status" id="chatStatus"></div></section>
+    <section id="chat" class="section">
+      <h2>Chat</h2>
+      <div class="grid2">
+        <div>
+          <div class="field" style="margin-bottom:10px"><label>Character</label><select id="chatChar"></select></div>
+          <div class="bubble-wrap" id="chatList"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <input id="chatInput" placeholder="Say something…" style="flex:1"/>
+            <button class="btn" id="sendChat" type="button">Send</button>
+            <button class="btn secondary" id="clearChat" type="button">Clear</button>
+          </div>
+          <div class="status" id="chatStatus"></div>
+        </div>
+        <div>
+          <div class="field" style="margin-bottom:12px">
+            <label>Emotional Beat</label>
+            <select id="chatBeat">
+              <option value="neutral">neutral — default</option>
+              <option value="intimacy">intimacy — vulnerability possible</option>
+              <option value="repair">repair — after conflict</option>
+              <option value="rupture">rupture — strained/broken</option>
+            </select>
+          </div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px">Relationship State</div>
+          <div class="field"><label>Trust <span id="rv_trust">0.5</span></label><input type="range" id="rs_trust" min="0" max="1" step="0.05" value="0.5" oninput="$('rv_trust').textContent=this.value"/></div>
+          <div class="field"><label>Attraction <span id="rv_attraction">0.3</span></label><input type="range" id="rs_attraction" min="0" max="1" step="0.05" value="0.3" oninput="$('rv_attraction').textContent=this.value"/></div>
+          <div class="field"><label>Comfort <span id="rv_comfort">0.4</span></label><input type="range" id="rs_comfort" min="0" max="1" step="0.05" value="0.4" oninput="$('rv_comfort').textContent=this.value"/></div>
+          <div class="field"><label>Hurt <span id="rv_hurt">0.0</span></label><input type="range" id="rs_hurt" min="0" max="1" step="0.05" value="0" oninput="$('rv_hurt').textContent=this.value"/></div>
+          <div class="field"><label>Jealousy <span id="rv_jealousy">0.0</span></label><input type="range" id="rs_jealousy" min="0" max="1" step="0.05" value="0" oninput="$('rv_jealousy').textContent=this.value"/></div>
+          <div class="field"><label>Attachment <span id="rv_attachment">0.3</span></label><input type="range" id="rs_attachment" min="0" max="1" step="0.05" value="0.3" oninput="$('rv_attachment').textContent=this.value"/></div>
+          <div class="field"><label>Intimacy Readiness <span id="rv_intimacyReadiness">0.1</span></label><input type="range" id="rs_intimacyReadiness" min="0" max="1" step="0.05" value="0.1" oninput="$('rv_intimacyReadiness').textContent=this.value"/></div>
+          <div class="sep"></div>
+          <label>System prompt (identity)</label>
+          <div class="system" id="chatIdentity"></div>
+        </div>
+      </div>
+    </section>
 
     <section id="commands" class="section"><h2>Commands</h2><div style="display:flex;gap:8px"><select id="cmdSel"><option>clear-all-history</option><option>clear-images</option><option>list-images</option><option>ping-comfy</option><option>server-status</option></select><button class="btn" id="runCmd" type="button">Run</button></div><pre class="mono" id="cmdOut"></pre></section>
   </main>
@@ -190,7 +226,7 @@ function updatePrompt(){const txt=[$('pb_subject').value,$('pb_atmo').value,$('p
 function renderAB(){const box=$('abShots'); box.innerHTML=''; state.shots.slice(0,2).forEach((s,idx)=>{const d=document.createElement('div'); d.innerHTML=`<div style="color:var(--muted);font-size:12px">${s.timestamp} — ${s.backend||'unknown'}</div><img src="${s.path}"/><div style="display:flex;gap:8px;margin-top:8px"><button class="btn secondary" type="button" data-anim="${idx}">Animate</button>${s.videoPath?`<a class="btn secondary" href="${s.videoPath}" download>Save video</a>`:''}</div>${s.videoPath?`<video src="${s.videoPath}" controls autoplay loop muted style="width:100%;margin-top:8px;border:1px solid var(--border);border-radius:8px"></video>`:''}`; box.appendChild(d);}); box.querySelectorAll('[data-anim]').forEach(btn=>btn.onclick=()=>animateShot(Number(btn.dataset.anim)).catch(err=>stat('cameraStatus',err.message,false)));}
 function renderSnips(){const list=$('snipList');list.innerHTML=''; [...baseSnips,...state.snips].forEach((s,i)=>{const d=document.createElement('div');d.className='snip';d.textContent=s;d.onclick=()=>navigator.clipboard.writeText(s); if(i>=baseSnips.length){const x=document.createElement('button');x.className='btn secondary';x.type='button';x.textContent='Delete';x.onclick=(e)=>{e.stopPropagation();state.snips.splice(i-baseSnips.length,1);localStorage.setItem(SN,JSON.stringify(state.snips));renderSnips();};d.appendChild(document.createElement('br'));d.appendChild(x);} list.appendChild(d);});}
 function renderNotes(notes){const l=$('noteList');l.innerHTML='';notes.forEach(n=>{const d=document.createElement('div');d.className='snip';d.innerHTML=`<div style="color:var(--muted);font-size:12px">${n.timestamp}</div><div>${n.text||''}</div>${n.imagePath?`<img class="thumb" src="${n.imagePath}"/>`:''}`;l.appendChild(d);});}
-function renderChat(){const l=$('chatList');l.innerHTML='';state.chat.forEach(m=>{const d=document.createElement('div');d.className=`bubble ${m.role==='user'?'u':'a'}`;d.textContent=m.text;l.appendChild(d);}); l.scrollTop=l.scrollHeight;}
+function renderChat(){const l=$('chatList');l.innerHTML='';state.chat.forEach(m=>{const d=document.createElement('div');d.className=`bubble ${m.role==='user'?'u':'a'}`;d.textContent=m.text;if(m.toneClass){const t=document.createElement('div');t.style.cssText='font-size:10px;opacity:0.5;margin-top:4px';t.textContent=m.toneClass;d.appendChild(t);}l.appendChild(d);}); l.scrollTop=l.scrollHeight;}
 async function loadChars(){const d=await jfetch('/api/admin/characters');state.chars=d.characters||[];renderChars(); if(state.chars[0]) fill(state.chars[0]); updateChatIdentity();}
 async function saveChar(e){e.preventDefault();const p=payload();if(!/^[a-z0-9-]+$/.test(p.id)) return stat('charStatus','Invalid id',false);await jfetch(`/api/admin/characters/${p.id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});stat('charStatus',`Saved ${p.id}`);await loadChars();}
 async function gen(){const character=$('labCharacter').value; const preview=$('pb_preview').value; const falParams={model:document.querySelector('input[name="model"]:checked').value,num_inference_steps:Number($('fal_steps').value),guidance_scale:Number($('fal_gs').value),safety_tolerance:Number($('fal_safe').value),aspect_ratio:$('fal_aspect').value,output_format:$('fal_format').value}; if($('fal_seed').value) falParams.seed=Number($('fal_seed').value); const comfyParams={steps:Number($('comfy_steps').value),cfg:Number($('comfy_cfg').value),sampler_name:$('comfy_sampler').value,scheduler:$('comfy_scheduler').value,denoise:Number($('comfy_denoise').value),width:Number($('comfy_w').value),height:Number($('comfy_h').value)}; const d=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood:$('pb_atmo').value,customPrompt:preview,falParams,comfyParams})}).then(r=>r.json()); if(!d.ok) throw new Error(d.error||'generate failed'); state.shots.unshift({...d.shot,timestamp:new Date().toLocaleString()}); state.shots=state.shots.slice(0,2); renderAB(); stat('cameraStatus','Generated shot');}
@@ -201,7 +237,8 @@ async function sendNote(){const fd=new FormData(); fd.append('note',`${new Date(
 async function comfyHealth(){const d=await jfetch('/api/admin/comfy/health'); $('comfyDot').style.background=d.available?'var(--ok)':'var(--bad)'; $('comfyText').textContent=d.available?`Available ${d.version||''}`:'Unavailable';}
 async function comfyImages(){const d=await jfetch('/api/admin/comfy/images'); const box=$('comfyThumbs'); box.innerHTML=''; d.images.forEach(f=>{const img=document.createElement('img');img.className='thumb';img.src=`/api/admin/comfy/image/${encodeURIComponent(f)}`;img.onclick=()=>window.open(img.src,'_blank');box.appendChild(img);});}
 async function comfyRun(){let wf={}; try{wf=JSON.parse($('workflowJson').value||'{}')}catch{throw new Error('Invalid workflow JSON');} const d=await jfetch('/api/admin/comfy/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow:wf})}); stat('cameraStatus',`Comfy prompt_id: ${d.prompt_id||'n/a'}`);}
-async function sendChat(){const id=$('chatChar').value; const text=$('chatInput').value.trim(); if(!text) return; state.chat.push({role:'user',text}); renderChat(); $('chatInput').value=''; const r=await fetch(`/api/characters/${id}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})}); const d=await r.json(); if(!r.ok||d.ok===false){stat('chatStatus',d.error||'chat failed',false); return;} state.chat.push({role:'assistant',text:d.reply||'...'}); renderChat();}
+function chatRelationship(){return{trust:Number($('rs_trust').value),attraction:Number($('rs_attraction').value),comfort:Number($('rs_comfort').value),hurt:Number($('rs_hurt').value),jealousy:Number($('rs_jealousy').value),attachment:Number($('rs_attachment').value),intimacyReadiness:Number($('rs_intimacyReadiness').value)};}
+async function sendChat(){const id=$('chatChar').value; const text=$('chatInput').value.trim(); if(!text) return; state.chat.push({role:'user',text}); renderChat(); $('chatInput').value=''; stat('chatStatus','…'); const r=await fetch(`/api/characters/${id}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,emotionalBeat:$('chatBeat').value,relationship:chatRelationship()})}); const d=await r.json(); if(!r.ok||d.ok===false){stat('chatStatus',d.error||'chat failed',false); return;} state.chat.push({role:'assistant',text:d.reply||'...',toneClass:d.meta?.toneClass}); renderChat(); stat('chatStatus',`tone: ${d.meta?.toneClass||'?'} · subtext: ${d.meta?.subtextStrength??'?'}`);}
 async function clearChat(){const id=$('chatChar').value; await fetch(`/api/characters/${id}/history`,{method:'DELETE'}); state.chat=[]; renderChat(); stat('chatStatus','History cleared');}
 function updateChatIdentity(){const id=$('chatChar').value; const c=state.chars.find(x=>x.id===id); $('chatIdentity').textContent=c?.identity||'';}
 function exportChar(){const p=payload(); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:'application/json'})); a.download=`${p.id||'character'}.json`; a.click();}
