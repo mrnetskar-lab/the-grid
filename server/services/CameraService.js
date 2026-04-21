@@ -33,6 +33,37 @@ export function setLook(id, value) {
   return true;
 }
 
+export function patchLookDefaultInSource(id, value) {
+  if (!id || typeof value !== 'string') return false;
+  const sourcePath = fileURLToPath(import.meta.url);
+  const normalized = value.trim().replace(/\\/g, '\\\\').replace(/'/g, '\\\'');
+  const nextLine = `  ${id}: '${normalized}',`;
+
+  try {
+    const original = fs.readFileSync(sourcePath, 'utf-8');
+    const blockMatch = original.match(/const CHARACTER_LOOKS_DEFAULT = \\{([\\s\\S]*?)\\n\\};/);
+    if (!blockMatch) return false;
+
+    const block = blockMatch[1];
+    const keyRegex = new RegExp(`(^\\\\s*${id}:\\\\s*'.*?',?\\\\s*$)`, 'm');
+    let updatedBlock;
+
+    if (keyRegex.test(block)) {
+      updatedBlock = block.replace(keyRegex, nextLine);
+    } else {
+      updatedBlock = `${block}\\n${nextLine}`;
+    }
+
+    const updated = original.replace(blockMatch[0], `const CHARACTER_LOOKS_DEFAULT = {${updatedBlock}\\n};`);
+    if (updated !== original) {
+      fs.writeFileSync(sourcePath, updated, 'utf-8');
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const CHARACTER_SEEDS = {
   nina:  3847291650,
   hazel: 9182736450,
