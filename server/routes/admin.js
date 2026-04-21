@@ -17,11 +17,8 @@ function requireAdminKey(req, res, next) {
   return next();
 }
 
-function normalizeId(id) {
-  return String(id || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]/g, '-');
+function isValidId(id) {
+  return typeof id === 'string' && /^[a-z0-9-]+$/.test(id);
 }
 
 router.use(requireAdminKey);
@@ -35,11 +32,9 @@ router.get('/characters', (_req, res) => {
     const characters = files
       .map((file) => {
         const content = fs.readFileSync(path.join(CHARS_DIR, file), 'utf-8');
-        const parsed = JSON.parse(content);
-        const id = file.replace('.json', '');
-        return { id, ...parsed };
+        return JSON.parse(content);
       })
-      .sort((a, b) => String(a.name || a.id).localeCompare(String(b.name || b.id)));
+      .sort((a, b) => String(a.id || '').localeCompare(String(b.id || '')));
 
     return res.json({ ok: true, characters });
   } catch (error) {
@@ -51,8 +46,10 @@ router.get('/characters', (_req, res) => {
 router.post('/character', (req, res) => {
   try {
     const body = req.body || {};
-    const id = normalizeId(body.id);
-    if (!id) return res.status(400).json({ ok: false, error: 'id required' });
+    const id = String(body.id || '').trim().toLowerCase();
+    if (!isValidId(id)) {
+      return res.status(400).json({ ok: false, error: 'id must be lowercase slug (a-z, 0-9, -)' });
+    }
 
     const character = {
       id,
@@ -64,7 +61,7 @@ router.post('/character', (req, res) => {
       greeting: String(body.greeting || ''),
       identity: String(body.identity || ''),
       camera_look: String(body.camera_look || ''),
-      camera_seed: Number.isFinite(Number(body.camera_seed)) ? Number(body.camera_seed) : null,
+      camera_seed: Number.isFinite(Number(body.camera_seed)) ? Number(body.camera_seed) : 0,
       tags: Array.isArray(body.tags)
         ? body.tags.map((tag) => String(tag).trim()).filter(Boolean)
         : String(body.tags || '').split(',').map((tag) => tag.trim()).filter(Boolean),
@@ -72,6 +69,11 @@ router.post('/character', (req, res) => {
 
     const filePath = path.join(CHARS_DIR, `${id}.json`);
     fs.writeFileSync(filePath, JSON.stringify(character, null, 2), 'utf-8');
+
+    if (character.camera_look) {
+      setLook(id, character.camera_look);
+    }
+
     return res.json({ ok: true, character });
   } catch (error) {
     return res.status(500).json({ ok: false, error: error.message });
@@ -85,17 +87,17 @@ router.get('/camera-looks', (_req, res) => {
 
 // POST /api/admin/camera-look
 router.post('/camera-look', (req, res) => {
-  const id = normalizeId(req.body?.id);
-  const value = String(req.body?.value || '').trim();
+  const id = String(req.body?.id || '').trim().toLowerCase();
+  const value = String(req.body?.look || req.body?.value || '').trim();
 
-  if (!id || !value) {
-    return res.status(400).json({ ok: false, error: 'id and value required' });
+  if (!isValidId(id) || !value) {
+    return res.status(400).json({ ok: false, error: 'id and look/value required' });
   }
 
   const saved = setLook(id, value);
   const patched = patchLookDefaultInSource(id, value);
 
-  return res.json({ ok: Boolean(saved), patchedDefault: patched });
+  return res.json({ ok: Boolean(saved), patchedDefault: patched, looks: getLooks() });
 });
 
 export default router;
