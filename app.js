@@ -783,3 +783,21 @@ trackLoginBonuses();
 renderInboxes();
 fetch('/api/characters').then(r=>r.json()).then(d=>{if(d.ok&&d.characters)d.characters.forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});}).catch(()=>{});
 
+// ── LIGHTBOX ──
+const lightbox=document.getElementById('lightbox');
+const lightboxImg=document.getElementById('lightboxImg');
+const lightboxName=document.getElementById('lightboxName');
+function openLightbox(src,name){lightboxImg.src=src;lightboxName.textContent=name||'';lightbox.classList.add('open');}
+function closeLightbox(){lightbox.classList.remove('open');}
+document.getElementById('lightboxClose').addEventListener('click',closeLightbox);
+lightbox.addEventListener('click',e=>{if(e.target===lightbox)closeLightbox();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
+document.querySelectorAll('.discover-card').forEach(card=>{
+  card.addEventListener('click',e=>{
+    if(e.target.closest('.d-btn'))return;
+    const img=card.querySelector('.d-photo img');
+    const name=card.querySelector('.d-footer h3');
+    if(img)openLightbox(img.src,name?.textContent||'');
+  });
+});
+
