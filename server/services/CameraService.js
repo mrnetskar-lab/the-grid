@@ -173,6 +173,81 @@ async function generateViaFal(prompt, character, falParams = {}) {
   throw lastError;
 }
 
+// ─── FAL ComfyUI (cloud) ──────────────────────────────────────────────────────
+
+async function generateViaFalComfy(workflow, key) {
+  // FAL comfy endpoint uses queue pattern — submit then poll
+  const submitBody = JSON.stringify({ workflow_json: workflow });
+  const submitData = await new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'queue.fal.run',
+      path: '/fal-ai/comfy',
+      method: 'POST',
+      headers: { 'Authorization': `Key ${key}`, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(submitBody) },
+    }, (res) => {
+      let d = ''; res.on('data', c => { d += c; }); res.on('end', () => {
+        if (res.statusCode >= 400) return reject(new Error(`FAL comfy submit ${res.statusCode}: ${d.slice(0,200)}`));
+        try { resolve(JSON.parse(d)); } catch { reject(new Error('FAL comfy invalid JSON')); }
+      });
+    });
+    req.on('error', reject); req.write(submitBody); req.end();
+  });
+
+  const requestId = submitData.request_id;
+  if (!requestId) throw new Error('No request_id from FAL comfy');
+
+  // Poll status
+  for (let i = 0; i < 120; i++) {
+    await sleep(2000);
+    const statusData = await new Promise((resolve, reject) => {
+      const req = https.request({
+        hostname: 'queue.fal.run',
+        path: `/fal-ai/comfy/requests/${requestId}/status`,
+        method: 'GET',
+        headers: { 'Authorization': `Key ${key}` },
+      }, (res) => {
+        let d = ''; res.on('data', c => { d += c; }); res.on('end', () => {
+          try { resolve(JSON.parse(d)); } catch { resolve({}); }
+        });
+      });
+      req.on('error', reject); req.end();
+    });
+
+    if (statusData.status === 'COMPLETED') {
+      const resultData = await new Promise((resolve, reject) => {
+        const req = https.request({
+          hostname: 'queue.fal.run',
+          path: `/fal-ai/comfy/requests/${requestId}`,
+          method: 'GET',
+          headers: { 'Authorization': `Key ${key}` },
+        }, (res) => {
+          let d = ''; res.on('data', c => { d += c; }); res.on('end', () => {
+            try { resolve(JSON.parse(d)); } catch { reject(new Error('FAL comfy result invalid JSON')); }
+          });
+        });
+        req.on('error', reject); req.end();
+      });
+
+      const images = resultData.images || resultData.outputs || [];
+      const imageUrl = Array.isArray(images) ? images[0]?.url || images[0] : null;
+      if (!imageUrl) throw new Error('No image in FAL comfy result');
+      const filename = `shot_${Date.now()}.png`;
+      await downloadFile(typeof imageUrl === 'string' ? imageUrl : imageUrl.url, path.join(IMAGES_DIR, filename));
+      return { filename, path: `/images/${filename}`, backend: 'fal-ai/comfy' };
+    }
+
+    if (statusData.status === 'FAILED') throw new Error('FAL comfy job failed: ' + (statusData.error || 'unknown'));
+  }
+  throw new Error('FAL comfy timed out after 4 minutes');
+}
+
+export async function runFalComfyWorkflow(workflow) {
+  const key = process.env.FAL_API_KEY;
+  if (!key) throw new Error('FAL_API_KEY not set');
+  if (!workflow || typeof workflow !== 'object') throw new Error('workflow object required');
+  return generateViaFalComfy(workflow, key);
+}
+
 // ─── ComfyUI (local only) ─────────────────────────────────────────────────────
 
 const COMFY_HOST = '127.0.0.1';

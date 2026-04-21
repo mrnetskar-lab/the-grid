@@ -6,7 +6,7 @@ import { spawn, execSync } from 'child_process';
 import multer from 'multer';
 import archiver from 'archiver';
 import { fileURLToPath } from 'url';
-import { getLooks, setLook, patchLookDefaultInSource } from '../services/CameraService.js';
+import { getLooks, setLook, patchLookDefaultInSource, runFalComfyWorkflow } from '../services/CameraService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, '../..');
@@ -284,10 +284,19 @@ router.get('/comfy/image/:filename', (req, res) => {
 });
 
 router.post('/comfy/run', async (req, res) => {
+  if (!req.body?.workflow || typeof req.body.workflow !== 'object') return res.status(400).json({ ok: false, error: 'workflow object required' });
+
+  // Try local ComfyUI first
   try {
-    if (!req.body?.workflow || typeof req.body.workflow !== 'object') return res.status(400).json({ ok: false, error: 'workflow object required' });
     const out = await comfyRequest('POST', '/prompt', { prompt: req.body.workflow, client_id: 'admin-tool' });
-    return res.json({ ok: out.status < 400, prompt_id: out.data?.prompt_id || null, data: out.data });
+    if (out.status < 400) return res.json({ ok: true, prompt_id: out.data?.prompt_id || null, backend: 'local', data: out.data });
+  } catch {}
+
+  // Fall back to FAL cloud ComfyUI
+  if (!process.env.FAL_API_KEY) return res.status(503).json({ ok: false, error: 'Local ComfyUI unavailable and FAL_API_KEY not set' });
+  try {
+    const shot = await runFalComfyWorkflow(req.body.workflow);
+    return res.json({ ok: true, backend: 'fal-ai/comfy', shot });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }

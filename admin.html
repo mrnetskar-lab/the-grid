@@ -442,7 +442,20 @@ async function backendStatus(){
     s.style.color='var(--muted)';
   }
 }
-async function comfyRun(){let wf={}; try{wf=JSON.parse($('workflowJson').value||'{}')}catch{throw new Error('Invalid workflow JSON');} const d=await jfetch('/api/admin/comfy/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow:wf})}); stat('cameraStatus',`Comfy prompt_id: ${d.prompt_id||'n/a'}`);}
+async function comfyRun(){
+  let wf={};
+  try{wf=JSON.parse($('workflowJson').value||'{}')}catch{throw new Error('Invalid workflow JSON');}
+  stat('cameraStatus','Running…');
+  const d=await jfetch('/api/admin/comfy/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow:wf})});
+  if(d.backend==='fal-ai/comfy'&&d.shot?.path){
+    state.shots.unshift({...d.shot,timestamp:new Date().toLocaleString()});
+    state.shots=state.shots.slice(0,2);
+    renderAB();
+    stat('cameraStatus',`FAL ComfyUI ✓ — ${d.shot.filename}`);
+  } else {
+    stat('cameraStatus',`Local Comfy prompt_id: ${d.prompt_id||'n/a'}`);
+  }
+}
 function chatRelationship(){return{trust:Number($('rs_trust').value),attraction:Number($('rs_attraction').value),comfort:Number($('rs_comfort').value),hurt:Number($('rs_hurt').value),jealousy:Number($('rs_jealousy').value),attachment:Number($('rs_attachment').value),intimacyReadiness:Number($('rs_intimacyReadiness').value)};}
 async function sendChat(){const id=$('chatChar').value; const text=$('chatInput').value.trim(); if(!text) return; state.chat.push({role:'user',text}); renderChat(); $('chatInput').value=''; stat('chatStatus','…'); const r=await fetch(`/api/characters/${id}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,emotionalBeat:$('chatBeat').value,relationship:chatRelationship()})}); const d=await r.json(); if(!r.ok||d.ok===false){stat('chatStatus',d.error||'chat failed',false); return;} state.chat.push({role:'assistant',text:d.reply||'...',toneClass:d.meta?.toneClass}); renderChat(); stat('chatStatus',`tone: ${d.meta?.toneClass||'?'} · subtext: ${d.meta?.subtextStrength??'?'}`);}
 async function clearChat(){const id=$('chatChar').value; await fetch(`/api/characters/${id}/history`,{method:'DELETE'}); state.chat=[]; renderChat(); stat('chatStatus','History cleared');}
