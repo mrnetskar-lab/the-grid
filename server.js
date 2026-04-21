@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 app.use(express.static(__dirname));
+app.use('/admin_notes', express.static(__dirname + '/admin_notes'));
 
 // API routes
 app.use('/api/characters', characterRoutes);

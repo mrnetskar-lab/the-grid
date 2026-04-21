@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>THE GRID — Admin Dev Tool</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --panel: #12121b;
+      --panel-2: #171723;
+      --border: #28283a;
+      --text: #eef0ff;
+      --muted: #9ea3bf;
+      --accent: #f0308a;
+      --ok: #6dde9d;
+      --bad: #ff7c7c;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    .app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+    .sidebar { border-right: 1px solid var(--border); background: var(--panel); padding: 16px; }
+    .title { font-weight: 700; margin-bottom: 8px; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .keybox { margin: 12px 0; display: flex; gap: 6px; }
+    .nav { display: grid; gap: 8px; margin-top: 10px; }
+    .nav button { text-align: left; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 10px; cursor: pointer; }
+    .nav button.active { border-color: var(--accent); }
+    .content { padding: 22px; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .row { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 10px; }
+    .full { grid-column: 1 / -1; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    label { color: var(--muted); font-size: 12px; }
+    input, select, textarea, button { font: inherit; }
+    input, select, textarea { width: 100%; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); padding: 9px; }
+    textarea { min-height: 90px; resize: vertical; }
+    .btn { border: 0; background: var(--accent); color: #fff; border-radius: 8px; padding: 10px 12px; cursor: pointer; }
+    .btn.secondary { background: #2b3252; }
+    .char-list { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+    .chip { border: 1px solid var(--border); background: var(--panel-2); color: var(--text); padding: 7px 9px; border-radius: 999px; cursor: pointer; }
+    .sl { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; }
+    .ab { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .ab img { width: 100%; border-radius: 8px; border: 1px solid var(--border); }
+    .snips { display: grid; gap: 8px; margin-top: 8px; }
+    .snip { border: 1px solid var(--border); border-radius: 8px; background: var(--panel-2); padding: 9px; cursor: pointer; }
+    .note-card { border: 1px solid var(--border); border-radius: 8px; background: var(--panel-2); padding: 10px; margin-top: 10px; }
+    .thumb { max-width: 180px; border-radius: 8px; border: 1px solid var(--border); margin-top: 6px; }
+    .status { margin-top: 8px; font-size: 13px; }
+    .toast { position: fixed; right: 18px; bottom: 18px; background: #111827; color: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; display: none; }
+    .dropzone { border: 1px dashed var(--border); border-radius: 8px; padding: 10px; text-align: center; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="title">Admin Dev Tool</div>
+    <div class="muted">Local + Railway admin panel</div>
+    <div class="keybox">
+      <input id="adminKey" placeholder="x-admin-key" />
+      <button class="btn secondary" id="saveKeyBtn">Save</button>
+    </div>
+    <nav class="nav">
+      <button data-section="characters" class="active">1) Characters</button>
+      <button data-section="camera">2) Camera Lab</button>
+      <button data-section="snippets">3) Prompt Snippets</button>
+      <button data-section="notes">4) Smoke Test Log</button>
+    </nav>
+  </aside>
+  <main class="content">
+    <section id="characters" class="section active">
+      <h2>Characters</h2>
+      <div class="char-list" id="charList"></div>
+      <button class="btn secondary" id="newCharBtn" type="button">New character</button>
+      <form id="charForm">
+        <div class="row">
+          <div class="field"><label>id</label><input id="c_id" required /></div>
+          <div class="field"><label>name</label><input id="c_name" /></div>
+          <div class="field"><label>color</label><input id="c_color" type="color" value="#9f67ff" /></div>
+          <div class="field"><label>status</label><select id="c_status"><option>ONLINE</option><option>OBSERVANT</option><option>LISTENING</option><option>UNSTABLE</option></select></div>
+          <div class="field full"><label>route</label><input id="c_route" /></div>
+          <div class="field full"><label>bio</label><textarea id="c_bio"></textarea></div>
+          <div class="field full"><label>greeting</label><textarea id="c_greeting"></textarea></div>
+          <div class="field full"><label>identity</label><textarea id="c_identity"></textarea></div>
+          <div class="field full"><label>anchors (JSON)</label><textarea id="c_anchors">{}</textarea></div>
+          <div class="field full"><label>camera_look</label><textarea id="c_camera_look"></textarea></div>
+        </div>
+        <button class="btn" type="submit">Save character</button>
+        <div class="status" id="charStatus"></div>
+      </form>
+    </section>
+
+    <section id="camera" class="section">
+      <h2>Camera Lab</h2>
+      <div class="row">
+        <div class="field"><label>Character</label><select id="labCharacter"></select></div>
+        <div class="field"><label>Mood</label><select id="labMood"><option>warm</option><option>calm</option><option>charged</option><option>tense</option></select></div>
+        <div class="field full sl"><label>steps</label><div><input id="labSteps" type="range" min="1" max="60" value="28"/><span id="labStepsVal">28</span></div></div>
+        <div class="field full sl"><label>guidance_scale</label><div><input id="labGuidance" type="range" min="1" max="15" step="0.1" value="3.5"/><span id="labGuidanceVal">3.5</span></div></div>
+        <div class="field full sl"><label>cfg</label><div><input id="labCfg" type="range" min="1" max="15" step="0.5" value="7"/><span id="labCfgVal">7</span></div></div>
+        <div class="field full">
+          <label>model</label>
+          <div>
+            <label><input type="radio" name="labModel" value="fal-ai/flux-pro/v1.1-ultra" checked /> fal-ai/flux-pro/v1.1-ultra</label><br>
+            <label><input type="radio" name="labModel" value="fal-ai/flux-pro/v1.1" /> fal-ai/flux-pro/v1.1</label><br>
+            <label><input type="radio" name="labModel" value="fal-ai/flux-realism" /> fal-ai/flux-realism</label>
+          </div>
+        </div>
+        <div class="field full"><label>camera look</label><textarea id="labLook"></textarea></div>
+      </div>
+      <button class="btn" id="generateBtn" type="button">Generate</button>
+      <button class="btn secondary" id="saveLookBtn" type="button">Save look</button>
+      <div class="status" id="cameraStatus"></div>
+      <div class="ab" id="abShots"></div>
+    </section>
+
+    <section id="snippets" class="section">
+      <h2>Prompt Snippets</h2>
+      <div class="row">
+        <div class="field full"><label>Add custom snippet</label><input id="newSnippet" placeholder="Type snippet and press add" /></div>
+      </div>
+      <button class="btn secondary" id="addSnippetBtn" type="button">Add snippet</button>
+      <div class="snips" id="snippetList"></div>
+    </section>
+
+    <section id="notes" class="section">
+      <h2>Smoke Test Log</h2>
+      <div class="field"><label>Note (timestamp auto)</label><textarea id="noteText"></textarea></div>
+      <div class="dropzone" id="dropzone">Drag & drop image here or choose file below</div>
+      <div class="field"><input id="noteImage" type="file" accept="image/*" /></div>
+      <img id="notePreview" class="thumb" style="display:none;" />
+      <button class="btn" id="submitNoteBtn" type="button">Submit note</button>
+      <div class="status" id="noteStatus"></div>
+      <div id="noteList"></div>
+    </section>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const DEFAULT_KEY = 'velora-admin-2025';
+const KEY_STORE = 'grid_admin_key';
+const SNIP_STORE = 'grid_custom_snippets';
+const els = (id) => document.getElementById(id);
+const state = { characters: [], shots: [], customSnips: JSON.parse(localStorage.getItem(SNIP_STORE) || '[]'), draggedFile: null };
+
+const baseSnippets = [
+  'Photorealistic portrait, ultra-detailed skin texture, natural pores',
+  '35mm lens, shallow depth of field, soft bokeh, cinematic framing',
+  'Golden hour window light, warm subtle highlights, gentle shadows',
+  'Soft diffused key light with realistic falloff and clean catchlights',
+  'Natural color grading, filmic contrast, true-to-life tones',
+  'Fine film grain, crisp focus on eyes, lifelike detail',
+  'Moody low-key lighting with subtle rim light separation',
+  'Quiet intimate composition, candid expression, grounded realism',
+  'Present-day styling, believable wardrobe, no fantasy elements',
+  'Masterpiece quality, high realism, non-illustrative photography',
+  'No text, no watermark, no logo, no UI overlays',
+  'Realistic skin translucency, accurate facial anatomy, neutral retouch',
+];
+
+function adminHeaders(extra = {}) {
+  return { 'x-admin-key': localStorage.getItem(KEY_STORE) || DEFAULT_KEY, ...extra };
+}
+
+function toast(msg) {
+  const t = els('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 1400);
+}
+
+function setStatus(id, msg, ok = true) {
+  const e = els(id);
+  e.textContent = msg;
+  e.style.color = ok ? 'var(--ok)' : 'var(--bad)';
+}
+
+async function api(url, opts = {}) {
+  const headers = opts.headers || {};
+  const res = await fetch(url, { ...opts, headers: adminHeaders(headers) });
+  const data = await res.json();
+  if (!res.ok || data.ok === false) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  els(id).classList.add('active');
+  document.querySelector(`.nav button[data-section="${id}"]`).classList.add('active');
+}
+
+function charPayload() {
+  let anchors;
+  try { anchors = JSON.parse(els('c_anchors').value || '{}'); } catch { anchors = {}; }
+  return {
+    id: els('c_id').value.trim().toLowerCase(),
+    name: els('c_name').value,
+    color: els('c_color').value,
+    status: els('c_status').value,
+    route: els('c_route').value,
+    bio: els('c_bio').value,
+    greeting: els('c_greeting').value,
+    identity: els('c_identity').value,
+    anchors,
+    camera_look: els('c_camera_look').value,
+  };
+}
+
+function fillCharacter(c = {}) {
+  els('c_id').value = c.id || '';
+  els('c_name').value = c.name || '';
+  els('c_color').value = c.color || '#9f67ff';
+  els('c_status').value = c.status || 'ONLINE';
+  els('c_route').value = c.route || '';
+  els('c_bio').value = c.bio || '';
+  els('c_greeting').value = c.greeting || '';
+  els('c_identity').value = c.identity || '';
+  els('c_anchors').value = JSON.stringify(c.anchors || {}, null, 2);
+  els('c_camera_look').value = c.camera_look || '';
+}
+
+function renderCharList() {
+  const box = els('charList');
+  box.innerHTML = '';
+  for (const c of state.characters) {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button';
+    b.textContent = `${c.name || c.id} (${c.id})`;
+    b.onclick = () => { fillCharacter(c); syncLabFromCharacter(); };
+    box.appendChild(b);
+  }
+  const sel = els('labCharacter');
+  sel.innerHTML = state.characters.map(c => `<option value="${c.id}">${c.name || c.id}</option>`).join('');
+}
+
+function syncLabFromCharacter() {
+  const id = els('c_id').value;
+  if (id) els('labCharacter').value = id;
+  els('labLook').value = els('c_camera_look').value;
+}
+
+function renderShots() {
+  const box = els('abShots');
+  box.innerHTML = '';
+  state.shots.slice(0,2).forEach((s, i) => {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div class="muted">Shot ${i+1}</div><img src="${s.path}" alt="shot"/>`;
+    box.appendChild(wrap);
+  });
+}
+
+function renderSnippets() {
+  const list = els('snippetList');
+  list.innerHTML = '';
+  const all = [...baseSnippets, ...state.customSnips];
+  all.forEach((s, idx) => {
+    const item = document.createElement('div');
+    item.className = 'snip';
+    item.textContent = s;
+    item.onclick = async () => {
+      await navigator.clipboard.writeText(s);
+      toast('Snippet copied');
+    };
+    if (idx >= baseSnippets.length) {
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'btn secondary'; del.style.marginTop = '8px';
+      del.textContent = 'Delete';
+      del.onclick = (e) => {
+        e.stopPropagation();
+        state.customSnips.splice(idx - baseSnippets.length, 1);
+        localStorage.setItem(SNIP_STORE, JSON.stringify(state.customSnips));
+        renderSnippets();
+      };
+      item.appendChild(document.createElement('br'));
+      item.appendChild(del);
+    }
+    list.appendChild(item);
+  });
+}
+
+function renderNotes(notes) {
+  const list = els('noteList');
+  list.innerHTML = '';
+  notes.forEach(n => {
+    const d = document.createElement('div');
+    d.className = 'note-card';
+    d.innerHTML = `<div class="muted">${n.timestamp}</div><div>${n.text || ''}</div>${n.imagePath ? `<img class="thumb" src="${n.imagePath}" />` : ''}`;
+    list.appendChild(d);
+  });
+}
+
+async function loadCharacters() {
+  const data = await api('/api/admin/characters');
+  state.characters = data.characters || [];
+  renderCharList();
+  if (state.characters[0]) {
+    fillCharacter(state.characters[0]);
+    syncLabFromCharacter();
+  }
+}
+
+async function saveCharacter(e) {
+  e.preventDefault();
+  const p = charPayload();
+  if (!/^[a-z0-9-]+$/.test(p.id)) return setStatus('charStatus', 'Invalid id format', false);
+  await api(`/api/admin/characters/${p.id}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(p) });
+  setStatus('charStatus', `Saved ${p.id}`);
+  await loadCharacters();
+}
+
+async function generateShot() {
+  const character = els('labCharacter').value;
+  const mood = els('labMood').value;
+  const customPrompt = els('labLook').value;
+  const model = document.querySelector('input[name="labModel"]:checked').value;
+  const steps = els('labSteps').value;
+  const guidance_scale = els('labGuidance').value;
+  const cfg = els('labCfg').value;
+  const decoratedPrompt = `${customPrompt}\nModel: ${model}. Steps: ${steps}. Guidance scale: ${guidance_scale}. Cfg: ${cfg}.`;
+  const data = await fetch('/api/camera/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ character, mood, customPrompt: decoratedPrompt }) }).then(r => r.json());
+  if (!data.ok) throw new Error(data.error || 'generate failed');
+  state.shots.unshift(data.shot);
+  state.shots = state.shots.slice(0, 2);
+  renderShots();
+  setStatus('cameraStatus', 'Generated shot');
+}
+
+async function saveLook() {
+  const id = els('labCharacter').value;
+  const value = els('labLook').value;
+  await api('/api/admin/camera-look', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, value }) });
+  els('c_camera_look').value = value;
+  setStatus('cameraStatus', `Saved look for ${id}`);
+}
+
+function bindSliders() {
+  const map = [['labSteps','labStepsVal'],['labGuidance','labGuidanceVal'],['labCfg','labCfgVal']];
+  map.forEach(([a,b]) => { els(a).oninput = () => els(b).textContent = els(a).value; });
+}
+
+async function submitNote() {
+  const form = new FormData();
+  const text = `${new Date().toISOString()} — ${els('noteText').value.trim()}`;
+  form.append('note', text);
+  const file = els('noteImage').files[0] || state.draggedFile;
+  if (file) form.append('image', file);
+  const res = await fetch('/api/admin/notes', { method:'POST', headers: adminHeaders(), body: form });
+  const data = await res.json();
+  if (!res.ok || !data.ok) throw new Error(data.error || 'failed');
+  setStatus('noteStatus', 'Note submitted');
+  els('noteText').value = ''; els('noteImage').value = ''; state.draggedFile = null; els('notePreview').style.display='none';
+  await loadNotes();
+}
+
+async function loadNotes() {
+  const data = await api('/api/admin/notes');
+  renderNotes(data.notes || []);
+}
+
+function bindDropzone() {
+  const z = els('dropzone');
+  ['dragenter','dragover'].forEach(ev => z.addEventListener(ev, (e)=>{e.preventDefault(); z.style.borderColor='var(--accent)';}));
+  ['dragleave','drop'].forEach(ev => z.addEventListener(ev, (e)=>{e.preventDefault(); z.style.borderColor='var(--border)';}));
+  z.addEventListener('drop', (e) => {
+    const f = e.dataTransfer.files?.[0];
+    if (!f) return;
+    state.draggedFile = f;
+    const url = URL.createObjectURL(f);
+    els('notePreview').src = url;
+    els('notePreview').style.display = 'block';
+  });
+  els('noteImage').addEventListener('change', () => {
+    const f = els('noteImage').files[0];
+    if (!f) return;
+    const url = URL.createObjectURL(f);
+    els('notePreview').src = url;
+    els('notePreview').style.display = 'block';
+  });
+}
+
+function init() {
+  els('adminKey').value = localStorage.getItem(KEY_STORE) || DEFAULT_KEY;
+  document.querySelectorAll('.nav button').forEach(b => b.onclick = () => showSection(b.dataset.section));
+  els('saveKeyBtn').onclick = () => { localStorage.setItem(KEY_STORE, els('adminKey').value.trim() || DEFAULT_KEY); toast('Admin key saved'); };
+  els('newCharBtn').onclick = () => fillCharacter({ anchors:{} });
+  els('charForm').addEventListener('submit', (e) => saveCharacter(e).catch(err => setStatus('charStatus', err.message, false)));
+  els('labCharacter').addEventListener('change', () => {
+    const c = state.characters.find(x => x.id === els('labCharacter').value);
+    if (c) els('labLook').value = c.camera_look || '';
+  });
+  els('generateBtn').onclick = () => generateShot().catch(err => setStatus('cameraStatus', err.message, false));
+  els('saveLookBtn').onclick = () => saveLook().catch(err => setStatus('cameraStatus', err.message, false));
+  els('addSnippetBtn').onclick = () => {
+    const s = els('newSnippet').value.trim();
+    if (!s) return;
+    state.customSnips.push(s);
+    localStorage.setItem(SNIP_STORE, JSON.stringify(state.customSnips));
+    els('newSnippet').value = '';
+    renderSnippets();
+  };
+  els('submitNoteBtn').onclick = () => submitNote().catch(err => setStatus('noteStatus', err.message, false));
+  bindSliders();
+  bindDropzone();
+  renderSnippets();
+  loadCharacters().catch(err => setStatus('charStatus', err.message, false));
+  loadNotes().catch(err => setStatus('noteStatus', err.message, false));
+}
+
+init();
+</script>
+</body>
+</html>

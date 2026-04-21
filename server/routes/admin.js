@@ -1,12 +1,27 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import multer from 'multer';
 import { fileURLToPath } from 'url';
 import { getLooks, setLook, patchLookDefaultInSource } from '../services/CameraService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CHARS_DIR = path.resolve(__dirname, '../../characters');
-const ADMIN_KEY = process.env.ADMIN_KEY || 'velora-admin-2025';
+const NOTES_DIR = path.resolve(__dirname, '../../admin_notes');
+const NOTES_JSON = path.join(NOTES_DIR, 'notes.json');
+const ADMIN_KEY = 'velora-admin-2025';
+
+if (!fs.existsSync(NOTES_DIR)) fs.mkdirSync(NOTES_DIR, { recursive: true });
+if (!fs.existsSync(NOTES_JSON)) fs.writeFileSync(NOTES_JSON, '[]', 'utf-8');
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, NOTES_DIR),
+  filename: (_req, file, cb) => {
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    cb(null, `${Date.now()}_${safeName}`);
+  },
+});
+const upload = multer({ storage });
 
 const router = express.Router();
 
@@ -19,6 +34,18 @@ function auth(req, res, next) {
 
 function isValidId(id) {
   return typeof id === 'string' && /^[a-z0-9-]+$/.test(id);
+}
+
+function readNotes() {
+  try {
+    return JSON.parse(fs.readFileSync(NOTES_JSON, 'utf-8'));
+  } catch {
+    return [];
+  }
+}
+
+function writeNotes(notes) {
+  fs.writeFileSync(NOTES_JSON, JSON.stringify(notes, null, 2), 'utf-8');
 }
 
 router.use(auth);
@@ -89,6 +116,38 @@ router.post('/camera-look', (req, res) => {
   const saved = setLook(id, value);
   const patched = patchLookDefaultInSource(id, value);
   return res.json({ ok: Boolean(saved), patchedDefault: patched, looks: getLooks() });
+});
+
+// GET /api/admin/notes
+router.get('/notes', (_req, res) => {
+  const notes = readNotes().sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
+  return res.json({ ok: true, notes });
+});
+
+// POST /api/admin/notes (multipart)
+router.post('/notes', upload.single('image'), (req, res) => {
+  try {
+    const text = String(req.body?.note || '').trim();
+    const imagePath = req.file ? `/admin_notes/${req.file.filename}` : null;
+    if (!text && !imagePath) {
+      return res.status(400).json({ ok: false, error: 'note text or image is required' });
+    }
+
+    const entry = {
+      id: `note_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+      timestamp: new Date().toISOString(),
+      text,
+      imagePath,
+    };
+
+    const notes = readNotes();
+    notes.unshift(entry);
+    writeNotes(notes);
+
+    return res.json({ ok: true, note: entry });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
 });
 
 export default router;
