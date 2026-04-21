@@ -16,7 +16,8 @@ const NOTES_JSON = path.join(NOTES_DIR, 'notes.json');
 const COMFY_HOST = '127.0.0.1';
 const COMFY_PORT = 8188;
 const COMFYUI_OUTPUT_DIR = process.env.COMFYUI_OUTPUT_DIR || 'C:/Users/mn/ComfyUI_windows_portable/ComfyUI/output';
-const ADMIN_KEY = process.env.ADMIN_KEY || 'velora-admin-2025';
+const ADMIN_KEY = process.env.ADMIN_KEY || (process.env.NODE_ENV === 'production' ? null : 'velora-admin-2025');
+if (!ADMIN_KEY) console.error('[admin] WARNING: ADMIN_KEY env var not set — admin routes are disabled');
 
 if (!fs.existsSync(NOTES_DIR)) fs.mkdirSync(NOTES_DIR, { recursive: true });
 if (!fs.existsSync(NOTES_JSON)) fs.writeFileSync(NOTES_JSON, '[]', 'utf-8');
@@ -75,6 +76,7 @@ const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } });
 const router = express.Router();
 
 function auth(req, res, next) {
+  if (!ADMIN_KEY) return res.status(503).json({ ok: false, error: 'Admin not configured — set ADMIN_KEY env var' });
   if (req.headers['x-admin-key'] !== ADMIN_KEY) {
     return res.status(403).json({ ok: false, error: 'Forbidden' });
   }
