@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { generateCameraShot, listShots } from '../services/CameraService.js';
+import { generateCameraShot, listShots, getLooks, setLook } from '../services/CameraService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const IMAGES_DIR = path.resolve(__dirname, '../../images');
@@ -27,6 +27,23 @@ router.post('/generate', async (req, res) => {
 // GET /api/camera/list
 router.get('/list', (_req, res) => {
   res.json({ ok: true, shots: listShots() });
+});
+
+// GET /api/camera/prompts — dev only
+router.get('/prompts', (_req, res) => {
+  res.json({ ok: true, looks: getLooks() });
+});
+
+// POST /api/camera/prompts — dev only
+// Body: { id: string, value: string, devKey: string }
+router.post('/prompts', (req, res) => {
+  if (req.body?.devKey !== (process.env.DEV_KEY || 'dev:1337')) {
+    return res.status(403).json({ ok: false, error: 'Forbidden' });
+  }
+  const { id, value } = req.body;
+  if (!id || !value) return res.status(400).json({ ok: false, error: 'id and value required' });
+  const ok = setLook(id, value);
+  return res.json({ ok });
 });
 
 // DELETE /api/camera/:filename

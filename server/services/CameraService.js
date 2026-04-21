@@ -13,12 +13,25 @@ if (!fs.existsSync(IMAGES_DIR)) fs.mkdirSync(IMAGES_DIR, { recursive: true });
 
 // ─── Character tables ─────────────────────────────────────────────────────────
 
-const CHARACTER_LOOKS = {
+const LOOKS_PATH = path.resolve(__dirname, '../../characters/camera_looks.json');
+
+const CHARACTER_LOOKS_DEFAULT = {
   nina:  'a young woman in her mid-twenties, warm and familiar energy, soft brunette features, intimate gaze, naturally beautiful, quiet chemistry',
   hazel: 'a young woman in her late twenties, warm but withholding, sharp observant eyes, composed and elegant, quietly intense',
   iris:  'a young woman in her mid-twenties, melancholic and mysterious, dark expressive eyes, quiet presence, ethereal softness',
   vale:  'a young woman in her mid-twenties, electric and volatile energy, striking features, intense direct gaze, unpredictable beauty',
 };
+
+let CHARACTER_LOOKS = { ...CHARACTER_LOOKS_DEFAULT };
+try { if (fs.existsSync(LOOKS_PATH)) CHARACTER_LOOKS = { ...CHARACTER_LOOKS_DEFAULT, ...JSON.parse(fs.readFileSync(LOOKS_PATH, 'utf-8')) }; } catch {}
+
+export function getLooks() { return { ...CHARACTER_LOOKS }; }
+export function setLook(id, value) {
+  if (!id || typeof value !== 'string') return false;
+  CHARACTER_LOOKS[id] = value.trim();
+  try { fs.writeFileSync(LOOKS_PATH, JSON.stringify(CHARACTER_LOOKS, null, 2), 'utf-8'); } catch {}
+  return true;
+}
 
 const CHARACTER_SEEDS = {
   nina:  3847291650,

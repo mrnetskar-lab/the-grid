@@ -258,6 +258,26 @@
     .scene-input{width:100%;padding:9px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:.84rem;outline:none;box-sizing:border-box;}
     .scene-input:focus{border-color:var(--accent-border);}
     .scene-generate{width:100%;justify-content:center;margin-top:4px;}
+    /* Dev panel */
+    .dev-panel{background:var(--surface);border:1px solid rgba(240,48,138,0.35);border-radius:var(--r);padding:0;overflow:hidden;margin-bottom:12px;}
+    .dev-header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);background:rgba(240,48,138,0.06);}
+    .dev-header h3{margin:0;font-size:.85rem;font-weight:700;flex:1;}
+    .dev-badge{font-size:.6rem;font-weight:800;letter-spacing:.08em;background:var(--accent);color:#fff;padding:2px 6px;border-radius:4px;}
+    .dev-close{width:22px;height:22px;border-radius:50%;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-size:.75rem;}
+    .dev-body{padding:12px 14px;display:flex;flex-direction:column;gap:14px;}
+    .dev-section{display:flex;flex-direction:column;gap:8px;}
+    .dev-section-title{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:2px;}
+    .dev-look-row{display:flex;flex-direction:column;gap:4px;padding:8px;background:var(--surface-2);border-radius:var(--r-sm);border:1px solid var(--border);}
+    .dev-look-id{font-size:.72rem;font-weight:700;color:var(--text-2);text-transform:capitalize;}
+    .dev-look-input{width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface-3);color:var(--text);font-size:.76rem;resize:vertical;min-height:50px;box-sizing:border-box;}
+    .dev-look-input:focus{border-color:var(--accent-border);outline:none;}
+    .dev-look-save{align-self:flex-end;padding:4px 10px;font-size:.72rem;font-weight:700;border-radius:6px;border:1px solid var(--accent-border);background:transparent;color:var(--accent);cursor:pointer;transition:.15s;}
+    .dev-look-save:hover{background:var(--accent);color:#fff;}
+    .dev-input{width:100%;padding:7px 10px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:.8rem;box-sizing:border-box;outline:none;}
+    .dev-input:focus{border-color:var(--accent-border);}
+    .dev-textarea{resize:vertical;min-height:60px;}
+    .dev-btn{width:100%;justify-content:center;margin-top:4px;}
+    .dev-status{font-size:.72rem;color:var(--text-2);min-height:14px;}
     /* Toast */
     .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface-3);border:1px solid var(--border-2);border-radius:999px;padding:8px 18px;font-size:.8rem;color:var(--text);pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;z-index:600;white-space:nowrap;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -964,6 +984,34 @@
               <article class="g-tile" data-name="Vale" data-desc="Vale's private collection."><div class="g-photo"><img src="/profile_pictures/vale_profile.png" alt="Vale"/></div><div class="g-overlay"></div><span class="g-lock">New</span><div class="g-caption"><div class="g-name">Vale</div><div class="g-mood">Volatile · Electric</div></div></article>
             </div>
           </section>
+          <!-- DEV PANEL — hidden until dev:1337 -->
+          <div class="dev-panel" id="devPanel" style="display:none">
+            <div class="dev-header">
+              <span class="dev-badge">DEV</span>
+              <h3>Prompt Editor</h3>
+              <button class="dev-close" id="devClose">✕</button>
+            </div>
+            <div class="dev-body">
+              <div class="dev-section">
+                <div class="dev-section-title">Character Looks</div>
+                <div id="devLooksList"></div>
+              </div>
+              <div class="dev-section">
+                <div class="dev-section-title">New Character</div>
+                <input class="dev-input" id="devNewId" type="text" placeholder="ID (e.g. luna)" autocomplete="off"/>
+                <textarea class="dev-input dev-textarea" id="devNewLook" placeholder="Describe her appearance, energy, style…" rows="3"></textarea>
+                <select class="dev-input" id="devNewMood">
+                  <option value="warm">Warm</option>
+                  <option value="calm">Calm</option>
+                  <option value="charged">Charged</option>
+                  <option value="tense">Tense</option>
+                </select>
+                <button class="btn btn-primary dev-btn" id="devNewGenerate">Generate &amp; Add</button>
+                <div id="devNewStatus" class="dev-status"></div>
+              </div>
+            </div>
+          </div>
+
           <aside class="gallery-side">
             <div class="premium-card">
               <h3>Generate</h3>
@@ -1206,6 +1254,91 @@ document.getElementById('camBtn')?.addEventListener('click',async()=>{
   }catch(err){statusEl.textContent='Error: '+err.message;}
   btn.disabled=false;btn.textContent='📷';
 });
+
+// ── DEV MODE ──────────────────────────────────────────────────────────────────
+const DEV_CODE='dev:1337';
+let devUnlocked=localStorage.getItem('v_dev')==='1';
+
+function openDevPanel(){
+  const panel=document.getElementById('devPanel');
+  if(!panel)return;
+  panel.style.display='block';
+  loadDevLooks();
+  goTo('gallery');
+  showToast('Dev mode active');
+}
+
+function loadDevLooks(){
+  fetch('/api/camera/prompts').then(r=>r.json()).then(data=>{
+    if(!data.ok)return;
+    const list=document.getElementById('devLooksList');
+    list.innerHTML='';
+    Object.entries(data.looks).forEach(([id,val])=>{
+      const row=document.createElement('div');row.className='dev-look-row';
+      row.innerHTML=`<div class="dev-look-id">${id}</div>
+        <textarea class="dev-look-input" id="devLook_${id}" rows="2">${val}</textarea>
+        <button class="dev-look-save" data-id="${id}">Save</button>`;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.dev-look-save').forEach(btn=>{
+      btn.addEventListener('click',async()=>{
+        const id=btn.dataset.id;
+        const value=document.getElementById(`devLook_${id}`)?.value.trim();
+        if(!value)return;
+        btn.textContent='Saving…';
+        const res=await fetch('/api/camera/prompts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,value,devKey:DEV_CODE})});
+        const d=await res.json();
+        btn.textContent=d.ok?'Saved ✓':'Error';
+        setTimeout(()=>btn.textContent='Save',1500);
+      });
+    });
+  }).catch(()=>showToast('Could not load prompts'));
+}
+
+document.getElementById('devClose')?.addEventListener('click',()=>{
+  document.getElementById('devPanel').style.display='none';
+});
+
+document.getElementById('devNewGenerate')?.addEventListener('click',async()=>{
+  const btn=document.getElementById('devNewGenerate');
+  const status=document.getElementById('devNewStatus');
+  const id=document.getElementById('devNewId')?.value.trim().toLowerCase().replace(/\s+/g,'_');
+  const look=document.getElementById('devNewLook')?.value.trim();
+  const mood=document.getElementById('devNewMood')?.value||'warm';
+  if(!id){status.textContent='Enter a character ID';return;}
+  if(!look){status.textContent='Describe her appearance';return;}
+  btn.disabled=true;btn.textContent='Saving…';
+  await fetch('/api/camera/prompts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,value:look,devKey:DEV_CODE})});
+  btn.textContent='Generating…';status.textContent='Generating preview (~20s)…';
+  try{
+    const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character:id,mood})});
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error||'Failed');
+    const grid=document.querySelector('.gallery-grid');
+    const tile=document.createElement('article');
+    tile.className='g-tile';
+    tile.innerHTML=`<img src="${data.shot.path}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy" alt="${id}"><div class="g-overlay"></div><div class="g-caption"><div class="g-name">${id.charAt(0).toUpperCase()+id.slice(1)}</div><div class="g-mood">New · ${mood}</div></div>`;
+    grid.prepend(tile);
+    status.textContent='Done! Reloading prompts…';
+    loadDevLooks();
+    document.getElementById('devNewId').value='';
+    document.getElementById('devNewLook').value='';
+  }catch(err){status.textContent='Error: '+err.message;}
+  btn.disabled=false;btn.textContent='Generate & Add';
+});
+
+// Dev unlock via chat input
+const _origSubmit=document.getElementById('chatForm').onsubmit;
+document.getElementById('chatInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&chatInput.value.trim()===DEV_CODE){
+    e.preventDefault();chatInput.value='';
+    localStorage.setItem('v_dev','1');devUnlocked=true;
+    openDevPanel();
+  }
+});
+if(devUnlocked)openDevPanel();
+
+// ── DEV MODE END ──────────────────────────────────────────────────────────────
 
 // Toast helper
 function showToast(msg,ms=2400){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
