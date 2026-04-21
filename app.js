@@ -452,7 +452,7 @@ if(e.key==='Enter'&&chatInput.value.trim()===DEV_CODE){
   openDevPanel();
 }
 });
-if(devUnlocked)openDevPanel();
+// dev panel intentionally not auto-opened on refresh
 
 // ── SCREENSHOT + ANNOTATE ────────────────────────────────────────────────────
 (function(){
