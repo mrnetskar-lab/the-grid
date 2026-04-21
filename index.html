@@ -1127,6 +1127,12 @@ const apiCharGreetings={};
 const tierPerks={free:{name:'Free',daily:3,monthly:0,gallery:false},pulse:{name:'Pulse',daily:0,monthly:50,gallery:true},signal:{name:'Signal',daily:0,monthly:Infinity,gallery:true}};
 const tierState={tier:localStorage.getItem('v_tier')||'free'};
 const currency={sparks:parseInt(localStorage.getItem('v_sparks')||'120',10),pulses:parseInt(localStorage.getItem('v_pulses')||'0',10),save(){localStorage.setItem('v_sparks',this.sparks);localStorage.setItem('v_pulses',this.pulses);}};
+function grantRequestedCurrency(){
+  const k='v_bonus_added_5000';
+  if(localStorage.getItem(k)==='1') return;
+  currency.sparks+=5000;
+  localStorage.setItem(k,'1');
+}
 
 function closeSb(){sidebar.classList.remove('open');document.body.classList.remove('sb-open');}
 function toggleDrawer(f){chatOpen=f!==undefined?f:!chatOpen;drawer.classList.toggle('open',chatOpen);chatNav.classList.toggle('open',chatOpen);}
@@ -1654,6 +1660,7 @@ function setPresence(id,text){const el=document.getElementById('pres-'+id);if(el
 function randPresence(id){const p=PRESENCE_POOLS[id]||['online'];return p[Math.floor(Math.random()*p.length)];}
 Object.keys(PRESENCE_POOLS).forEach(id=>{setPresence(id,randPresence(id));function sched(){setTimeout(()=>{setPresence(id,randPresence(id));sched();},45000+Math.random()*45000);}sched();});
 
+grantRequestedCurrency();
 updateCurrencyUI();
 trackLoginBonuses();
 renderInboxes();
