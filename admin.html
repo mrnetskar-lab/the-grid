@@ -322,6 +322,35 @@
       </div>
       <div class="status" id="npStatus"></div>
     </section>
+
+    <section id="wendy" class="section">
+      <h2>🤖 Wendy — AI Studio</h2>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+        <span id="wendyStatus" class="dot" style="background:var(--muted)"></span>
+        <span id="wendyStatusLabel" style="font-size:12px;color:var(--muted)">checking…</span>
+        <a href="https://wendy.velora-ai.no" target="_blank" class="btn secondary" style="margin-left:auto;text-decoration:none;padding:6px 12px;font-size:12px">Open in tab ↗</a>
+      </div>
+      <iframe id="wendyFrame" src="https://wendy.velora-ai.no"
+        style="width:100%;height:calc(100vh - 180px);border:1px solid var(--border);border-radius:10px;background:#0a0a0f;"
+        onload="document.getElementById('wendyStatus').style.background='var(--ok)';document.getElementById('wendyStatusLabel').textContent='Online'"
+        onerror="document.getElementById('wendyStatus').style.background='var(--bad)';document.getElementById('wendyStatusLabel').textContent='Offline'">
+      </iframe>
+    </section>
+
+    <section id="comfy" class="section">
+      <h2>🎨 ComfyUI — Image Studio</h2>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+        <span id="comfyStatus" class="dot" style="background:var(--muted)"></span>
+        <span id="comfyStatusLabel" style="font-size:12px;color:var(--muted)">checking…</span>
+        <a href="https://comfy.velora-ai.no" target="_blank" class="btn secondary" style="margin-left:auto;text-decoration:none;padding:6px 12px;font-size:12px">Open in tab ↗</a>
+      </div>
+      <iframe id="comfyFrame" src="https://comfy.velora-ai.no"
+        style="width:100%;height:calc(100vh - 180px);border:1px solid var(--border);border-radius:10px;background:#0a0a0f;"
+        onload="document.getElementById('comfyStatus').style.background='var(--ok)';document.getElementById('comfyStatusLabel').textContent='Online'"
+        onerror="document.getElementById('comfyStatus').style.background='var(--bad)';document.getElementById('comfyStatusLabel').textContent='Offline'">
+      </iframe>
+    </section>
+
   </main>
 </div>
 <script>
