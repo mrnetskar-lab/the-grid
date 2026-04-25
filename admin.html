@@ -95,6 +95,7 @@
       <button data-sec="deploy">🚀 Deploy</button>
       <button data-sec="notepad">📝 Notepad</button>
       <button data-sec="comfy">🎨 ComfyUI</button>
+      <button data-sec="studio">🧠 AI Studio</button>
     </nav>
   </aside>
   <main class="content">
@@ -322,6 +323,20 @@
       <div class="status" id="npStatus"></div>
     </section>
 
+
+    <section id="studio" class="section">
+      <h2>🧠 AI Studio — Open WebUI</h2>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+        <span id="studioStatus" class="dot" style="background:var(--muted)"></span>
+        <span id="studioStatusLabel" style="font-size:12px;color:var(--muted)">checking…</span>
+        <a href="http://95.253.220.115:48668" target="_blank" class="btn secondary" style="margin-left:auto;text-decoration:none;padding:6px 12px;font-size:12px">Open in tab ↗</a>
+      </div>
+      <iframe id="studioFrame" src="http://95.253.220.115:48668"
+        style="width:100%;height:calc(100vh - 180px);border:1px solid var(--border);border-radius:10px;background:#0a0a0f;"
+        onload="document.getElementById('studioStatus').style.background='var(--ok)';document.getElementById('studioStatusLabel').textContent='Online'"
+        onerror="document.getElementById('studioStatus').style.background='var(--bad)';document.getElementById('studioStatusLabel').textContent='Offline'">
+      </iframe>
+    </section>
 
     <section id="comfy" class="section">
       <h2>🎨 ComfyUI — Image Studio</h2>
