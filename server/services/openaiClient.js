@@ -9,8 +9,14 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config();
 
-// Priority: OPENROUTER → GROQ → TOGETHER → OPENAI
+// Priority: OLLAMA → OPENROUTER → GROQ → TOGETHER → OPENAI
 const PROVIDERS = [
+  {
+    name: 'ollama',
+    envKey: 'OLLAMA_BASE_URL',
+    baseURL: process.env.OLLAMA_BASE_URL ? `${process.env.OLLAMA_BASE_URL}/v1` : null,
+    defaultModel: process.env.OLLAMA_MODEL || 'dolphin-mistral:latest',
+  },
   {
     name: 'openrouter',
     envKey: 'OPENROUTER_API_KEY',
@@ -51,6 +57,9 @@ const CHARACTER_MODELS = {
 
 function resolveProvider() {
   for (const provider of PROVIDERS) {
+    if (provider.name === 'ollama' && process.env.OLLAMA_BASE_URL) {
+      return { provider, apiKey: 'ollama' };
+    }
     const key = process.env[provider.envKey];
     if (key) return { provider, apiKey: key };
   }
