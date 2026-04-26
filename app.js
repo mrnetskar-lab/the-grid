@@ -22,7 +22,7 @@ let chatOpen=false;
 
 const characterDirectory={
 hazel:{id:'hazel',name:'Hazel',status:'OBSERVANT',color:'#b83468',route:'After the pause',bio:'Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.',photo:'/profile_pictures/hazel.png',tags:['Observant','Late night']},
-nina:{id:'nina',name:'Nina',status:'ONLINE',color:'#ca5f8a',route:'The return',bio:'Warm, easy, and quietly funny. You knew each other before.',photo:'/profile_pictures/nina.png',tags:['Familiar','Romantic']},
+nina:{id:'nina',name:'Nina',status:'ONLINE',color:'#ca5f8a',route:'The return',bio:'Warm, easy, and quietly funny. You knew each other before.',photo:'/profile_pictures/shot_1776768014043.jpg',tags:['Familiar','Romantic']},
 iris:{id:'iris',name:'Iris',status:'LISTENING',color:'#7982cc',route:'Low signal',bio:'Deeply attentive yet almost impossible to reach.',photo:'/profile_pictures/iris.png',tags:['Silent','Watcher']},
 vale:{id:'vale',name:'Vale',status:'UNSTABLE',color:'#d83b72',route:'Brief window',bio:'Unpredictable and brief. Electric when present.',photo:'/profile_pictures/vale_profile.png',tags:['Volatile','Electric']}
 };
@@ -148,7 +148,7 @@ document.querySelectorAll('.fpill').forEach(p=>{p.addEventListener('click',()=>{
 const chatMsgs=document.getElementById('chatMsgs'),chatInput=document.getElementById('chatInput'),sendBtn=document.querySelector('.send-btn');
 const charData={
 hazel:{photo:'/profile_pictures/hazel.png',bio:'Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.',status:'ONLINE NOW',stats:[{l:'Mood',v:'Observant'},{l:'Style',v:'Slow burn'},{l:'Speaks',v:'English'},{l:'Route',v:'After the pause'}]},
-nina:{photo:'/profile_pictures/nina.png',bio:'Warm, easy, and quietly funny. You knew each other before — years of silence, but the closeness never fully left.',status:'ONLINE NOW',stats:[{l:'Mood',v:'Familiar'},{l:'Style',v:'Warm'},{l:'Speaks',v:'English'},{l:'Route',v:'The return'}]},
+nina:{photo:'/profile_pictures/shot_1776768014043.jpg',bio:'Warm, easy, and quietly funny. You knew each other before — years of silence, but the closeness never fully left.',status:'ONLINE NOW',stats:[{l:'Mood',v:'Familiar'},{l:'Style',v:'Warm'},{l:'Speaks',v:'English'},{l:'Route',v:'The return'}]},
 iris:{photo:'/profile_pictures/iris.png',bio:'Deeply attentive yet almost impossible to reach. When she does say something real, it lands with unexpected weight.',status:'LISTENING',stats:[{l:'Mood',v:'Distant'},{l:'Style',v:'Minimal'},{l:'Speaks',v:'English'},{l:'Route',v:'Low signal'}]},
 vale:{photo:'/profile_pictures/vale_profile.png',bio:'Unpredictable and brief. Electric when present. She connects fast and hard, then closes just as fast. No explanation.',status:'UNSTABLE',stats:[{l:'Mood',v:'Volatile'},{l:'Style',v:'Intense'},{l:'Speaks',v:'English'},{l:'Route',v:'Brief window'}]}
 };
@@ -161,6 +161,8 @@ document.getElementById('cpStatus').textContent=`● ${d.status}`;
 document.getElementById('cpBio').textContent=d.bio;
 const stats=document.getElementById('cpStats');
 stats.innerHTML=d.stats.map(s=>`<div class="cp-stat"><div class="cp-stat-label">${s.l}</div><div class="cp-stat-value">${s.v}</div></div>`).join('');
+const pd=profileData[thread];
+[0,1,2,3,4].forEach(i=>{const el=document.getElementById('cpg'+i);if(el)el.src=(pd?.gallery&&pd.gallery[i])||d.photo;});
 }
 const chatAv=document.getElementById('chatAv'),chatName=document.getElementById('chatName'),chatStatus=document.getElementById('chatStatus');
 
@@ -281,7 +283,7 @@ if(thread){window._profileFrom='chat';openProfile(thread);}
 // Profile page
 const profileData={
 hazel:{photo:'/profile_pictures/hazel.png',wide:'/profile_pictures/hazel_large_picture.png',name:'Hazel',status:'● ONLINE NOW',bio:'Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.',tags:['Observant','Slow burn','Late night','Voice notes','Warm'],stats:[{l:'Mood',v:'Observant'},{l:'Style',v:'Slow burn'},{l:'Speaks',v:'English'},{l:'Route',v:'After the pause'}],thread:'hazel'},
-nina:{photo:'/profile_pictures/nina.png',wide:'/profile_pictures/nina.png',name:'Nina',status:'● ONLINE NOW',bio:'Warm, easy, and quietly funny. You knew each other before — years of silence, but the closeness never fully left. She asks real questions and remembers the answers.',tags:['Familiar','Romantic','Emotionally honest','Nostalgic'],stats:[{l:'Mood',v:'Familiar'},{l:'Style',v:'Warm'},{l:'Speaks',v:'English'},{l:'Route',v:'The return'}],thread:'nina'},
+nina:{photo:'/profile_pictures/shot_1776768014043.jpg',wide:'/profile_pictures/shot_1776796231645.jpg',name:'Nina',status:'● ONLINE NOW',bio:'Warm, easy, and quietly funny. You knew each other before — years of silence, but the closeness never fully left. She asks real questions and remembers the answers.',tags:['Familiar','Romantic','Emotionally honest','Nostalgic'],stats:[{l:'Mood',v:'Familiar'},{l:'Style',v:'Warm'},{l:'Speaks',v:'English'},{l:'Route',v:'The return'}],thread:'nina',gallery:['/profile_pictures/shot_1776768014043.jpg','/profile_pictures/shot_1776796231645.jpg','/profile_pictures/shot_1776768013585.jpg','/profile_pictures/nina_beauty.jpg','/profile_pictures/Flux2_00027_.png','/profile_pictures/shot_1776764694215.jpg']},
 iris:{photo:'/profile_pictures/iris.png',wide:'/profile_pictures/iris.png',name:'Iris',status:'● LISTENING',bio:'Deeply attentive yet almost impossible to reach. She goes silent sometimes with no warning. When she does say something real, it lands with unexpected weight.',tags:['Silent','Watcher','Melancholic','Hard to reach'],stats:[{l:'Mood',v:'Distant'},{l:'Style',v:'Minimal'},{l:'Speaks',v:'English'},{l:'Route',v:'Low signal'}],thread:'iris'},
 vale:{photo:'/profile_pictures/vale_profile.png',wide:'/profile_pictures/vale_profile.png',name:'Vale',status:'● UNSTABLE',bio:'Unpredictable and brief. She connects fast and hard, then closes just as fast. Electric when present. She does not apologize for disappearing.',tags:['Volatile','Electric','Intense','Brief'],stats:[{l:'Mood',v:'Volatile'},{l:'Style',v:'Intense'},{l:'Speaks',v:'English'},{l:'Route',v:'Brief window'}],thread:'vale'}
 };
@@ -297,8 +299,8 @@ const tagsEl=document.getElementById('profileTags');
 tagsEl.innerHTML=d.tags.map((t,i)=>`<span class="profile-tag${i<2?' accent':''}">${t}</span>`).join('');
 // stats
 document.getElementById('profileStats').innerHTML=d.stats.map(s=>`<div class="profile-stat"><div class="profile-stat-label">${s.l}</div><div class="profile-stat-value">${s.v}</div></div>`).join('');
-// gallery tiles — use same photo as placeholder
-[0,1,2,3,4].forEach(i=>{const el=document.getElementById('pgTile'+i);if(el)el.src=d.photo;});
+// gallery tiles
+[0,1,2,3,4].forEach(i=>{const el=document.getElementById('pgTile'+i);if(el)el.src=(d.gallery&&d.gallery[i])||d.photo;});
 // wire chat button
 document.getElementById('profileChatBtn').onclick=()=>startChat(d.thread);
 // navigate
