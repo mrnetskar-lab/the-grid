@@ -78,27 +78,6 @@
   </div>
 </div>
 
-<!-- PAYWALL -->
-<div class="paywall" id="paywall">
-  <div class="paywall-inner">
-    <button class="paywall-close" id="paywallClose">✕</button>
-    <div class="paywall-photo">
-      <img id="paywallImg" src="/profile_pictures/hazel.png" alt=""/>
-      <div class="paywall-photo-name" id="paywallName">Hazel</div>
-    </div>
-    <div class="paywall-body">
-      <div class="paywall-headline">Unlock the full experience</div>
-      <div class="paywall-sub">Choose a plan. Billing is mocked for now — we store your tier locally.</div>
-      <div class="tier-grid">
-        <div class="tier-card" data-tier="free"><div class="paywall-perk-label">Free</div><div class="paywall-perk-desc">$0/mo · 3 scenes/day</div></div>
-        <div class="tier-card" data-tier="pulse"><div class="paywall-perk-label">Pulse</div><div class="paywall-perk-desc">$9/mo · 50 scenes/month + gallery</div></div>
-        <div class="tier-card" data-tier="signal"><div class="paywall-perk-label">Signal</div><div class="paywall-perk-desc">$24/mo · Unlimited + video</div></div>
-      </div>
-      <button class="paywall-cta" id="paywallChoose">Start free trial</button>
-      <button class="paywall-restore">Restore purchase</button>
-    </div>
-  </div>
-</div>
 
 <!-- Scene Builder -->
 <div class="scene-sheet" id="sceneSheet">
@@ -318,7 +297,6 @@
             </div>
             <div class="profile-cta">
               <button class="btn btn-primary" id="profileChatBtn">♥ &nbsp;Start chatting</button>
-              <button class="btn">Unlock gallery</button>
             </div>
           </div>
           <div class="profile-info">
@@ -349,11 +327,10 @@
               <div class="profile-section-title">Gallery preview</div>
               <div class="profile-gallery-grid">
                 <div class="profile-gallery-tile unlocked"><img id="pgTile0" src="/profile_pictures/hazel.png" alt=""/></div>
-                <div class="profile-gallery-tile"><img id="pgTile1" src="/profile_pictures/hazel_large_picture.png" alt=""/><div class="tile-lock">Locked</div></div>
-                <div class="profile-gallery-tile"><img id="pgTile2" src="/profile_pictures/hazel.png" alt=""/><div class="tile-lock">Members</div></div>
-                <div class="profile-gallery-tile"><img id="pgTile3" src="/profile_pictures/hazel.png" alt=""/><div class="tile-lock">Locked</div></div>
-                <div class="profile-gallery-tile"><img id="pgTile4" src="/profile_pictures/hazel.png" alt=""/><div class="tile-lock">Locked</div></div>
-                <div class="profile-gallery-tile"><div class="tile-lock" style="background:var(--surface-2);color:var(--text-3)">+ More</div></div>
+                <div class="profile-gallery-tile unlocked"><img id="pgTile1" src="/profile_pictures/hazel_large_picture.png" alt=""/></div>
+                <div class="profile-gallery-tile unlocked"><img id="pgTile2" src="/profile_pictures/hazel.png" alt=""/></div>
+                <div class="profile-gallery-tile unlocked"><img id="pgTile3" src="/profile_pictures/hazel.png" alt=""/></div>
+                <div class="profile-gallery-tile unlocked"><img id="pgTile4" src="/profile_pictures/hazel.png" alt=""/></div>
               </div>
             </div>
           </div>
@@ -467,14 +444,10 @@
           <div class="cp-tab-panel" id="cpTabGallery">
             <div class="cp-gallery-grid" id="cpGalleryGrid">
               <div class="cp-gallery-tile free"><img id="cpg0" src="/profile_pictures/hazel.png" alt=""/></div>
-              <div class="cp-gallery-tile"><img id="cpg1" src="/profile_pictures/hazel.png" alt=""/><div class="cp-lock">Locked</div></div>
-              <div class="cp-gallery-tile"><img id="cpg2" src="/profile_pictures/hazel.png" alt=""/><div class="cp-lock">Members</div></div>
-              <div class="cp-gallery-tile"><img id="cpg3" src="/profile_pictures/hazel.png" alt=""/><div class="cp-lock">Locked</div></div>
-              <div class="cp-gallery-tile"><img id="cpg4" src="/profile_pictures/hazel.png" alt=""/><div class="cp-lock">Locked</div></div>
-              <div class="cp-gallery-tile" style="display:flex;align-items:center;justify-content:center;font-size:.64rem;color:var(--text-3);font-weight:700;">+ More</div>
-            </div>
-            <div style="padding:0 14px 14px;">
-              <button class="cp-cta" onclick="openPaywall()">🖼️ &nbsp;Unlock all photos</button>
+              <div class="cp-gallery-tile free"><img id="cpg1" src="/profile_pictures/hazel.png" alt=""/></div>
+              <div class="cp-gallery-tile free"><img id="cpg2" src="/profile_pictures/hazel.png" alt=""/></div>
+              <div class="cp-gallery-tile free"><img id="cpg3" src="/profile_pictures/hazel.png" alt=""/></div>
+              <div class="cp-gallery-tile free"><img id="cpg4" src="/profile_pictures/hazel.png" alt=""/></div>
             </div>
           </div>
         </aside>
@@ -486,10 +459,10 @@
           <section class="gallery-panel">
             <div class="sh"><h2>Gallery</h2><p style="font-size:.8rem;color:var(--text-2)">Private collections.</p></div>
             <div class="gallery-grid">
-              <article class="g-tile" data-name="Hazel" data-desc="Hazel's private collection."><div class="g-photo"><img src="/profile_pictures/hazel.png" alt="Hazel"/></div><div class="g-overlay"></div><span class="g-lock">Locked</span><div class="g-caption"><div class="g-name">Hazel</div><div class="g-mood">Observant · Warm</div></div></article>
-              <article class="g-tile" data-name="Nina" data-desc="Nina's private collection."><div class="g-photo"><img src="/profile_pictures/nina.png" alt="Nina"/></div><div class="g-overlay"></div><span class="g-lock">Members</span><div class="g-caption"><div class="g-name">Nina</div><div class="g-mood">Familiar · Romantic</div></div></article>
-              <article class="g-tile" data-name="Iris" data-desc="Iris's private collection."><div class="g-photo"><img src="/profile_pictures/iris.png" alt="Iris"/></div><div class="g-overlay"></div><span class="g-lock">Preview</span><div class="g-caption"><div class="g-name">Iris</div><div class="g-mood">Silent · Watching</div></div></article>
-              <article class="g-tile" data-name="Vale" data-desc="Vale's private collection."><div class="g-photo"><img src="/profile_pictures/vale_profile.png" alt="Vale"/></div><div class="g-overlay"></div><span class="g-lock">New</span><div class="g-caption"><div class="g-name">Vale</div><div class="g-mood">Volatile · Electric</div></div></article>
+              <article class="g-tile" data-name="Hazel" data-desc="Hazel's private collection."><div class="g-photo"><img src="/profile_pictures/hazel.png" alt="Hazel"/></div><div class="g-overlay"></div><div class="g-caption"><div class="g-name">Hazel</div><div class="g-mood">Observant · Warm</div></div></article>
+              <article class="g-tile" data-name="Nina" data-desc="Nina's private collection."><div class="g-photo"><img src="/profile_pictures/nina.png" alt="Nina"/></div><div class="g-overlay"></div><div class="g-caption"><div class="g-name">Nina</div><div class="g-mood">Familiar · Romantic</div></div></article>
+              <article class="g-tile" data-name="Iris" data-desc="Iris's private collection."><div class="g-photo"><img src="/profile_pictures/iris.png" alt="Iris"/></div><div class="g-overlay"></div><div class="g-caption"><div class="g-name">Iris</div><div class="g-mood">Silent · Watching</div></div></article>
+              <article class="g-tile" data-name="Vale" data-desc="Vale's private collection."><div class="g-photo"><img src="/profile_pictures/vale_profile.png" alt="Vale"/></div><div class="g-overlay"></div><div class="g-caption"><div class="g-name">Vale</div><div class="g-mood">Volatile · Electric</div></div></article>
             </div>
           </section>
           <!-- DEV PANEL — hidden until dev:1337 -->
@@ -537,18 +510,6 @@
               </select>
               <button class="btn btn-primary" id="genBtn" style="width:100%;justify-content:center">Generate photo</button>
               <div id="genStatus" style="font-size:.75rem;color:var(--text-2);margin-top:8px;min-height:16px"></div>
-            </div>
-            <div class="premium-card">
-              <h3>Premium</h3>
-              <p>Unlock all collections and unlimited messaging.</p>
-              <div class="price-tag">$24 <span>/ month</span></div>
-              <div class="perk-list">
-                <div class="perk"><span class="perk-dot">✓</span>All private galleries</div>
-                <div class="perk"><span class="perk-dot">✓</span>Unlimited messaging</div>
-                <div class="perk"><span class="perk-dot">✓</span>New drops weekly</div>
-                <div class="perk"><span class="perk-dot">✓</span>Priority access</div>
-              </div>
-              <button class="btn btn-primary" style="width:100%;justify-content:center">Unlock Premium</button>
             </div>
           </aside>
         </div>

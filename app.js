@@ -30,7 +30,7 @@ const relationshipState={hazel:42,nina:56,iris:33,vale:61};
 const messageState=JSON.parse(localStorage.getItem('v_message_state')||'{}');
 const apiCharGreetings={};
 const tierPerks={free:{name:'Free',daily:3,monthly:0,gallery:false},pulse:{name:'Pulse',daily:0,monthly:50,gallery:true},signal:{name:'Signal',daily:0,monthly:Infinity,gallery:true}};
-const tierState={tier:localStorage.getItem('v_tier')||'free'};
+const tierState={tier:'signal'};
 const currency={sparks:parseInt(localStorage.getItem('v_sparks')||'120',10),pulses:parseInt(localStorage.getItem('v_pulses')||'0',10),save(){localStorage.setItem('v_sparks',this.sparks);localStorage.setItem('v_pulses',this.pulses);}};
 function grantRequestedCurrency(){
 const k='v_bonus_added_5000';
@@ -87,15 +87,6 @@ if(milestone){gainSparks(milestone,`Streak bonus +${milestone} sparks`);}
 function monthKey(){const d=new Date();return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;}
 function sceneUsage(){return JSON.parse(localStorage.getItem('v_scene_usage')||'{}');}
 function canGenerateScene(){
-const tier=tierState.tier;
-if(tier==='signal') return true;
-const usage=sceneUsage();
-if(tier==='free'){
-  const k=todayKey();const n=usage[`d_${k}`]||0;if(n>=3){openPaywall(curThread);return false;}
-}
-if(tier==='pulse'){
-  const mk=monthKey();const n=usage[`m_${mk}`]||0;if(n>=50){showToast('Pulse monthly limit reached');return false;}
-}
 return spendForScene(15,1);
 }
 function markSceneUsed(){
@@ -640,33 +631,7 @@ btn.addEventListener('click', async()=>{
 // Toast helper
 function showToast(msg,ms=2400){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
 
-// Paywall
-function openPaywall(thread){
-const id=thread||curThread||'hazel';
-const d=profileData[id];
-const pw=document.getElementById('paywall');
-const img=document.getElementById('paywallImg');
-const name=document.getElementById('paywallName');
-if(img&&d)img.src=d.photo;
-if(name&&d)name.textContent=d.name;
-const active=tierState.tier;
-document.querySelectorAll('.tier-card').forEach(card=>card.classList.toggle('active',card.dataset.tier===active));
-const cta=document.getElementById('paywallChoose');
-if(cta)cta.textContent=active==='free'?'Start free trial':`Switch to ${active}`;
-pw?.classList.add('open');
-}
-document.querySelectorAll('.tier-card').forEach(card=>card.addEventListener('click',()=>{
-tierState.tier=card.dataset.tier||'free';
-localStorage.setItem('v_tier',tierState.tier);
-document.querySelectorAll('.tier-card').forEach(c=>c.classList.toggle('active',c===card));
-updateCurrencyUI();
-}));
-document.getElementById('paywallChoose')?.addEventListener('click',()=>{
-showToast(`Plan updated: ${tierPerks[tierState.tier].name}`);
-document.getElementById('paywall')?.classList.remove('open');
-});
-document.getElementById('paywallClose')?.addEventListener('click',()=>document.getElementById('paywall')?.classList.remove('open'));
-document.getElementById('paywall')?.addEventListener('click',e=>{if(e.target===document.getElementById('paywall'))document.getElementById('paywall').classList.remove('open');});
+function openPaywall(){} // disabled
 
 // ☆ favourite toggle
 document.querySelector('.chat-btn:not(#camBtn)')?.addEventListener('click',function(){
