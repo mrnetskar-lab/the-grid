@@ -326,21 +326,17 @@
 
     <section id="studio" class="section">
       <h2>🤖 Wendy — AI Studio</h2>
-      <div style="display:flex;gap:12px;align-items:center;margin-bottom:24px">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
         <span id="studioStatus" class="dot" style="background:var(--muted)"></span>
         <span id="studioStatusLabel" style="font-size:12px;color:var(--muted)">checking…</span>
+        <a href="https://wendy.velora-ai.no" target="_blank" class="btn secondary" style="margin-left:auto;text-decoration:none;padding:6px 12px;font-size:12px">Open in tab ↗</a>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:600px">
-        <a href="http://95.253.220.115:48668" target="_blank" class="btn" style="text-decoration:none;padding:14px 20px;font-size:14px;text-align:center">Open WebUI ↗</a>
-        <a href="https://wendy.velora-ai.no" target="_blank" class="btn secondary" style="text-decoration:none;padding:14px 20px;font-size:14px;text-align:center">Ollama API ↗</a>
-      </div>
-      <div style="margin-top:24px;padding:16px;border:1px solid var(--border);border-radius:10px;font-size:13px;line-height:1.8;color:var(--muted)">
-        <div><strong style="color:var(--fg)">Active model:</strong> dolphin-venice-24b</div>
-        <div><strong style="color:var(--fg)">Ollama:</strong> wendy.velora-ai.no → port 7862</div>
-        <div><strong style="color:var(--fg)">Open WebUI:</strong> 95.253.220.115:48668 → port 18000</div>
-      </div>
+      <iframe src="https://wendy.velora-ai.no"
+        style="width:100%;height:calc(100vh - 180px);border:1px solid var(--border);border-radius:10px;background:#0a0a0f;"
+        allow="microphone">
+      </iframe>
       <script>
-        fetch('https://wendy.velora-ai.no/api/tags').then(r=>{
+        fetch('https://wendy.velora-ai.no').then(r=>{
           document.getElementById('studioStatus').style.background = r.ok ? 'var(--ok)' : 'var(--bad)';
           document.getElementById('studioStatusLabel').textContent = r.ok ? 'Online' : 'Offline';
         }).catch(()=>{
