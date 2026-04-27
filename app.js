@@ -270,7 +270,12 @@ function addMsg(side,text,avSrc,extraEl){
   const w=document.createElement('div'),b=document.createElement('div'),t=document.createElement('div');
   const isMedia=!text&&extraEl&&extraEl.tagName==='IMG';
   b.className='bubble '+(isMedia?'media':(side==='mine'?'mine':'theirs'));
-  if(text)b.innerHTML=text.replace(/\*([^*]+)\*/g,'<span style="color:#9d80c8;font-style:italic">*$1*</span>');
+  if(text){
+    const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const isTheirs=side!=='mine';
+    const actionColor=isTheirs?'#7a5c3a':'#f0c8b0';
+    b.innerHTML=escaped.replace(/\*([^*]+)\*/g,`<span style="color:${actionColor};font-style:italic">*$1*</span>`);
+  }
   if(extraEl)b.appendChild(extraEl);
   t.className='msg-time';t.textContent=ts();if(side==='mine')t.style.textAlign='right';
   w.appendChild(b);w.appendChild(t);row.appendChild(w);chatMsgs?.appendChild(row);if(chatMsgs)chatMsgs.scrollTop=chatMsgs.scrollHeight;
@@ -382,6 +387,9 @@ function startChat(thread){
 document.getElementById('profileBack')?.addEventListener('click',()=>goTo(window._profileFrom||'discover'));
 
 // ── USER PROFILE ──────────────────────────────────────────────────────────────
+// Restore saved avatar on load
+(()=>{const saved=localStorage.getItem('v_user_avatar');if(!saved)return;const av=document.getElementById('userAvatar');if(av)av.src=saved;const top=document.querySelector('#myProfileBtn .profile-av');if(top)top.src=saved;})();
+
 function openUserProfile(){
   const name=localStorage.getItem('v_user_name')||'You';
   const streak=Number(localStorage.getItem('v_streak_count')||'0');
@@ -389,6 +397,8 @@ function openUserProfile(){
   const el=n=>document.getElementById(n);
   if(el('userDisplayName'))el('userDisplayName').textContent=name;
   if(el('userNameInput'))el('userNameInput').value=name==='You'?'':name;
+  const savedAv=localStorage.getItem('v_user_avatar');
+  if(savedAv&&el('userAvatar'))el('userAvatar').src=savedAv;
   if(el('uStatChats'))el('uStatChats').textContent=totalChats;
   if(el('uStatStreak'))el('uStatStreak').textContent=streak;
   if(el('uStatSparks'))el('uStatSparks').textContent=currency.sparks;
@@ -420,6 +430,23 @@ document.getElementById('userClearAll')?.addEventListener('click',()=>{
   localStorage.setItem('v_message_state',JSON.stringify(messageState));
   renderInboxes();
   showToast('All history cleared');
+});
+
+// Avatar upload
+document.getElementById('userAvatarEdit')?.addEventListener('click',()=>document.getElementById('userAvatarInput')?.click());
+document.getElementById('userAvatarInput')?.addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const src=ev.target.result;
+    const avatarEl=document.getElementById('userAvatar');
+    if(avatarEl)avatarEl.src=src;
+    const topbarAv=document.querySelector('#myProfileBtn .profile-av');
+    if(topbarAv)topbarAv.src=src;
+    localStorage.setItem('v_user_avatar',src);
+    showToast('Profile picture updated');
+  };
+  reader.readAsDataURL(f);
 });
 
 document.querySelectorAll('.discover-card').forEach(card=>{
@@ -687,4 +714,10 @@ document.getElementById('charPanel')?.addEventListener('click',e=>{
   const tile=e.target.closest('.cp-gallery-tile');if(!tile)return;
   const img=tile.querySelector('img');const name=document.getElementById('cpName')?.textContent?.replace('♥','').trim()||'';
   if(img)openLightbox(img.src,name);
+});
+
+// Chat images → lightbox
+document.getElementById('chatMsgs')?.addEventListener('click',e=>{
+  const img=e.target.closest('.bubble.media img');if(!img)return;
+  openLightbox(img.src,CHARACTERS[curThread]?.name||'');
 });
