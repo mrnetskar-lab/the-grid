@@ -228,6 +228,7 @@ function rememberMessage(character,text,role='assistant'){
   messageState[character]=slot;
   localStorage.setItem('v_message_state',JSON.stringify(messageState));
   renderInboxes();
+  renderJumpBackIn();
 }
 function relative(ts){if(!ts)return '';const diff=Math.max(1,Math.floor((Date.now()-ts)/60000));if(diff<60)return`${diff}m`;const h=Math.floor(diff/60);if(h<24)return`${h}h`;return`${Math.floor(h/24)}d`;}
 function markInboxReadAll(){Object.keys(CHARACTERS).forEach(id=>localStorage.setItem(`v_read_${id}`,String(Date.now())));renderInboxes();}
@@ -242,6 +243,135 @@ function renderInboxes(){
   if(home)home.innerHTML=markup||empty;
   if(inbox)inbox.innerHTML=markup||empty;
   document.querySelectorAll('#homeInboxList .inbox-row,#inboxList .inbox-row').forEach(row=>row.addEventListener('click',()=>startChat(row.dataset.thread)));
+  renderJumpBackIn();
+}
+
+function bindHomePromo(){
+  const strip=document.getElementById('homePromoStrip');
+  const close=document.getElementById('homePromoClose');
+  const openChat=document.getElementById('promoOpenChat');
+  if(!strip)return;
+  if(localStorage.getItem('v_home_promo_hidden')==='1')strip.style.display='none';
+  close?.addEventListener('click',()=>{
+    strip.style.display='none';
+    localStorage.setItem('v_home_promo_hidden','1');
+  });
+  openChat?.addEventListener('click',()=>goTo('chat'));
+}
+
+function renderJumpBackIn(){
+  const grid=document.getElementById('jumpBackGrid');
+  if(!grid)return;
+
+  const starters={
+    hazel:'She noticed you came back.',
+    nina:'Feels like you never stopped talking.',
+    iris:'No signal. Still listening.',
+    vale:'Brief window open.'
+  };
+
+  const rows=Object.keys(CHARACTERS).map(id=>{
+    const c=CHARACTERS[id];
+    const entry=messageState[id]||{messages:[],lastAt:0};
+    const last=entry.messages[entry.messages.length-1];
+    return {
+      id,
+      c,
+      last,
+      lastAt:entry.lastAt||0,
+      preview:last?.text||starters[id]||c.greeting||'Start a conversation'
+    };
+  }).sort((a,b)=>b.lastAt-a.lastAt);
+
+  grid.innerHTML=rows.map(row=>`
+    <button class="jump-card" type="button" data-thread="${escapeHTML(row.id)}">
+      <img src="${safeAssetPath(row.c.photo,'/profile_pictures/hazel.png')}" alt="${escapeHTML(row.c.name)}"/>
+      <div class="jump-card-body">
+        <div class="jump-card-top">
+          <strong>${escapeHTML(row.c.name)}</strong>
+          <span class="live-dot"></span>
+        </div>
+        <p>${escapeHTML(String(row.preview).slice(0,80))}</p>
+      </div>
+      <span class="jump-cta">Continue</span>
+    </button>
+  `).join('');
+
+  grid.querySelectorAll('.jump-card').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const thread=card.dataset.thread;
+      if(typeof selectThread==='function')selectThread(thread);
+      else if(typeof startChat==='function')startChat(thread);
+      else goTo('chat');
+    });
+  });
+
+  const jumpInbox=document.getElementById('jumpOpenInbox');
+  if(jumpInbox&&!jumpInbox.dataset.bound){
+    jumpInbox.dataset.bound='1';
+    jumpInbox.addEventListener('click',()=>goTo('inbox'));
+  }
+}
+
+function characterMatchesFilter(c,filter){
+  if(!c||filter==='all')return true;
+  const haystack=[c.status,c.mood,c.style,c.discoverTag,c.discoverTags,...(c.tags||[])].join(' ').toLowerCase();
+  return haystack.includes(filter.toLowerCase());
+}
+
+function bindHomeFilters(){
+  const wrap=document.getElementById('homeFilterChips');
+  if(!wrap||wrap.dataset.bound==='1')return;
+  wrap.dataset.bound='1';
+  wrap.querySelectorAll('.filter-chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      const filter=chip.dataset.filter||'all';
+      wrap.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active'));
+      chip.classList.add('active');
+      document.querySelectorAll('.char-card[data-char]').forEach(card=>{
+        const id=card.dataset.char;
+        const c=CHARACTERS[id];
+        card.style.display=characterMatchesFilter(c,filter)?'':'none';
+      });
+    });
+  });
+}
+
+function bindHomeLobbyInteractions(){
+  const CHARACTER_CTA={hazel:"Enter Hazel’s room",nina:'Reconnect',iris:'Send a signal',vale:'Catch her now'};
+  document.querySelectorAll('.char-card[data-char]').forEach(card=>{
+    const id=card.dataset.char;
+    const c=CHARACTERS[id];
+    if(!c)return;
+    const badge=card.querySelector('.char-badge');
+    const age=card.querySelector('.char-age');
+    const cta=card.querySelector('.char-btn');
+    if(badge)badge.textContent=(c.discoverTag||c.status||'Online').toUpperCase();
+    if(age)age.textContent=c.discoverBlurb||c.bioBrief||c.route||'Start a conversation';
+    if(cta)cta.textContent=CHARACTER_CTA[id]||'Open chat';
+  });
+
+  document.getElementById('activeNowSeeAll')?.addEventListener('click',()=>goTo('discover'));
+  document.querySelectorAll('#homeActiveRail .av-item[data-thread]').forEach(item=>{
+    const thread=item.dataset.thread;
+    const c=CHARACTERS[thread];
+    const nameEl=item.querySelector('.av-name');
+    const moodEl=item.querySelector('.av-mood');
+    if(c&&nameEl)nameEl.textContent=c.name||thread;
+    if(c&&moodEl)moodEl.textContent=c.mood||c.status||'Online';
+    item.addEventListener('click',()=>{
+      if(typeof selectThread==='function')selectThread(thread);
+      else startChat(thread);
+    });
+  });
+  document.querySelectorAll('.char-card[data-thread]').forEach(card=>{
+    card.addEventListener('click',e=>{
+      if(e.target.closest('.char-btn'))return;
+      const thread=card.dataset.thread;
+      if(typeof selectThread==='function')selectThread(thread);
+      else startChat(thread);
+    });
+  });
 }
 
 function openDiscoverProfile(id){
@@ -823,6 +953,10 @@ grantDevCurrency();
 updateCurrencyUI();
 trackLoginBonuses();
 renderInboxes();
+bindHomePromo();
+bindHomeLobbyInteractions();
+bindHomeFilters();
+renderJumpBackIn();
 apiJson('/api/characters').then(d=>{if(d.ok&&d.characters)d.characters.forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});}).catch(()=>{});
 
 // ── LIGHTBOX ──────────────────────────────────────────────────────────────────

@@ -212,70 +212,106 @@
 
       <!-- HOME -->
       <section class="view active" id="view-home">
+        <div class="home-promo-strip" id="homePromoStrip">
+          <button class="home-promo-close" id="homePromoClose" type="button" aria-label="Hide promo">×</button>
+          <div class="home-promo-copy">
+            <span class="home-promo-kicker">Live now</span>
+            <strong>4 companions are active tonight</strong>
+            <span>Private scenes, memories, and new replies are waiting.</span>
+          </div>
+          <button class="btn btn-primary" id="promoOpenChat" type="button">Open chat</button>
+        </div>
+
         <div class="hero-banner">
           <div class="hero-photo">
             <img src="/profile_pictures/hazel_large_picture.png" alt="Hazel"/>
           </div>
           <div class="hero-text">
+            <div class="hero-live-pill"><span></span>Live companion lobby</div>
             <div class="hero-label">Private · 18+ · AI Companions</div>
             <h1>Your companion<br/>is waiting.</h1>
-            <p>Exclusive personas, private galleries, and conversations that feel real.</p>
+            <p>Exclusive personas, private galleries, and conversations that remember you.</p>
             <div class="hero-actions">
               <button class="btn btn-primary" data-to="discover">Find a persona</button>
               <button class="btn" data-to="chat">Open chat</button>
             </div>
             <div style="margin-top:10px"><span class="streak-badge" id="streakBadge">🔥 1 day streak</span></div>
           </div>
-        </div>
-
-        <div>
-          <div class="sh"><h2>Active now</h2><button class="sh-link" data-to="discover">See all</button></div>
-          <div class="avatar-rail">
-            <div class="av-item" data-to="chat"><div class="av-ring" data-char="hazel"><img src="/profile_pictures/hazel.png" alt="Hazel"/><span class="av-status"></span></div><span class="av-name">Hazel</span><span class="av-mood">Observant</span></div>
-            <div class="av-item" data-to="chat"><div class="av-ring" data-char="nina"><img src="/profile_pictures/shot_1776768014043.jpg" alt="Nina"/><span class="av-status"></span></div><span class="av-name">Nina</span><span class="av-mood">Familiar</span></div>
-            <div class="av-item" data-to="chat"><div class="av-ring" data-char="iris"><img src="/profile_pictures/iris.png" alt="Iris"/><span class="av-status"></span></div><span class="av-name">Iris</span><span class="av-mood">Listening</span></div>
-            <div class="av-item" data-to="chat"><div class="av-ring offline" data-char="vale"><img src="/profile_pictures/vale_profile.png" alt="Vale"/><span class="av-status"></span></div><span class="av-name">Vale</span><span class="av-mood">Unstable</span></div>
+          <div class="hero-floating-card">
+            <div class="hero-floating-top"><span class="live-dot"></span>Hazel is watching you</div>
+            <p>Last reply · 1m ago</p>
+          </div>
+          <div class="hero-dots" aria-hidden="true">
+            <span class="hero-dot active"></span>
+            <span class="hero-dot"></span>
+            <span class="hero-dot"></span>
           </div>
         </div>
 
-        <div>
+        <section class="home-section active-now-section">
+          <div class="sh"><h2>Active now</h2><button class="sh-link" id="activeNowSeeAll" type="button">See all</button></div>
+          <div class="avatar-rail enhanced-avatar-rail" id="homeActiveRail">
+            <button class="av-item" type="button" data-thread="hazel"><div class="av-ring" data-char="hazel"><img src="/profile_pictures/hazel.png" alt="Hazel"/><span class="av-status"></span></div><span class="av-name">Hazel</span><span class="av-mood">Observant</span></button>
+            <button class="av-item" type="button" data-thread="nina"><div class="av-ring" data-char="nina"><img src="/profile_pictures/shot_1776768014043.jpg" alt="Nina"/><span class="av-status"></span></div><span class="av-name">Nina</span><span class="av-mood">Familiar</span></button>
+            <button class="av-item" type="button" data-thread="iris"><div class="av-ring" data-char="iris"><img src="/profile_pictures/iris.png" alt="Iris"/><span class="av-status"></span></div><span class="av-name">Iris</span><span class="av-mood">Listening</span></button>
+            <button class="av-item" type="button" data-thread="vale"><div class="av-ring offline" data-char="vale"><img src="/profile_pictures/vale_profile.png" alt="Vale"/><span class="av-status"></span></div><span class="av-name">Vale</span><span class="av-mood">Unstable</span></button>
+          </div>
+        </section>
+
+        <section class="home-section jump-section">
+          <div class="sh">
+            <h2>Jump back in</h2>
+            <button class="sh-link" type="button" id="jumpOpenInbox">View inbox</button>
+          </div>
+          <div class="jump-grid" id="jumpBackGrid"></div>
+        </section>
+
+        <section class="home-section">
           <div class="sh"><h2>Featured</h2></div>
+          <div class="filter-chips" id="homeFilterChips">
+            <button class="filter-chip active" type="button" data-filter="all">All</button>
+            <button class="filter-chip" type="button" data-filter="online">Online</button>
+            <button class="filter-chip" type="button" data-filter="slow burn">Slow burn</button>
+            <button class="filter-chip" type="button" data-filter="familiar">Familiar</button>
+            <button class="filter-chip" type="button" data-filter="mysterious">Mysterious</button>
+            <button class="filter-chip" type="button" data-filter="intense">Intense</button>
+          </div>
           <div class="char-grid">
-            <article class="char-card">
+            <article class="char-card" data-char="hazel" data-thread="hazel">
               <div class="char-photo"><img src="/profile_pictures/hazel.png" alt="Hazel"/></div>
               <div class="char-overlay"></div>
               <div class="char-tags"><span class="char-tag">Observant</span><span class="char-tag">Late night</span></div>
               <span class="char-badge">OBSERVANT</span>
-              <div class="char-info"><div class="char-name">Hazel</div><div class="char-age">Warm but withholding</div><button class="char-btn" data-to="chat">Chat now</button></div>
+              <div class="char-info"><div class="char-name">Hazel</div><div class="char-age">Warm but withholding</div><button class="char-btn" data-to="chat">Enter Hazel’s room</button></div>
             </article>
-            <article class="char-card">
+            <article class="char-card" data-char="nina" data-thread="nina">
               <div class="char-photo"><img src="/profile_pictures/shot_1776768014043.jpg" alt="Nina"/></div>
               <div class="char-overlay"></div>
               <div class="char-tags"><span class="char-tag">Familiar</span><span class="char-tag">Romantic</span></div>
               <span class="char-badge">ONLINE</span>
-              <div class="char-info"><div class="char-name">Nina</div><div class="char-age">You knew each other before</div><button class="char-btn" data-to="chat">Chat now</button></div>
+              <div class="char-info"><div class="char-name">Nina</div><div class="char-age">You knew each other before</div><button class="char-btn" data-to="chat">Reconnect</button></div>
             </article>
-            <article class="char-card">
+            <article class="char-card" data-char="iris" data-thread="iris">
               <div class="char-photo"><img src="/profile_pictures/iris.png" alt="Iris"/></div>
               <div class="char-overlay"></div>
               <div class="char-tags"><span class="char-tag">Silent</span><span class="char-tag">Watcher</span></div>
               <span class="char-badge">LISTENING</span>
-              <div class="char-info"><div class="char-name">Iris</div><div class="char-age">Low signal — hard to reach</div><button class="char-btn" data-to="chat">Chat now</button></div>
+              <div class="char-info"><div class="char-name">Iris</div><div class="char-age">Low signal — hard to reach</div><button class="char-btn" data-to="chat">Send a signal</button></div>
             </article>
-            <article class="char-card">
+            <article class="char-card" data-char="vale" data-thread="vale">
               <div class="char-photo"><img src="/profile_pictures/vale_profile.png" alt="Vale"/></div>
               <div class="char-overlay"></div>
               <div class="char-tags"><span class="char-tag">Electric</span><span class="char-tag">Volatile</span></div>
               <span class="char-badge">UNSTABLE</span>
-              <div class="char-info"><div class="char-name">Vale</div><div class="char-age">Connects in brief windows</div><button class="char-btn" data-to="chat">Chat now</button></div>
+              <div class="char-info"><div class="char-name">Vale</div><div class="char-age">Connects in brief windows</div><button class="char-btn" data-to="chat">Catch her now</button></div>
             </article>
           </div>
-        </div>
+        </section>
 
-        <div>
+        <section class="home-section">
           <div class="sh"><h2>Messages</h2><button class="sh-link" data-to="chat">Open chat</button></div>
           <div class="inbox-card" id="homeInboxList"></div>
-        </div>
+        </section>
       </section>
 
       <!-- CHARACTER PROFILE -->
