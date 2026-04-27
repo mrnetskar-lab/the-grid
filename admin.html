@@ -96,6 +96,7 @@
       <button data-sec="notepad">📝 Notepad</button>
       <button data-sec="comfy">🎨 ComfyUI</button>
       <button data-sec="studio">🤖 Wendy</button>
+      <button data-sec="ailab">🧠 AI Lab</button>
     </nav>
   </aside>
   <main class="content">
@@ -360,6 +361,56 @@
       </iframe>
     </section>
 
+    <section id="ailab" class="section">
+      <h2>🧠 AI Lab</h2>
+      <details id="alConfigDetails" open>
+        <summary>Provider config</summary>
+        <div class="row" style="margin-top:12px">
+          <div class="field full"><label>Base URL</label><input id="al_url" placeholder="https://your-vast-endpoint/v1 — leave empty to use default provider"/></div>
+          <div class="field"><label>API Key</label><input id="al_key" type="password" placeholder="API key for custom endpoint"/></div>
+          <div class="field"><label>Model</label><input id="al_model" placeholder="e.g. cognitivecomputations/dolphin-mistral-7b"/></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <button class="btn secondary" id="al_saveConfig" type="button">Save config</button>
+          <span id="al_configStatus" style="font-size:12px;margin-left:4px"></span>
+        </div>
+      </details>
+      <div style="display:flex;gap:8px;margin:16px 0 12px">
+        <button class="chip" id="al_tab_chat" type="button">Chat</button>
+        <button class="chip" id="al_tab_gen" type="button">Character Generator</button>
+      </div>
+      <div id="al_pane_chat">
+        <div class="field" style="margin-bottom:8px">
+          <label>System prompt (optional)</label>
+          <textarea id="al_sysPrompt" style="min-height:55px" placeholder="Leave empty for raw AI access…"></textarea>
+        </div>
+        <div class="bubble-wrap" id="al_chatList"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="al_chatInput" placeholder="Say something…" style="flex:1"/>
+          <button class="btn" id="al_send" type="button">Send</button>
+          <button class="btn secondary" id="al_clear" type="button">Clear</button>
+        </div>
+        <div class="status" id="al_chatStatus"></div>
+      </div>
+      <div id="al_pane_gen" style="display:none">
+        <div class="row">
+          <div class="field"><label>Name</label><input id="cg_name" placeholder="e.g. Luna"/></div>
+          <div class="field"><label>Color</label><input id="cg_color" type="color" value="#e879f9"/></div>
+          <div class="field"><label>Status</label><select id="cg_status"><option>ONLINE</option><option>OBSERVANT</option><option>LISTENING</option><option>UNSTABLE</option></select></div>
+          <div class="field full"><label>Archetype / personality</label><textarea id="cg_archetype" style="min-height:65px" placeholder="e.g. A former hacker who burned out and went quiet. Dry wit, deep loyalty, never asks for help."></textarea></div>
+          <div class="field full"><label>Relationship to user</label><textarea id="cg_relation" style="min-height:65px" placeholder="e.g. Old collaborator. You've worked together but drifted apart. She's cautious about reconnecting."></textarea></div>
+          <div class="field full"><label>Extra notes (optional)</label><textarea id="cg_notes" style="min-height:45px" placeholder="Visual references, voice notes, any other details…"></textarea></div>
+        </div>
+        <button class="btn" id="al_generate" type="button" style="margin-top:8px">Generate character</button>
+        <div class="status" id="al_genStatus"></div>
+        <pre class="mono" id="al_genOut" style="margin-top:12px;min-height:60px;white-space:pre-wrap;word-break:break-word"></pre>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn secondary" id="al_importGen" type="button" style="display:none">↑ Import to Characters</button>
+          <button class="btn secondary" id="al_copyGen" type="button" style="display:none">Copy JSON</button>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 <script>
@@ -535,6 +586,19 @@ async function captureAndNote(){
 }
 function uploadPromptTxt(file){const fr=new FileReader(); fr.onload=()=>{const txt=String(fr.result||''); const t=$('promptTarget').value==='focused'?focusedField:({subject:'pb_subject',atmosphere:'pb_atmo',scenery:'pb_scenery',style:'pb_style',quality:'pb_quality'}[$('promptTarget').value]||'pb_subject'); $(t).value+=($(t).value?'\n':'')+txt; updatePrompt();}; fr.readAsText(file);}
 async function runCmd(){const d=await jfetch('/api/admin/commands',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:$('cmdSel').value})}); $('cmdOut').textContent=JSON.stringify(d,null,2);} 
+// ── AI LAB ───────────────────────────────────────────────────────────────────
+const AL_KEY='grid_ailab_config';
+let alChat=[];
+function alLoadConfig(){try{return JSON.parse(localStorage.getItem(AL_KEY)||'{}');}catch{return {};}}
+function alSaveConfig(){const cfg={url:$('al_url').value.trim(),key:$('al_key').value.trim(),model:$('al_model').value.trim()};localStorage.setItem(AL_KEY,JSON.stringify(cfg));const s=$('al_configStatus');s.textContent='Saved';s.style.color='var(--ok)';setTimeout(()=>{s.textContent='';},2000);}
+function alInitConfig(){const cfg=alLoadConfig();$('al_url').value=cfg.url||'';$('al_key').value=cfg.key||'';$('al_model').value=cfg.model||'';}
+function alSwitchPane(p){$('al_pane_chat').style.display=p==='chat'?'':'none';$('al_pane_gen').style.display=p==='gen'?'':'none';$('al_tab_chat').classList.toggle('active',p==='chat');$('al_tab_gen').classList.toggle('active',p==='gen');}
+function alRenderChat(){const l=$('al_chatList');l.innerHTML='';alChat.forEach(m=>{const d=document.createElement('div');d.className=`bubble ${m.role==='user'?'u':'a'}`;d.textContent=m.content;l.appendChild(d);});l.scrollTop=l.scrollHeight;}
+async function alSend(){const text=$('al_chatInput').value.trim();if(!text)return;const cfg=alLoadConfig();alChat.push({role:'user',content:text});alRenderChat();$('al_chatInput').value='';const s=$('al_chatStatus');s.textContent='…';s.style.color='var(--muted)';const body={messages:alChat,systemPrompt:$('al_sysPrompt').value.trim()||undefined,providerUrl:cfg.url||undefined,providerKey:cfg.key||undefined,model:cfg.model||undefined};const r=await fetch('/api/admin/ai-chat',{method:'POST',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!d.ok){s.textContent=d.error;s.style.color='var(--bad)';return;}alChat.push({role:'assistant',content:d.reply});alRenderChat();s.textContent='';}
+function alClear(){alChat=[];alRenderChat();const s=$('al_chatStatus');s.textContent='Cleared';s.style.color='var(--ok)';}
+const CG_SYSTEM=`You are a character creator for THE GRID — a dark cyberpunk invite-only social network.\nCharacters feel real, damaged, magnetic. Each one hides something.\n\nGenerate a character JSON in exactly this format:\n{\n  "id": "lowercase-hyphen",\n  "name": "Display Name",\n  "color": "#hexcolor",\n  "status": "ONLINE",\n  "active": true,\n  "route": "SHORT PHRASE",\n  "bio": "1-2 sentence atmospheric bio.",\n  "greeting": "First message. Natural, slightly guarded. 1-2 sentences.",\n  "identity": "Internal AI spec: who she is, emotional baseline, how she speaks. 3-5 sentences.",\n  "camera_look": "Visual description for image gen. 1-2 sentences.",\n  "anchors": {\n    "contradiction": "Core tension.",\n    "weakness": "What she cannot hide.",\n    "rule": "One thing she will never do."\n  },\n  "warmth": 5,\n  "openness": 4,\n  "response_length": "medium",\n  "voice_guide": "AI tone instructions. Speech patterns, things to avoid."\n}\nOutput ONLY valid JSON. No markdown fences. No explanation.`;
+async function alGenerate(){const name=$('cg_name').value.trim();const archetype=$('cg_archetype').value.trim();const relation=$('cg_relation').value.trim();const notes=$('cg_notes').value.trim();const color=$('cg_color').value;const status=$('cg_status').value;if(!archetype){const s=$('al_genStatus');s.textContent='Fill in archetype first';s.style.color='var(--bad)';return;}const prompt=[name?`Name: ${name}`:'',`Color: ${color}`,`Status: ${status}`,`Archetype: ${archetype}`,relation?`Relationship to user: ${relation}`:'',notes?`Notes: ${notes}`:''].filter(Boolean).join('\n');const s=$('al_genStatus');s.textContent='Generating…';s.style.color='var(--muted)';$('al_generate').disabled=true;$('al_genOut').textContent='';$('al_importGen').style.display='none';$('al_copyGen').style.display='none';const cfg=alLoadConfig();const body={messages:[{role:'user',content:prompt}],systemPrompt:CG_SYSTEM,providerUrl:cfg.url||undefined,providerKey:cfg.key||undefined,model:cfg.model||undefined};try{const r=await fetch('/api/admin/ai-chat',{method:'POST',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!d.ok){s.textContent=d.error;s.style.color='var(--bad)';return;}$('al_genOut').textContent=d.reply;s.textContent='Generated ✓';s.style.color='var(--ok)';$('al_importGen').style.display='';$('al_copyGen').style.display='';}catch(e){s.textContent=e.message;s.style.color='var(--bad)';}finally{$('al_generate').disabled=false;}}
+function alImportGen(){try{const json=JSON.parse($('al_genOut').textContent);fill(json);section('characters');stat('charStatus','Imported from AI Lab');}catch{const s=$('al_genStatus');s.textContent='Invalid JSON — edit before importing';s.style.color='var(--bad)';}}
 // ── NOTEPAD ──────────────────────────────────────────────────────────────────
 const NP_KEY='grid_notepad';
 let npState={notes:[],active:0};
@@ -639,6 +703,17 @@ function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF;
   $('npDelete').onclick=npDelete;
   $('npTitle').oninput=npSaveCurrent;
   $('npBody').oninput=npSaveCurrent;
+  // AI Lab
+  alInitConfig(); alSwitchPane('chat');
+  $('al_saveConfig').onclick=alSaveConfig;
+  $('al_tab_chat').onclick=()=>alSwitchPane('chat');
+  $('al_tab_gen').onclick=()=>alSwitchPane('gen');
+  $('al_chatInput').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();alSend().catch(err=>{const s=$('al_chatStatus');s.textContent=err.message;s.style.color='var(--bad)';});}};
+  $('al_send').onclick=()=>alSend().catch(err=>{const s=$('al_chatStatus');s.textContent=err.message;s.style.color='var(--bad)';});
+  $('al_clear').onclick=alClear;
+  $('al_generate').onclick=()=>alGenerate().catch(err=>{const s=$('al_genStatus');s.textContent=err.message;s.style.color='var(--bad)';});
+  $('al_importGen').onclick=alImportGen;
+  $('al_copyGen').onclick=()=>navigator.clipboard.writeText($('al_genOut').textContent);
 }
 
 async function checkWatcherStatus(){

@@ -7,6 +7,8 @@ import multer from 'multer';
 import archiver from 'archiver';
 import { fileURLToPath } from 'url';
 import { getLooks, setLook, patchLookDefaultInSource, runFalComfyWorkflow } from '../services/CameraService.js';
+import OpenAI from 'openai';
+import { openai as defaultOpenai, activeModel as defaultActiveModel } from '../services/openaiClient.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, '../..');
@@ -445,6 +447,40 @@ router.get('/backend-status', async (_req, res) => {
 router.post('/launch-comfy', (req, res) => {
   const out = launchComfyUI();
   return res.status(out.status).json(out.body);
+});
+
+router.post('/ai-chat', auth, async (req, res) => {
+  const { messages, systemPrompt, providerUrl, providerKey, model } = req.body || {};
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ ok: false, error: 'messages array required' });
+  }
+  try {
+    let client;
+    let modelToUse;
+    if (providerUrl && providerKey) {
+      client = new OpenAI({ apiKey: providerKey, baseURL: providerUrl });
+      modelToUse = model || 'default';
+    } else {
+      if (!defaultOpenai) return res.status(503).json({ ok: false, error: 'No AI provider configured — add OPENROUTER_API_KEY or similar to .env' });
+      client = defaultOpenai;
+      modelToUse = model || defaultActiveModel;
+    }
+    const chatMessages = [];
+    if (systemPrompt) chatMessages.push({ role: 'system', content: String(systemPrompt) });
+    for (const m of messages) {
+      if (m?.role && m?.content) chatMessages.push({ role: m.role, content: String(m.content) });
+    }
+    const completion = await client.chat.completions.create({
+      model: modelToUse,
+      messages: chatMessages,
+      max_tokens: 2048,
+      temperature: 0.85,
+    });
+    const reply = completion.choices[0]?.message?.content || '';
+    return res.json({ ok: true, reply });
+  } catch (err) {
+    return res.json({ ok: false, error: err.message });
+  }
 });
 
 export default router;
