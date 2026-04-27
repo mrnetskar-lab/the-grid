@@ -196,9 +196,11 @@ function rememberMessage(character,text,role='assistant'){
 function relative(ts){if(!ts)return '';const diff=Math.max(1,Math.floor((Date.now()-ts)/60000));if(diff<60)return`${diff}m`;const h=Math.floor(diff/60);if(h<24)return`${h}h`;return`${Math.floor(h/24)}d`;}
 function markInboxReadAll(){Object.keys(CHARACTERS).forEach(id=>localStorage.setItem(`v_read_${id}`,String(Date.now())));renderInboxes();}
 
+function escapeHTML(v=''){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+
 function renderInboxes(){
   const rows=Object.keys(CHARACTERS).map(id=>{const entry=messageState[id]||{messages:[]};const last=entry.messages[entry.messages.length-1];return{id,last,lastAt:entry.lastAt||0};}).sort((a,b)=>b.lastAt-a.lastAt);
-  const markup=rows.filter(r=>r.last).map(r=>{const c=CHARACTERS[r.id];const readTs=Number(localStorage.getItem(`v_read_${r.id}`)||'0');const unread=r.lastAt>readTs;const preview=(r.last?.text||'').slice(0,60);return`<div class="inbox-row" data-thread="${r.id}" data-to="chat"><img src="${c.photo}" class="inbox-av" alt="${c.name}"/><div class="inbox-body"><div class="inbox-name">${unread?'<span class="inbox-unread"></span>':''}${c.name}</div><div class="inbox-preview">${preview||'...'}</div></div><span class="inbox-meta">${relative(r.lastAt)}</span></div>`;}).join('');
+  const markup=rows.filter(r=>r.last).map(r=>{const c=CHARACTERS[r.id];const readTs=Number(localStorage.getItem(`v_read_${r.id}`)||'0');const unread=r.lastAt>readTs;const preview=escapeHTML((r.last?.text||'').slice(0,60));return`<div class="inbox-row" data-thread="${r.id}" data-to="chat"><img src="${c.photo}" class="inbox-av" alt="${escapeHTML(c.name)}"/><div class="inbox-body"><div class="inbox-name">${unread?'<span class="inbox-unread"></span>':''}${escapeHTML(c.name)}</div><div class="inbox-preview">${preview||'...'}</div></div><span class="inbox-meta">${relative(r.lastAt)}</span></div>`;}).join('');
   const empty='<div style="padding:18px;color:var(--text-2)">No messages yet — start a conversation</div>';
   const home=document.getElementById('homeInboxList');const inbox=document.getElementById('inboxList');
   if(home)home.innerHTML=markup||empty;
@@ -230,8 +232,6 @@ menuBtn?.addEventListener('click',()=>{sidebar?.classList.contains('open')?close
 sbg?.addEventListener('click',closeSb);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSb();});
 const sv=localStorage.getItem('v_view');if(sv&&views[sv])goTo(sv);else toggleDrawer(false);
-const lastThread=localStorage.getItem('v_last_thread');
-if(lastThread){const item=document.querySelector(`.drawer-item[data-thread="${lastThread}"]`);if(item)item.click();}
 
 // ── DISCOVER FILTERS ──────────────────────────────────────────────────────────
 document.querySelectorAll('.fpill').forEach(p=>{p.addEventListener('click',()=>{document.querySelectorAll('.fpill').forEach(x=>x.classList.remove('active'));p.classList.add('active');const f=p.dataset.f;document.querySelectorAll('.discover-card').forEach(c=>c.classList.toggle('hidden',f!=='all'&&!(c.dataset.tags||'').includes(f)));});});
@@ -311,12 +311,19 @@ document.querySelectorAll('.drawer-item').forEach(item=>{item.addEventListener('
   }
   fetch(`/api/characters/${thread}/history`)
     .then(r=>r.json()).then(d=>{
-      if(d.ok&&d.messages&&d.messages.length){
+      const hasBackend=d.ok&&d.messages&&d.messages.length>0;
+      const hasLocal=messageState[thread]?.messages?.length>0;
+      if(hasBackend){
         d.messages.forEach(m=>{addMsg(m.role==='user'?'mine':'theirs',String(m.content||''),m.role==='user'?'':curAvSrc);});
-        if(!(messageState[thread]?.lastAt)){const last=d.messages[d.messages.length-1];if(last){const slot={messages:[{text:String(last.content||''),role:last.role,ts:Date.now()}],lastAt:Date.now()};messageState[thread]=slot;localStorage.setItem('v_message_state',JSON.stringify(messageState));renderInboxes();}}
+        if(!messageState[thread]?.lastAt){const last=d.messages[d.messages.length-1];if(last){const slot={messages:[{text:String(last.content||''),role:last.role,ts:Date.now()}],lastAt:Date.now()};messageState[thread]=slot;localStorage.setItem('v_message_state',JSON.stringify(messageState));renderInboxes();}}
       }
-    }).catch(()=>{}).finally(()=>{_showGreeting();});
+      if(!hasBackend&&!hasLocal){_showGreeting();}
+    }).catch(()=>{if(!messageState[thread]?.messages?.length)_showGreeting();});
 });});
+
+// Restore last thread after listeners are registered
+const lastThread=localStorage.getItem('v_last_thread');
+if(lastThread){const item=document.querySelector(`.drawer-item[data-thread="${lastThread}"]`);if(item)item.click();}
 
 // Image attach
 const imgAttachInput=document.getElementById('imgAttachInput');
@@ -348,7 +355,7 @@ document.getElementById('chatForm')?.addEventListener('submit',async e=>{
   try{
     let reply;
     if(hasImg&&!txt){await new Promise(r=>setTimeout(r,900+Math.random()*600));reply=IMG_REACTIONS[Math.floor(Math.random()*IMG_REACTIONS.length)];}
-    else{const msgText=hasImg?`[sent an image] ${txt}`:txt;const res=await fetch(`/api/characters/${curThread||'hazel'}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:msgText})});const data=await res.json();reply=(data.reply||data.result||'…').trim();}
+    else{const msgText=hasImg?`[sent an image] ${txt}`:txt;const res=await fetch(`/api/characters/${curThread||'hazel'}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:msgText})});const data=await res.json();if(!res.ok||data.ok===false)throw new Error(data.error||`Chat failed: ${res.status}`);reply=(data.reply||data.result||'…').trim();}
     tr.remove();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');
   }catch{tr.remove();addMsg('theirs','One moment…',curAvSrc);rememberMessage(curThread,'One moment…','assistant');}
   if(sendBtn)sendBtn.disabled=false;chatInput?.focus();
@@ -421,12 +428,10 @@ document.getElementById('userNameSave')?.addEventListener('click',()=>{
   const el=document.getElementById('userDisplayName');if(el)el.textContent=val;
   showToast('Name updated');
 });
-document.getElementById('userClearAll')?.addEventListener('click',()=>{
+document.getElementById('userClearAll')?.addEventListener('click',async()=>{
   if(!confirm('Clear all chat history with every character?'))return;
-  Object.keys(CHARACTERS).forEach(id=>{
-    fetch(`/api/characters/${id}/history`,{method:'DELETE'});
-    delete messageState[id];
-  });
+  await Promise.allSettled(Object.keys(CHARACTERS).map(id=>fetch(`/api/characters/${id}/history`,{method:'DELETE'})));
+  Object.keys(CHARACTERS).forEach(id=>delete messageState[id]);
   localStorage.setItem('v_message_state',JSON.stringify(messageState));
   renderInboxes();
   showToast('All history cleared');
@@ -436,17 +441,21 @@ document.getElementById('userClearAll')?.addEventListener('click',()=>{
 document.getElementById('userAvatarEdit')?.addEventListener('click',()=>document.getElementById('userAvatarInput')?.click());
 document.getElementById('userAvatarInput')?.addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    const src=ev.target.result;
-    const avatarEl=document.getElementById('userAvatar');
-    if(avatarEl)avatarEl.src=src;
-    const topbarAv=document.querySelector('#myProfileBtn .profile-av');
-    if(topbarAv)topbarAv.src=src;
-    localStorage.setItem('v_user_avatar',src);
+  const img=new Image();
+  const objectUrl=URL.createObjectURL(f);
+  img.onload=()=>{
+    const MAX=200;
+    const scale=Math.min(1,MAX/Math.max(img.width,img.height));
+    const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(objectUrl);
+    const src=c.toDataURL('image/jpeg',0.82);
+    const avatarEl=document.getElementById('userAvatar');if(avatarEl)avatarEl.src=src;
+    const topbarAv=document.querySelector('#myProfileBtn .profile-av');if(topbarAv)topbarAv.src=src;
+    try{localStorage.setItem('v_user_avatar',src);}catch{showToast('Image too large to save locally');}
     showToast('Profile picture updated');
   };
-  reader.readAsDataURL(f);
+  img.src=objectUrl;
 });
 
 document.querySelectorAll('.discover-card').forEach(card=>{

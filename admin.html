@@ -414,12 +414,21 @@
   </main>
 </div>
 <script>
-const KEY='grid_admin_key', DEF='velora-admin-2025', SN='grid_custom_snippets';
+const KEY='grid_admin_key', SN='grid_custom_snippets';
 const $=(id)=>document.getElementById(id); const state={chars:[],shots:[],snips:JSON.parse(localStorage.getItem(SN)||'[]'),chat:[]};
 const baseSnips=['Photorealistic portrait, ultra-detailed skin texture','35mm lens, shallow depth of field, cinematic framing','Golden hour window light, subtle highlights','Natural color grading, filmic contrast','Fine film grain, crisp focus on eyes','Moody low-key lighting, rim light','Present-day styling, believable wardrobe','Masterpiece quality, non-illustrative photography','No text, no watermark, no overlays','Realistic skin translucency, accurate anatomy'];
 let focusedField='pb_subject';
-function headers(h={}){return {'x-admin-key':localStorage.getItem(KEY)||DEF,...h};}
-async function jfetch(url,opt={}){const r=await fetch(url,{...opt,headers:headers(opt.headers||{})}); const d=await r.json(); if(!r.ok||d.ok===false) throw new Error(d.error||'request failed'); return d;}
+function headers(h={}){
+  const key=localStorage.getItem(KEY);
+  if(!key) throw new Error('Admin key not set — enter it in Settings');
+  return {'x-admin-key':key,...h};
+}
+async function jfetch(url,opt={}){
+  const r=await fetch(url,{...opt,headers:headers(opt.headers||{})});
+  const d=await readApiResponse(r);
+  if(!r.ok||d.ok===false) throw new Error(d.error||`Request failed: ${r.status}`);
+  return d;
+}
 async function readApiResponse(r){
   const ct=(r.headers.get('content-type')||'').toLowerCase();
   const raw=await r.text();
