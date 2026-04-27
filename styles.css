@@ -222,14 +222,14 @@ img{display:block;}
 .msg{display:flex;gap:6px;align-items:end;}
 .msg.mine{justify-content:flex-end;}
 .msg-av{width:26px;height:26px;border-radius:50%;flex:0 0 26px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;object-fit:cover;}
-.bubble{max-width:min(340px,68%);padding:8px 13px;border-radius:14px;font-size:.84rem;line-height:1.52;word-break:break-word;white-space:pre-wrap;}
-.bubble.theirs{background:#1e1c18;border:1px solid rgba(255,240,210,0.07);color:#ddd8c8;border-bottom-left-radius:3px;}
-.bubble.mine{background:#1e1c18;border:1px solid rgba(255,240,210,0.07);color:#ddd8c8;border-bottom-right-radius:3px;}
+.bubble{max-width:min(340px,68%);min-width:48px;padding:8px 13px;border-radius:14px;font-size:.84rem;line-height:1.52;word-break:break-word;white-space:pre-wrap;}
+.bubble.theirs{background:linear-gradient(135deg,#ddceb8,#cdb99b);border:1px solid rgba(255,235,202,0.28);color:#201915;border-bottom-left-radius:3px;}
+.bubble.mine{background:linear-gradient(135deg,#9a6667,#7d5360);border:1px solid rgba(255,205,186,0.24);color:#fff4ec;border-bottom-right-radius:3px;}
 .bubble.media{background:transparent;border:none;padding:0;overflow:hidden;border-radius:12px;}
 .bubble.media img{display:block;max-width:240px;width:100%;border-radius:12px;}
-.msg-time{font-size:.62rem;color:#5a5548;margin-top:3px;}
-.typing-wrap{display:flex;gap:6px;align-items:center;padding:9px 13px;background:#1e1c18;border:1px solid rgba(255,240,210,0.07);border-radius:14px;border-bottom-left-radius:3px;width:fit-content;}
-.tdot{width:7px;height:7px;border-radius:50%;background:var(--chat-accent,#b83468);opacity:.55;animation:tb 1.4s ease infinite;}
+.msg-time{font-size:.62rem;color:#9f948a;margin-top:3px;}
+.typing-wrap{display:flex;gap:6px;align-items:center;padding:9px 13px;background:#cdb99b;border:1px solid rgba(255,235,202,0.28);border-radius:14px;border-bottom-left-radius:3px;width:fit-content;}
+.tdot{width:6px;height:6px;border-radius:50%;background:#5a3a2a;opacity:.5;animation:tb 1.4s ease infinite;}
 .tdot:nth-child(2){animation-delay:.18s;opacity:.7;}
 .tdot:nth-child(3){animation-delay:.36s;opacity:.9;}
 @keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.6}30%{transform:translateY(-6px);opacity:1;}}
