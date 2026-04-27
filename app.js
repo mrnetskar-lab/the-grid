@@ -1,7 +1,7 @@
 // ── CHARACTERS — single source of truth ──────────────────────────────────────
 const CHARACTERS = {
 hazel:{
-  id:'hazel',name:'Hazel',status:'OBSERVANT',color:'#b83468',accent:'#b83468',
+  id:'hazel',name:'Hazel',status:'OBSERVANT',color:'#b83468',accent:'#9f4f6f',
   route:'After the pause',mood:'Observant',style:'Slow burn',
   bio:'Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.',
   bioBrief:'Warm but withholding. She notices everything.',
@@ -14,7 +14,7 @@ hazel:{
   discoverTags:'romantic mystery',discoverTag:'Observant',discoverBlurb:'She notices before she speaks.'
 },
 nina:{
-  id:'nina',name:'Nina',status:'ONLINE',color:'#ca5f8a',accent:'#9f67ff',
+  id:'nina',name:'Nina',status:'ONLINE',color:'#ca5f8a',accent:'#7f74b5',
   route:'The return',mood:'Familiar',style:'Warm',
   bio:'Warm, easy, and quietly funny. You knew each other before — years of silence, but the closeness never fully left. She asks real questions and remembers the answers.',
   bioBrief:'Warm, easy, and quietly funny. You knew each other before.',
@@ -27,7 +27,7 @@ nina:{
   discoverTags:'romantic',discoverTag:'Familiar',discoverBlurb:'Warm, easy, and quietly funny.'
 },
 iris:{
-  id:'iris',name:'Iris',status:'LISTENING',color:'#7982cc',accent:'#a855f7',
+  id:'iris',name:'Iris',status:'LISTENING',color:'#7982cc',accent:'#6e78ad',
   route:'Low signal',mood:'Distant',style:'Minimal',
   bio:'Deeply attentive yet almost impossible to reach. She goes silent sometimes with no warning. When she does say something real, it lands with unexpected weight.',
   bioBrief:'Deeply attentive yet almost impossible to reach.',
@@ -40,7 +40,7 @@ iris:{
   discoverTags:'silent mystery',discoverTag:'Watcher',discoverBlurb:'When she speaks, it lands.'
 },
 vale:{
-  id:'vale',name:'Vale',status:'UNSTABLE',color:'#d83b72',accent:'#22d3ee',
+  id:'vale',name:'Vale',status:'UNSTABLE',color:'#d83b72',accent:'#5d94a3',
   route:'Brief window',mood:'Volatile',style:'Intense',
   bio:'Unpredictable and brief. She connects fast and hard, then closes just as fast. Electric when present. She does not apologize for disappearing.',
   bioBrief:'Unpredictable and brief. Electric when present.',
