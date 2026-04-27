@@ -222,9 +222,9 @@ img{display:block;}
 .msg{display:flex;gap:8px;align-items:end;}
 .msg.mine{justify-content:flex-end;}
 .msg-av{width:30px;height:30px;border-radius:50%;flex:0 0 30px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;object-fit:cover;}
-.bubble{max-width:min(520px,82%);padding:13px 18px;border-radius:18px;font-size:.9rem;line-height:1.62;}
-.bubble.theirs{background:var(--surface-3);border:1px solid var(--border-2);color:var(--text);border-bottom-left-radius:4px;}
-.bubble.mine{background:transparent;border:2px solid var(--chat-accent,var(--accent));color:var(--text);border-bottom-right-radius:4px;}
+.bubble{max-width:min(420px,76%);padding:9px 14px;border-radius:16px;font-size:.86rem;line-height:1.55;}
+.bubble.theirs{background:var(--surface-3);border:1px solid var(--border-2);color:var(--text);border-bottom-left-radius:3px;}
+.bubble.mine{background:linear-gradient(135deg,var(--chat-accent,var(--accent)),color-mix(in srgb,var(--chat-accent,var(--accent)) 70%,#000));border:none;color:#fff;border-bottom-right-radius:3px;box-shadow:0 2px 12px rgba(0,0,0,0.3);}
 .bubble.media{background:transparent;border:none;padding:0;overflow:hidden;border-radius:12px;}
 .bubble.media img{display:block;max-width:260px;width:100%;border-radius:12px;}
 .msg-time{font-size:.68rem;color:var(--text-3);margin-top:3px;}

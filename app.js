@@ -146,6 +146,9 @@ menuBtn.addEventListener('click',()=>{sidebar.classList.contains('open')?closeSb
 sbg.addEventListener('click',closeSb);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSb();});
 const sv=localStorage.getItem('v_view');if(sv&&views[sv])goTo(sv);else toggleDrawer(false);
+// Restore last active thread on reload
+const lastThread=localStorage.getItem('v_last_thread');
+if(lastThread){const item=document.querySelector(`.drawer-item[data-thread="${lastThread}"]`);if(item)item.click();}
 
 // Discover filters
 document.querySelectorAll('.fpill').forEach(p=>{p.addEventListener('click',()=>{document.querySelectorAll('.fpill').forEach(x=>x.classList.remove('active'));p.classList.add('active');const f=p.dataset.f;document.querySelectorAll('.discover-card').forEach(c=>c.classList.toggle('hidden',f!=='all'&&!(c.dataset.tags||'').includes(f)));});});
@@ -213,6 +216,7 @@ const thread=item.dataset.thread;
 const imgSrc=item.querySelector('img')?.src||'';
 chatAv.src=imgSrc;chatName.textContent=item.dataset.name;chatStatus.textContent=item.dataset.status;
 curPersona=item.dataset.p;curAvSrc=imgSrc;curThread=thread;
+localStorage.setItem('v_last_thread',thread);
 applyCharAccent(thread);
 chatMsgs.innerHTML='';updateCharPanel(thread);
 goTo('chat');
@@ -676,11 +680,8 @@ try{
 btn.disabled=false;
 });
 
-// Video pill → coming soon
-document.querySelectorAll('.chat-action-pill')[1]?.addEventListener('click',()=>showToast('Video is coming soon'));
-
-// Scene pill → open scene builder
-document.querySelectorAll('.chat-action-pill')[2]?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.add('open'));
+// Scene pill → open scene builder (index 1 now that Video is removed)
+document.querySelectorAll('.chat-action-pill')[1]?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.add('open'));
 document.getElementById('sceneClose')?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.remove('open'));
 document.getElementById('sceneBackdrop')?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.remove('open'));
 
@@ -771,5 +772,23 @@ document.getElementById('view-gallery')?.addEventListener('click',e=>{
   const img=tile.querySelector('img');
   const fallbackName=tile.querySelector('.g-name')?.textContent||'';
   if(img)openLightbox(img.src,tile.dataset.name||fallbackName);
+});
+
+// Profile gallery tiles → lightbox
+document.getElementById('view-profile')?.addEventListener('click',e=>{
+  const tile=e.target.closest('.profile-gallery-tile');
+  if(!tile)return;
+  const img=tile.querySelector('img');
+  const name=document.getElementById('profileName')?.textContent||'';
+  if(img)openLightbox(img.src,name);
+});
+
+// Chat panel gallery tiles → lightbox
+document.getElementById('charPanel')?.addEventListener('click',e=>{
+  const tile=e.target.closest('.cp-gallery-tile');
+  if(!tile)return;
+  const img=tile.querySelector('img');
+  const name=document.getElementById('cpName')?.textContent?.replace('♥','').trim()||'';
+  if(img)openLightbox(img.src,name);
 });
 
