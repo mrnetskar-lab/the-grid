@@ -325,37 +325,20 @@ document.querySelectorAll('.drawer-item').forEach(item=>{item.addEventListener('
 const lastThread=localStorage.getItem('v_last_thread');
 if(lastThread){const item=document.querySelector(`.drawer-item[data-thread="${lastThread}"]`);if(item)item.click();}
 
-// Image attach
-const imgAttachInput=document.getElementById('imgAttachInput');
-const imgAttachPreview=document.getElementById('imgAttachPreview');
-const imgAttachThumb=document.getElementById('imgAttachThumb');
-let pendingImg=null;
-document.getElementById('imgAttachBtn')?.addEventListener('click',()=>imgAttachInput?.click());
-document.getElementById('imgAttachClear')?.addEventListener('click',()=>{pendingImg=null;if(imgAttachInput)imgAttachInput.value='';if(imgAttachPreview)imgAttachPreview.style.display='none';});
-imgAttachInput?.addEventListener('change',()=>{
-  const f=imgAttachInput.files[0];if(!f)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{pendingImg=ev.target.result;if(imgAttachThumb)imgAttachThumb.src=pendingImg;if(imgAttachPreview)imgAttachPreview.style.display='block';};
-  reader.readAsDataURL(f);
-});
-
-const IMG_REACTIONS=["...I see you.","That's a good look.","Sent me something. Noted.","*looks at it longer than expected*","Okay. That one stays with me.","You really sent that.","*saves it without saying why*"];
-
 document.getElementById('chatForm')?.addEventListener('submit',async e=>{
   e.preventDefault();
   const txt=chatInput?.value.trim();
-  const hasImg=!!pendingImg;
-  if(!txt&&!hasImg)return;
+  if(!txt)return;
   gainSparks(2,'+2 sparks for chatting');
   if(!localStorage.getItem(`v_first_chat_${curThread}`)){localStorage.setItem(`v_first_chat_${curThread}`,'1');gainSparks(25,`+25 sparks first chat with ${CHARACTERS[curThread]?.name||curThread}`);}
   if(chatInput)chatInput.value='';if(sendBtn)sendBtn.disabled=true;
-  if(hasImg){const imgEl=document.createElement('img');imgEl.src=pendingImg;imgEl.alt='';addMsg('mine',null,null,imgEl);pendingImg=null;if(imgAttachInput)imgAttachInput.value='';if(imgAttachPreview)imgAttachPreview.style.display='none';}
-  if(txt){addMsg('mine',txt);rememberMessage(curThread,txt,'user');}
+  addMsg('mine',txt);rememberMessage(curThread,txt,'user');
   const tr=addTyping(curAvSrc);
   try{
-    let reply;
-    if(hasImg&&!txt){await new Promise(r=>setTimeout(r,900+Math.random()*600));reply=IMG_REACTIONS[Math.floor(Math.random()*IMG_REACTIONS.length)];}
-    else{const msgText=hasImg?`[sent an image] ${txt}`:txt;const res=await fetch(`/api/characters/${curThread||'hazel'}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:msgText})});const data=await res.json();if(!res.ok||data.ok===false)throw new Error(data.error||`Chat failed: ${res.status}`);reply=(data.reply||data.result||'…').trim();}
+    const res=await fetch(`/api/characters/${curThread||'hazel'}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
+    const data=await res.json();
+    if(!res.ok||data.ok===false)throw new Error(data.error||`Chat failed: ${res.status}`);
+    const reply=(data.reply||data.result||'…').trim();
     tr.remove();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');
   }catch{tr.remove();addMsg('theirs','One moment…',curAvSrc);rememberMessage(curThread,'One moment…','assistant');}
   if(sendBtn)sendBtn.disabled=false;chatInput?.focus();
@@ -622,24 +605,8 @@ document.querySelectorAll('.chat-btn')[0]?.addEventListener('click',()=>{
 });
 
 // ── CHAT ACTION PILLS ────────────────────────────────────────────────────────
-document.querySelectorAll('.chat-action-pill')[0]?.addEventListener('click',async()=>{
-  const btn=document.querySelectorAll('.chat-action-pill')[0];
-  const statusEl=document.getElementById('camStatus');
-  const character=curThread||'hazel';
-  btn.disabled=true;
-  if(statusEl){statusEl.style.display='block';statusEl.textContent='Generating… (~20s)';}
-  try{
-    const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood:'warm'})});
-    const data=await res.json();
-    if(!data.ok)throw new Error(data.error||'Failed');
-    const img=document.createElement('img');img.src=data.shot.path;img.alt=character;img.loading='lazy';
-    addMsg('theirs','',curAvSrc,img);
-    if(statusEl){statusEl.textContent='';statusEl.style.display='none';}
-  }catch(err){if(statusEl)statusEl.textContent='Error: '+err.message;}
-  btn.disabled=false;
-});
-
-document.querySelectorAll('.chat-action-pill')[1]?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.add('open'));
+// Scene is now index 0 (Image pill removed)
+document.querySelectorAll('.chat-action-pill')[0]?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.add('open'));
 document.getElementById('sceneClose')?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.remove('open'));
 document.getElementById('sceneBackdrop')?.addEventListener('click',()=>document.getElementById('sceneSheet')?.classList.remove('open'));
 
