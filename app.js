@@ -5,11 +5,17 @@ document.getElementById('gateEnter').addEventListener('click',()=>{localStorage.
 
 // Onboarding
 const onboard=document.getElementById('onboard');
+const onboardingGreetingFallback={
+hazel:'I noticed you were gone for a while. I didn\'t say anything.',
+nina:'It\'s strange — it feels like we never stopped talking.',
+iris:'…',
+vale:'You\'re here. Good. I have maybe five minutes.'
+};
 function _dismissOnboard(){if(onboard){onboard.style.transition='opacity .35s';onboard.style.opacity='0';setTimeout(()=>onboard.classList.add('hidden'),380);}localStorage.setItem('v_onboarded','1');}
 function skipOnboard(){_dismissOnboard();}
-function obSelect(el){document.querySelectorAll('.ob-char').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');const btn=document.getElementById('obPickBtn');if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';}const id=el.dataset.thread;const n=el.querySelector('.ob-char-name');const imgEl=el.querySelector('img');const step3title=document.getElementById('obStep3Title');if(step3title&&n)step3title.textContent=n.textContent+' is waiting.';const avatar=document.getElementById('obAvatarImg');if(avatar&&imgEl)avatar.src=imgEl.src;const obGreeting=document.getElementById('obGreeting');if(obGreeting)obGreeting.textContent='"'+(apiCharGreetings[id]||'…')+'"';}
+function obSelect(el){document.querySelectorAll('.ob-char').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');const btn=document.getElementById('obPickBtn');if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';}const id=el.dataset.thread;const n=el.querySelector('.ob-char-name');const imgEl=el.querySelector('img');const step3title=document.getElementById('obStep3Title');if(step3title&&n)step3title.textContent=n.textContent+' is waiting.';const avatar=document.getElementById('obAvatarImg');if(avatar&&imgEl)avatar.src=imgEl.src;const obGreeting=document.getElementById('obGreeting');if(obGreeting)obGreeting.textContent='"'+(apiCharGreetings[id]||onboardingGreetingFallback[id]||'…')+'"';}
 function finishOnboard(){const sel=document.querySelector('.ob-char.selected');if(sel){const t=sel.dataset.thread;if(t){const item=document.querySelector(`.drawer-item[data-thread="${t}"]`);if(item)item.click();}}_dismissOnboard();goTo('chat');}
-function obNext(step){document.querySelectorAll('.ob-step').forEach((s,i)=>s.classList.toggle('active',i===step-1));}
+function obNext(step){const target=document.getElementById(`ob${step}`);if(!target)return;document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('active'));if(step===3){const selected=document.querySelector('.ob-char.selected');if(selected)obSelect(selected);}target.classList.add('active');document.querySelectorAll('.ob-dot').forEach((dot,i)=>dot.classList.toggle('active',i===step-1));}
 if(localStorage.getItem('v_onboarded')){_dismissOnboard();}
 // clear stale message limit lock
 localStorage.removeItem('v_free_msgs');
@@ -759,12 +765,11 @@ function closeLightbox(){lightbox.classList.remove('open');}
 document.getElementById('lightboxClose').addEventListener('click',closeLightbox);
 lightbox.addEventListener('click',e=>{if(e.target===lightbox)closeLightbox();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
-document.querySelectorAll('.discover-card').forEach(card=>{
-  card.addEventListener('click',e=>{
-    if(e.target.closest('.d-btn'))return;
-    const img=card.querySelector('.d-photo img');
-    const name=card.querySelector('.d-footer h3');
-    if(img)openLightbox(img.src,name?.textContent||'');
-  });
+document.getElementById('view-gallery')?.addEventListener('click',e=>{
+  const tile=e.target.closest('.g-tile');
+  if(!tile)return;
+  const img=tile.querySelector('img');
+  const fallbackName=tile.querySelector('.g-name')?.textContent||'';
+  if(img)openLightbox(img.src,tile.dataset.name||fallbackName);
 });
 
