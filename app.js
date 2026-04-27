@@ -160,9 +160,10 @@ function spendForScene(sparkCost,pulseCost){
   showToast('Not enough sparks — earn more by chatting');
   return false;
 }
-function todayKey(){return new Date().toISOString().slice(0,10);}
-function yesterdayKey(){const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);}
-function monthKey(){const d=new Date();return`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;}
+function localDateKey(d=new Date()){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function todayKey(){return localDateKey();}
+function yesterdayKey(){const d=new Date();d.setDate(d.getDate()-1);return localDateKey(d);}
+function monthKey(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
 function trackLoginBonuses(){
   const today=todayKey();
   const last=localStorage.getItem('v_last_login');
@@ -177,12 +178,42 @@ function trackLoginBonuses(){
   if(milestone){gainSparks(milestone,`Streak bonus +${milestone} sparks`);}
 }
 function sceneUsage(){return JSON.parse(localStorage.getItem('v_scene_usage')||'{}');}
-function canGenerateScene(){return spendForScene(15,1);}
+function sceneLimitStatus(){const u=sceneUsage();return{daily:u[`d_${todayKey()}`]||0,monthly:u[`m_${monthKey()}`]||0,dailyLimit:3,monthlyLimit:20};}
+function canUseSceneQuota(){const q=sceneLimitStatus();return q.daily<q.dailyLimit&&q.monthly<q.monthlyLimit;}
+function canAffordScene(sc=15,pc=1){return currency.sparks>=sc||currency.pulses>=pc;}
+function canGenerateScene(){return canAffordScene();}
 function markSceneUsed(){
   const usage=sceneUsage();
   usage[`d_${todayKey()}`]=(usage[`d_${todayKey()}`]||0)+1;
   usage[`m_${monthKey()}`]=(usage[`m_${monthKey()}`]||0)+1;
   localStorage.setItem('v_scene_usage',JSON.stringify(usage));
+}
+
+function isJsonResponse(r){return(r.headers.get('content-type')||'').toLowerCase().includes('application/json');}
+async function apiJson(url,options={}){
+  const r=await fetch(url,options);
+  const raw=await r.text();
+  if(!raw){if(!r.ok)throw new Error(`Request failed: ${r.status}`);return{ok:true};}
+  if(!isJsonResponse(r)){const preview=raw.replace(/\s+/g,' ').slice(0,160);throw new Error(`Expected JSON from ${url}, got ${r.headers.get('content-type')||'unknown'}: ${preview}`);}
+  let data;try{data=JSON.parse(raw);}catch{throw new Error('Invalid JSON from server');}
+  if(!r.ok||data?.ok===false)throw new Error(data?.error||`Request failed: ${r.status}`);
+  return data;
+}
+async function apiDelete(url){
+  const r=await fetch(url,{method:'DELETE'});
+  if(r.status===204){if(!r.ok)throw new Error(`Delete failed: ${r.status}`);return{ok:true};}
+  const raw=await r.text();
+  if(!raw){if(!r.ok)throw new Error(`Delete failed: ${r.status}`);return{ok:true};}
+  if(!isJsonResponse(r))throw new Error(`Delete failed: expected JSON, got ${r.headers.get('content-type')||'unknown'}`);
+  let data;try{data=JSON.parse(raw);}catch{throw new Error('Invalid JSON from delete endpoint');}
+  if(!r.ok||data?.ok===false)throw new Error(data?.error||`Delete failed: ${r.status}`);
+  return data;
+}
+
+function safeAssetPath(path,fallback='/profile_pictures/hazel.png'){
+  const v=String(path||'').trim();
+  const ok=['/profile_pictures/','/outputs/','/generated/','/uploads/','/admin_notes/'];
+  return ok.some(p=>v.startsWith(p))?v:fallback;
 }
 function rememberMessage(character,text,role='assistant'){
   const now=Date.now();
@@ -214,13 +245,13 @@ function openDiscoverProfile(id){
   if(!grid||!detail)return;
   grid.style.display='none';detail.style.display='block';
   const rel=Math.max(0,Math.min(100,relationshipState[id]||0));
-  detail.innerHTML=`<div class="discover-profile-wrap" id="profile-${id}" style="border-color:${c.color}">
+  detail.innerHTML=`<div class="discover-profile-wrap" id="profile-${escapeHTML(id)}" style="border-color:${escapeHTML(c.color)}">
   <div class="discover-profile-head"><button class="btn" id="discoverBack">← Back</button><button class="btn btn-primary" id="discoverChat">Start chatting</button></div>
-  <div class="discover-profile-main"><img src="${c.photo}" alt="${c.name}"/><div>
-    <h2>${c.name}${id==='vale'?' <span style="display:inline-block;width:8px;height:8px;background:var(--accent);border-radius:50%;animation:glow 1.2s infinite"></span>':''}</h2>
-    <div style="color:var(--text-2);margin-bottom:8px">${c.route}</div><p style="margin-bottom:10px">${c.bio}</p>
+  <div class="discover-profile-main"><img src="${safeAssetPath(c.photo)}" alt="${escapeHTML(c.name)}"/><div>
+    <h2>${escapeHTML(c.name)}${id==='vale'?' <span style="display:inline-block;width:8px;height:8px;background:var(--accent);border-radius:50%;animation:glow 1.2s infinite"></span>':''}</h2>
+    <div style="color:var(--text-2);margin-bottom:8px">${escapeHTML(c.route)}</div><p style="margin-bottom:10px">${escapeHTML(c.bio)}</p>
     <div style="margin-bottom:4px;font-size:.78rem;color:var(--text-2)">Relationship status</div><div class="rel-bar"><div class="rel-fill" style="width:${rel}%"></div></div>
-    <div class="profile-gallery-grid" style="margin-top:14px">${(c.gallery||[c.photo]).slice(0,6).map(src=>`<div class="profile-gallery-tile unlocked"><img src="${src}" alt="${c.name}"/></div>`).join('')}</div>
+    <div class="profile-gallery-grid" style="margin-top:14px">${(c.gallery||[c.photo]).slice(0,6).map(src=>`<div class="profile-gallery-tile unlocked"><img src="${safeAssetPath(src)}" alt="${escapeHTML(c.name)}"/></div>`).join('')}</div>
   </div></div></div>`;
   document.getElementById('discoverBack').onclick=()=>{detail.style.display='none';grid.style.display='grid';};
   document.getElementById('discoverChat').onclick=()=>startChat(id);
@@ -242,16 +273,16 @@ const chatMsgs=document.getElementById('chatMsgs'),chatInput=document.getElement
 function updateCharPanel(thread){
   const c=CHARACTERS[thread];if(!c)return;
   const cpPhoto=document.getElementById('cpPhoto');
-  if(cpPhoto)cpPhoto.src=c.photo;
+  if(cpPhoto)cpPhoto.src=safeAssetPath(c.photo);
   const cpName=document.getElementById('cpName');
-  if(cpName)cpName.innerHTML=`${c.name} <span style="color:var(--accent);font-size:.9rem">♥</span>`;
+  if(cpName){cpName.textContent='';const t=document.createTextNode(c.name+' ');const s=document.createElement('span');s.style.cssText='color:var(--accent);font-size:.9rem';s.textContent='♥';cpName.appendChild(t);cpName.appendChild(s);}
   const cpStatus=document.getElementById('cpStatus');
   if(cpStatus)cpStatus.textContent=`● ${c.status}`;
   const cpBio=document.getElementById('cpBio');
   if(cpBio)cpBio.textContent=c.bio;
   const stats=document.getElementById('cpStats');
-  if(stats)stats.innerHTML=[{l:'Mood',v:c.mood},{l:'Style',v:c.style},{l:'Speaks',v:'English'},{l:'Route',v:c.route}].map(s=>`<div class="cp-stat"><div class="cp-stat-label">${s.l}</div><div class="cp-stat-value">${s.v}</div></div>`).join('');
-  (c.gallery||[c.photo]).slice(0,5).forEach((src,i)=>{const el=document.getElementById('cpg'+i);if(el)el.src=src;});
+  if(stats)stats.innerHTML=[{l:'Mood',v:c.mood},{l:'Style',v:c.style},{l:'Speaks',v:'English'},{l:'Route',v:c.route}].map(s=>`<div class="cp-stat"><div class="cp-stat-label">${escapeHTML(s.l)}</div><div class="cp-stat-value">${escapeHTML(s.v)}</div></div>`).join('');
+  (c.gallery||[c.photo]).slice(0,5).forEach((src,i)=>{const el=document.getElementById('cpg'+i);if(el)el.src=safeAssetPath(src);});
 }
 
 const chatAv=document.getElementById('chatAv'),chatName=document.getElementById('chatName'),chatStatus=document.getElementById('chatStatus');
@@ -289,59 +320,64 @@ function addTyping(avSrc){
   row.appendChild(tw);chatMsgs?.appendChild(row);if(chatMsgs)chatMsgs.scrollTop=chatMsgs.scrollHeight;return row;
 }
 
-document.querySelectorAll('.drawer-item').forEach(item=>{item.addEventListener('click',()=>{
+async function selectThread(thread){
+  const t=String(thread||'').trim();
+  if(!t||!CHARACTERS[t])return false;
+  const c=CHARACTERS[t];
+  const item=document.querySelector(`.drawer-item[data-thread="${CSS.escape(t)}"]`);
+  if(!item)return false;
   document.querySelectorAll('.drawer-item').forEach(x=>x.classList.toggle('active',x===item));
-  const thread=item.dataset.thread;
-  const c=CHARACTERS[thread];
-  const imgSrc=c?.photo||item.querySelector('img')?.src||'';
-  if(chatAv)chatAv.src=imgSrc;
-  if(chatName)chatName.textContent=item.dataset.name;
-  if(chatStatus)chatStatus.textContent=item.dataset.status;
-  curPersona=item.dataset.p;curAvSrc=imgSrc;curThread=thread;
-  localStorage.setItem('v_last_thread',thread);
-  applyCharAccent(thread);
+  curThread=t;curPersona=item.dataset.p||c.persona||'';curAvSrc=c.photo||item.querySelector('img')?.src||'';
+  localStorage.setItem('v_last_thread',t);
+  if(chatAv)chatAv.src=curAvSrc;
+  if(chatName)chatName.textContent=c.name||item.dataset.name||t;
+  if(chatStatus)chatStatus.textContent=item.dataset.status||c.status||'Online';
+  applyCharAccent(t);updateCharPanel(t);
   if(chatMsgs)chatMsgs.innerHTML='';
-  updateCharPanel(thread);
   goTo('chat');
   function _showGreeting(){
     const tr=addTyping(curAvSrc);
-    fetch(`/api/characters/${curThread}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__greeting__'})})
-      .then(r=>r.json()).then(d=>{tr.remove();const reply=(d.reply||CHARACTERS[curThread]?.greeting||'…').trim();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');})
-      .catch(()=>{tr.remove();const fallback=CHARACTERS[curThread]?.greeting||'…';addMsg('theirs',fallback,curAvSrc);rememberMessage(curThread,fallback,'assistant');});
+    apiJson(`/api/characters/${encodeURIComponent(t)}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__greeting__'})})
+      .then(d=>{tr.remove();const reply=(d.reply||c.greeting||'…').trim();addMsg('theirs',reply,curAvSrc);rememberMessage(t,reply,'assistant');})
+      .catch(()=>{tr.remove();addMsg('theirs',c.greeting||'…',curAvSrc);rememberMessage(t,c.greeting||'…','assistant');});
   }
-  fetch(`/api/characters/${thread}/history`)
-    .then(r=>r.json()).then(d=>{
-      const hasBackend=d.ok&&d.messages&&d.messages.length>0;
-      const hasLocal=messageState[thread]?.messages?.length>0;
-      if(hasBackend){
-        d.messages.forEach(m=>{addMsg(m.role==='user'?'mine':'theirs',String(m.content||''),m.role==='user'?'':curAvSrc);});
-        if(!messageState[thread]?.lastAt){const last=d.messages[d.messages.length-1];if(last){const slot={messages:[{text:String(last.content||''),role:last.role,ts:Date.now()}],lastAt:Date.now()};messageState[thread]=slot;localStorage.setItem('v_message_state',JSON.stringify(messageState));renderInboxes();}}
-      }
-      if(!hasBackend&&!hasLocal){_showGreeting();}
-    }).catch(()=>{if(!messageState[thread]?.messages?.length)_showGreeting();});
-});});
+  try{
+    const d=await apiJson(`/api/characters/${encodeURIComponent(t)}/history`);
+    const hasBackend=Array.isArray(d.messages)&&d.messages.length>0;
+    const hasLocal=!!messageState[t]?.messages?.length;
+    if(hasBackend){
+      d.messages.forEach(m=>{addMsg(m.role==='user'?'mine':'theirs',String(m.content||''),m.role==='user'?'':curAvSrc);});
+      if(!messageState[t]?.lastAt){const last=d.messages[d.messages.length-1];if(last){const slot={messages:[{text:String(last.content||''),role:last.role,ts:Date.now()}],lastAt:Date.now()};messageState[t]=slot;localStorage.setItem('v_message_state',JSON.stringify(messageState));renderInboxes();}}
+    }
+    if(!hasBackend&&!hasLocal)_showGreeting();
+  }catch{if(!messageState[t]?.messages?.length)_showGreeting();}
+  return true;
+}
+
+document.querySelectorAll('.drawer-item').forEach(item=>{
+  item.addEventListener('click',()=>selectThread(item.dataset.thread));
+});
 
 // Restore last thread after listeners are registered
 const lastThread=localStorage.getItem('v_last_thread');
-if(lastThread){const item=document.querySelector(`.drawer-item[data-thread="${lastThread}"]`);if(item)item.click();}
+if(lastThread){selectThread(lastThread);}
+else{const first=document.querySelector('.drawer-item')?.dataset.thread;if(first)selectThread(first);}
 
 document.getElementById('chatForm')?.addEventListener('submit',async e=>{
   e.preventDefault();
   const txt=chatInput?.value.trim();
   if(!txt)return;
-  gainSparks(2,'+2 sparks for chatting');
-  if(!localStorage.getItem(`v_first_chat_${curThread}`)){localStorage.setItem(`v_first_chat_${curThread}`,'1');gainSparks(25,`+25 sparks first chat with ${CHARACTERS[curThread]?.name||curThread}`);}
   if(chatInput)chatInput.value='';if(sendBtn)sendBtn.disabled=true;
   addMsg('mine',txt);rememberMessage(curThread,txt,'user');
   const tr=addTyping(curAvSrc);
   try{
-    const res=await fetch(`/api/characters/${curThread||'hazel'}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
-    const data=await res.json();
-    if(!res.ok||data.ok===false)throw new Error(data.error||`Chat failed: ${res.status}`);
-    const reply=(data.reply||data.result||'…').trim();
+    const data=await apiJson(`/api/characters/${encodeURIComponent(curThread||'hazel')}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
+    const reply=String(data.reply||data.result||'…').trim();
     tr.remove();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');
-  }catch{tr.remove();addMsg('theirs','One moment…',curAvSrc);rememberMessage(curThread,'One moment…','assistant');}
-  if(sendBtn)sendBtn.disabled=false;chatInput?.focus();
+    gainSparks(2);
+    if(!localStorage.getItem(`v_first_chat_${curThread}`)){localStorage.setItem(`v_first_chat_${curThread}`,'1');gainSparks(25,`+25 sparks first chat with ${CHARACTERS[curThread]?.name||curThread}`);}
+  }catch(err){console.error(err);tr.remove();addMsg('theirs','One moment…',curAvSrc);}
+  finally{if(sendBtn)sendBtn.disabled=false;chatInput?.focus();}
 });
 
 document.getElementById('cpViewProfile')?.addEventListener('click',()=>{
@@ -597,11 +633,18 @@ function showToast(msg,ms=2400){const t=document.getElementById('toast');if(!t)r
 function openPaywall(){}
 
 // ── CHAT CLEAR HISTORY ────────────────────────────────────────────────────────
-document.querySelectorAll('.chat-btn')[0]?.addEventListener('click',()=>{
-  if(!confirm('Clear chat history with '+(CHARACTERS[curThread]?.name||curThread)+'?'))return;
-  fetch(`/api/characters/${curThread}/history`,{method:'DELETE'});
-  if(chatMsgs)chatMsgs.innerHTML='';
-  showToast('Chat history cleared');
+document.querySelectorAll('.chat-btn')[0]?.addEventListener('click',async()=>{
+  const name=CHARACTERS[curThread]?.name||curThread||'this chat';
+  if(!confirm(`Clear chat history with ${name}?`))return;
+  try{
+    await apiDelete(`/api/characters/${encodeURIComponent(curThread)}/history`);
+    if(chatMsgs)chatMsgs.innerHTML='';
+    delete messageState[curThread];
+    localStorage.setItem('v_message_state',JSON.stringify(messageState));
+    localStorage.removeItem(`v_read_${curThread}`);
+    renderInboxes();
+    showToast('Chat history cleared');
+  }catch(err){console.error(err);showToast('Could not clear history');}
 });
 
 // ── CHAT ACTION PILLS ────────────────────────────────────────────────────────
@@ -617,6 +660,8 @@ document.querySelectorAll('.scene-pills').forEach(group=>{
 });
 
 document.getElementById('sceneGenerate')?.addEventListener('click',async()=>{
+  if(!canAffordScene()){showToast('Not enough sparks — earn more by chatting');return;}
+  if(!canUseSceneQuota()){const q=sceneLimitStatus();showToast(`Scene limit reached — ${q.daily}/${q.dailyLimit} today`);return;}
   const btn=document.getElementById('sceneGenerate');const status=document.getElementById('sceneStatus');
   const mood=document.querySelector('#sceneMood .scene-pill.active')?.dataset.val||'intimate';
   const setting=document.querySelector('#sceneSetting .scene-pill.active')?.dataset.val||'bedroom';
@@ -625,33 +670,39 @@ document.getElementById('sceneGenerate')?.addEventListener('click',async()=>{
   const character=curThread||'hazel';
   const charName=CHARACTERS[character]?.name||character;
   const prompt=`${style} portrait photo, ${mood} mood, ${setting} setting${detail?', '+detail:''}, ${charName} character, cinematic lighting, photorealistic, 4k, shallow depth of field`;
-  if(!canGenerateScene())return;
   btn.disabled=true;btn.textContent='Generating…';if(status)status.textContent='This may take 20–40 seconds…';
   try{
-    const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood,customPrompt:prompt})});
-    const data=await res.json();if(!data.ok)throw new Error(data.error||'Failed');
-    const img=document.createElement('img');img.src=data.shot.path;img.alt=character;img.loading='lazy';
+    const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood,customPrompt:prompt})});
+    const imgPath=safeAssetPath(data.shot?.path,null);
+    if(!imgPath)throw new Error('No image returned');
+    spendForScene(15,1);markSceneUsed();
+    const img=document.createElement('img');img.src=imgPath;img.alt=escapeHTML(character);img.loading='lazy';
     document.getElementById('sceneSheet')?.classList.remove('open');
-    addMsg('theirs','',curAvSrc,img);markSceneUsed();if(status)status.textContent='';
-  }catch(err){if(status)status.textContent='Error: '+err.message;}
-  btn.disabled=false;btn.textContent='Generate scene';
+    addMsg('theirs','',curAvSrc,img);if(status)status.textContent='';
+  }catch(err){console.error(err);if(status)status.textContent='Error: '+err.message;}
+  finally{btn.disabled=false;btn.textContent='Generate scene';}
 });
 
 document.getElementById('genBtn')?.addEventListener('click',async()=>{
+  if(!canAffordScene()){showToast('Not enough sparks — earn more by chatting');return;}
+  if(!canUseSceneQuota()){const q=sceneLimitStatus();showToast(`Scene limit reached — ${q.daily}/${q.dailyLimit} today`);return;}
   const btn=document.getElementById('genBtn');const status=document.getElementById('genStatus');
   const character=document.getElementById('genCharSelect')?.value;
   const mood=document.getElementById('genMoodSelect')?.value;
-  if(!canGenerateScene())return;
   btn.disabled=true;btn.textContent='Generating…';if(status)status.textContent='This may take 10–30 seconds…';
   try{
-    const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood})});
-    const data=await res.json();if(!data.ok)throw new Error(data.error||'Generation failed');
+    const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood})});
+    const imgPath=safeAssetPath(data.shot?.path,null);
+    if(!imgPath)throw new Error('No image returned');
+    spendForScene(15,1);markSceneUsed();
     const grid=document.querySelector('.gallery-grid');
     const tile=document.createElement('article');tile.className='g-tile';
-    tile.innerHTML=`<img src="${data.shot.path}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy"><div class="g-overlay"></div><div class="g-caption"><div class="g-name">${(character||'').charAt(0).toUpperCase()+(character||'').slice(1)}</div><div class="g-mood">AI Generated · ${mood}</div></div>`;
-    grid?.prepend(tile);markSceneUsed();if(status)status.textContent='Done!';if(btn)btn.textContent='Generate photo';
-  }catch(err){if(status)status.textContent='Error: '+err.message;if(btn)btn.textContent='Generate photo';}
-  btn.disabled=false;
+    const safeChar=escapeHTML((character||''));
+    const safeMood=escapeHTML(mood||'');
+    tile.innerHTML=`<img src="${imgPath}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy"><div class="g-overlay"></div><div class="g-caption"><div class="g-name">${safeChar.charAt(0).toUpperCase()+safeChar.slice(1)}</div><div class="g-mood">AI Generated · ${safeMood}</div></div>`;
+    grid?.prepend(tile);if(status)status.textContent='Done!';if(btn)btn.textContent='Generate photo';
+  }catch(err){console.error(err);if(status)status.textContent='Error: '+err.message;if(btn)btn.textContent='Generate photo';}
+  finally{btn.disabled=false;}
 });
 
 // ── PRESENCE ──────────────────────────────────────────────────────────────────

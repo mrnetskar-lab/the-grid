@@ -656,14 +656,18 @@ async function syncAndExport(){
   stat('noteStatus','Synced ✓  '+d.output.split('\n').pop());
 }
 
-function bind(){ $('adminKey').value=localStorage.getItem(KEY)||DEF;
+function getAdminKey(){return localStorage.getItem(KEY)||'';}
+function setAdminKey(value){const clean=String(value||'').trim();if(clean){localStorage.setItem(KEY,clean);return true;}localStorage.removeItem(KEY);return false;}
+function syncAdminKeyInputs(){const k=getAdminKey();if($('adminKey'))$('adminKey').value=k;if($('mobAdminKey'))$('mobAdminKey').value=k;}
+function bind(){
+  syncAdminKeyInputs();
   // mobile nav sheet
   const mobNav=$('mobNav'); mobNav.innerHTML=$('desktopNav').innerHTML;
   function closeMobNav(){$('mobNavSheet').classList.remove('open');$('mobNavOverlay').classList.remove('open');}
-  $('mobMenuBtn').onclick=()=>{$('mobNavSheet').classList.add('open');$('mobNavOverlay').classList.add('open');$('mobAdminKey').value=localStorage.getItem(KEY)||DEF;};
+  $('mobMenuBtn').onclick=()=>{$('mobNavSheet').classList.add('open');$('mobNavOverlay').classList.add('open');syncAdminKeyInputs();};
   $('mobNavClose').onclick=closeMobNav; $('mobNavOverlay').onclick=closeMobNav;
-  $('mobSaveKey').onclick=()=>localStorage.setItem(KEY,$('mobAdminKey').value.trim()||DEF);
-  document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{section(b.dataset.sec);closeMobNav();}); $('saveKey').onclick=()=>localStorage.setItem(KEY,$('adminKey').value.trim()||DEF);
+  $('mobSaveKey').onclick=()=>{const saved=setAdminKey($('mobAdminKey')?.value||'');syncAdminKeyInputs();stat('charStatus',saved?'Admin key saved':'Admin key cleared');};
+  document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{section(b.dataset.sec);closeMobNav();}); $('saveKey').onclick=()=>{const saved=setAdminKey($('adminKey')?.value||'');syncAdminKeyInputs();stat('charStatus',saved?'Admin key saved':'Admin key cleared');};
   $('charForm').addEventListener('submit',e=>saveChar(e).catch(err=>stat('charStatus',err.message,false))); $('newChar').onclick=()=>fill({anchors:{}}); $('exportChar').onclick=exportChar; $('importChar').onclick=()=>$('importCharFile').click(); $('importCharFile').onchange=e=>e.target.files[0]&&importChar(e.target.files[0]); $('uploadPromptTxt').onclick=()=>$('promptTxtFile').click(); $('promptTxtFile').onchange=e=>e.target.files[0]&&uploadPromptTxt(e.target.files[0]);
   ['pb_subject','pb_atmo','pb_scenery','pb_style','pb_quality','pb_cast'].forEach(id=>{$(id).addEventListener('input',updatePrompt); $(id).addEventListener('focus',()=>focusedField=id);}); document.querySelectorAll('.atmo').forEach(b=>b.onclick=()=>{$('pb_atmo').value=b.dataset.v;updatePrompt();});
   $('labCharacter').onchange=syncLabFromChar; ['fal_steps','fal_gs','fal_safe'].forEach(id=>$(id).oninput=()=>$(id+'_v').textContent=$(id).value);
