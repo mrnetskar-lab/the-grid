@@ -351,26 +351,6 @@ const persona=getPersonaFromEl(btn);
 if(persona){e.stopImmediatePropagation();startChat(persona);}
 },true);
 
-// Camera — chat header
-document.getElementById('camBtn')?.addEventListener('click',async()=>{
-const btn=document.getElementById('camBtn');
-const statusEl=document.getElementById('camStatus');
-const character=curThread||'hazel';
-btn.disabled=true;btn.textContent='⏳';
-statusEl.style.display='block';statusEl.textContent='Generating… (~20s)';
-try{
-  const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood:'warm'})});
-  const data=await res.json();
-  if(!data.ok) throw new Error(data.error||'Generation failed');
-  if(data.shot?.path){
-    const img=document.createElement('img');
-    img.src=data.shot.path;img.alt=character;img.loading='lazy';
-    addMsg('theirs','',curAvSrc,img);
-  }
-  statusEl.textContent='';statusEl.style.display='none';
-}catch(err){statusEl.textContent='Error: '+err.message;}
-btn.disabled=false;btn.textContent='📷';
-});
 
 // ── DEV MODE ──────────────────────────────────────────────────────────────────
 const DEV_CODE='dev:1337';
@@ -645,13 +625,6 @@ function showToast(msg,ms=2400){const t=document.getElementById('toast');t.textC
 
 function openPaywall(){} // disabled
 
-// ☆ favourite toggle
-document.querySelector('.chat-btn:not(#camBtn)')?.addEventListener('click',function(){
-const starred=this.textContent.trim()==='★';
-this.textContent=starred?'☆':'★';
-this.style.color=starred?'':'#b83468';
-showToast(starred?'Removed from favourites':'Added to favourites');
-});
 
 // ⋯ clear history
 document.querySelectorAll('.chat-btn')[2]?.addEventListener('click',()=>{
