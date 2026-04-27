@@ -246,6 +246,8 @@ img{display:block;}
 .chat-action-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:#6e6880;font-size:.71rem;font-weight:600;cursor:pointer;transition:.16s;letter-spacing:.02em;}
 .chat-action-pill:hover{border-color:rgba(184,52,104,0.3);color:#c4bfd0;background:rgba(184,52,104,0.06);}
 .chat-action-pill svg{opacity:.55;}
+.chat-attach-preview{padding:0 2px;}
+.chat-attach-preview img{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,0.12);}
 /* Scene builder */
 .scene-sheet{position:fixed;inset:0;z-index:500;pointer-events:none;}
 .scene-sheet.open{pointer-events:auto;}
@@ -574,5 +576,4 @@ img{display:block;}
 .nav-item:focus-visible,.drawer-item:focus-visible,.btn:focus-visible,.scene-pill:focus-visible,
 .char-card:focus-visible,.discover-card:focus-visible,button:focus-visible,
 input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
-#toast{role:status;}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important;transition-duration:.01ms !important;}}

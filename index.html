@@ -80,10 +80,10 @@
 
 
 <!-- Scene Builder -->
-<div class="scene-sheet" id="sceneSheet">
+<div class="scene-sheet" id="sceneSheet" aria-hidden="true">
   <div class="scene-backdrop" id="sceneBackdrop"></div>
   <div class="scene-inner">
-    <div class="scene-header"><h3>Scene</h3><button class="scene-close" id="sceneClose">✕</button></div>
+    <div class="scene-header"><h3>Scene</h3><button class="scene-close" id="sceneClose" aria-label="Close scene">✕</button></div>
     <div class="scene-body">
       <div class="scene-row">
         <label class="scene-label">Mood</label>
@@ -127,11 +127,11 @@
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox">
+<div class="lightbox" id="lightbox" aria-hidden="true">
   <div class="lightbox-inner">
     <img id="lightboxImg" src="" alt=""/>
     <div class="lightbox-name" id="lightboxName"></div>
-    <button class="lightbox-close" id="lightboxClose">✕</button>
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close lightbox">✕</button>
   </div>
 </div>
 
@@ -381,7 +381,15 @@
             <div class="chat-input-row">
               <div class="chat-input-wrap"><input id="chatInput" type="text" placeholder="Write a message…" autocomplete="off"/><button class="send-btn" type="submit">➤</button></div>
             </div>
+            <input type="file" id="imgAttachInput" accept="image/*" style="display:none"/>
+            <div class="chat-attach-preview" id="imgAttachPreview" style="display:none">
+              <img id="imgAttachThumb" alt="Selected image preview"/>
+            </div>
             <div class="chat-actions-row">
+              <button type="button" class="chat-action-pill" id="imgAttachBtn">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M17 3h4v4"/><path d="M10 14L21 3"/></svg>
+                Image
+              </button>
               <button type="button" class="chat-action-pill">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                 Scene
