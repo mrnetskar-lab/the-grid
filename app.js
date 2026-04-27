@@ -112,7 +112,7 @@ localStorage.removeItem('v_free_msgs');
 
 // ── NAV ───────────────────────────────────────────────────────────────────────
 const sidebar=document.getElementById('sidebar'),menuBtn=document.getElementById('menuBtn'),sbg=document.getElementById('sidebarBg');
-const views={home:document.getElementById('view-home'),discover:document.getElementById('view-discover'),inbox:document.getElementById('view-inbox'),chat:document.getElementById('view-chat'),gallery:document.getElementById('view-gallery'),profile:document.getElementById('view-profile')};
+const views={home:document.getElementById('view-home'),discover:document.getElementById('view-discover'),inbox:document.getElementById('view-inbox'),chat:document.getElementById('view-chat'),gallery:document.getElementById('view-gallery'),profile:document.getElementById('view-profile'),'user-profile':document.getElementById('view-user-profile')};
 const chatNav=document.getElementById('chatNav'),drawer=document.getElementById('threadDrawer');
 let chatOpen=false;
 
@@ -380,6 +380,47 @@ function startChat(thread){
 }
 
 document.getElementById('profileBack')?.addEventListener('click',()=>goTo(window._profileFrom||'discover'));
+
+// ── USER PROFILE ──────────────────────────────────────────────────────────────
+function openUserProfile(){
+  const name=localStorage.getItem('v_user_name')||'You';
+  const streak=Number(localStorage.getItem('v_streak_count')||'0');
+  const totalChats=Object.keys(CHARACTERS).filter(id=>messageState[id]?.messages?.length>0).length;
+  const el=n=>document.getElementById(n);
+  if(el('userDisplayName'))el('userDisplayName').textContent=name;
+  if(el('userNameInput'))el('userNameInput').value=name==='You'?'':name;
+  if(el('uStatChats'))el('uStatChats').textContent=totalChats;
+  if(el('uStatStreak'))el('uStatStreak').textContent=streak;
+  if(el('uStatSparks'))el('uStatSparks').textContent=currency.sparks;
+  const conns=el('userConnections');
+  if(conns){
+    conns.innerHTML=Object.keys(CHARACTERS).map(id=>{
+      const c=CHARACTERS[id];
+      const msgs=(messageState[id]?.messages||[]).filter(m=>m.role==='assistant').length;
+      return`<div class="user-conn-row"><div class="user-conn-av"><img src="${c.photo}" alt="${c.name}"/></div><div class="user-conn-name">${c.name}</div><div class="user-conn-msgs">${msgs} messages</div></div>`;
+    }).join('');
+  }
+  goTo('user-profile');
+}
+document.getElementById('myProfileBtn')?.addEventListener('click',openUserProfile);
+document.getElementById('userProfileBack')?.addEventListener('click',()=>goTo('home'));
+document.getElementById('userNameSave')?.addEventListener('click',()=>{
+  const val=document.getElementById('userNameInput')?.value.trim();
+  if(!val)return;
+  localStorage.setItem('v_user_name',val);
+  const el=document.getElementById('userDisplayName');if(el)el.textContent=val;
+  showToast('Name updated');
+});
+document.getElementById('userClearAll')?.addEventListener('click',()=>{
+  if(!confirm('Clear all chat history with every character?'))return;
+  Object.keys(CHARACTERS).forEach(id=>{
+    fetch(`/api/characters/${id}/history`,{method:'DELETE'});
+    delete messageState[id];
+  });
+  localStorage.setItem('v_message_state',JSON.stringify(messageState));
+  renderInboxes();
+  showToast('All history cleared');
+});
 
 document.querySelectorAll('.discover-card').forEach(card=>{
   card.addEventListener('click',e=>{

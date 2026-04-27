@@ -202,7 +202,7 @@
         <div class="tokens-pill" id="sparkCounter">⚡ <span id="sparkCount">0</span></div>
       </div>
       <div class="topbar-right">
-        <button class="btn btn-primary">
+        <button class="btn btn-primary" id="myProfileBtn">
           <img src="/profile_pictures/hazel.png" class="profile-av" alt=""/>My Profile
         </button>
       </div>
@@ -505,6 +505,50 @@
               <div id="genStatus" style="font-size:.75rem;color:var(--text-2);margin-top:8px;min-height:16px"></div>
             </div>
           </aside>
+        </div>
+      </section>
+
+      <!-- USER PROFILE -->
+      <section class="view" id="view-user-profile">
+        <button class="profile-back" id="userProfileBack">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+        <div class="user-profile-wrap">
+          <div class="user-profile-card">
+            <div class="user-avatar-wrap">
+              <div class="user-avatar">
+                <img id="userAvatar" src="/profile_pictures/hazel.png" alt=""/>
+              </div>
+              <div class="user-avatar-edit" id="userAvatarEdit">✎</div>
+            </div>
+            <div class="user-name" id="userDisplayName">You</div>
+            <div class="user-since">Member since April 2026</div>
+          </div>
+
+          <div class="user-stats-grid">
+            <div class="user-stat"><div class="user-stat-value" id="uStatChats">0</div><div class="user-stat-label">Conversations</div></div>
+            <div class="user-stat"><div class="user-stat-value" id="uStatStreak">0</div><div class="user-stat-label">Day streak</div></div>
+            <div class="user-stat"><div class="user-stat-value" id="uStatSparks">0</div><div class="user-stat-label">Sparks</div></div>
+          </div>
+
+          <div class="user-section">
+            <div class="user-section-title">Display name</div>
+            <div class="user-edit-row">
+              <input class="user-input" id="userNameInput" type="text" placeholder="Enter a name…" maxlength="32" autocomplete="off"/>
+              <button class="btn btn-primary" id="userNameSave" style="flex:0 0 auto">Save</button>
+            </div>
+          </div>
+
+          <div class="user-section">
+            <div class="user-section-title">Connections</div>
+            <div class="user-connections" id="userConnections"></div>
+          </div>
+
+          <div class="user-section">
+            <div class="user-section-title">Danger zone</div>
+            <button class="btn" id="userClearAll" style="width:100%;justify-content:center;color:#e05070;border-color:rgba(220,60,80,0.25)">Clear all chat history</button>
+          </div>
         </div>
       </section>
 
