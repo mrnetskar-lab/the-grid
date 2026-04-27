@@ -473,7 +473,7 @@ router.post('/ai-chat', auth, async (req, res) => {
     const completion = await client.chat.completions.create({
       model: modelToUse,
       messages: chatMessages,
-      max_tokens: 2048,
+      max_tokens: 600,
       temperature: 0.85,
     });
     const reply = completion.choices[0]?.message?.content || '';
