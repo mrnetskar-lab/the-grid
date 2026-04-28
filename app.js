@@ -133,7 +133,7 @@ function configureSceneModule(){
     apiJson,
     safeAssetPath,
     showToast,
-    onServerEconomy:({sparks,pulses,usage}={})=>applyServerEconomy({sparks,pulses,usage}),
+    onServerEconomy:(data={})=>applyServerEconomy({sparksRemaining:data.sparks??data.sparksRemaining,pulsesRemaining:data.pulses??data.pulsesRemaining,usage:data.usage}),
     getCurrentThread:()=>ChatCore.getCurrentThread?.()||'hazel',
     getCharacterAvatar:(thread)=>safeAssetPath(CHARACTERS[thread]?.photo,'/profile_pictures/hazel.png'),
     renderSceneResult:(img,avSrc)=>ChatCore.renderChat?.({side:'theirs',text:'',avSrc,extraEl:img})
@@ -906,7 +906,7 @@ document.querySelectorAll('.chat-btn')[0]?.addEventListener('click',async()=>{
 function openSceneSheet(){SceneCore.openScene?.();}
 function closeSceneSheet(){SceneCore.closeScene?.();}
 
-document.querySelectorAll('.chat-action-pill')[1]?.addEventListener('click',openSceneSheet);
+document.querySelectorAll('.chat-action-pill')[0]?.addEventListener('click',openSceneSheet);
 document.getElementById('sceneClose')?.addEventListener('click',closeSceneSheet);
 document.getElementById('sceneBackdrop')?.addEventListener('click',closeSceneSheet);
 
