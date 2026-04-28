@@ -133,7 +133,7 @@ function configureSceneModule(){
     apiJson,
     safeAssetPath,
     showToast,
-    onServerEconomy:applyServerEconomy,
+    onServerEconomy:({sparks,pulses,usage}={})=>applyServerEconomy({sparks,pulses,usage}),
     getCurrentThread:()=>ChatCore.getCurrentThread?.()||'hazel',
     getCharacterAvatar:(thread)=>safeAssetPath(CHARACTERS[thread]?.photo,'/profile_pictures/hazel.png'),
     renderSceneResult:(img,avSrc)=>ChatCore.renderChat?.({side:'theirs',text:'',avSrc,extraEl:img})
@@ -266,11 +266,13 @@ function updateCurrencyUI(flash=false){
 // Frontend role: receive server truth and sync local UI cache only.
 // Pattern: scene.js → POST /api/camera/generate → applyServerEconomy() → sync UI
 function applyServerEconomy(data={}){
+  const sparks = Number.isFinite(Number(data.sparksRemaining)) ? Number(data.sparksRemaining) : Number(data.sparks);
+  const pulses = Number.isFinite(Number(data.pulsesRemaining)) ? Number(data.pulsesRemaining) : Number(data.pulses);
   if(typeof currency.setFromServer==='function'){
-    currency.setFromServer({sparks:data.sparksRemaining,pulses:data.pulsesRemaining});
+    currency.setFromServer({sparks,pulses});
   }else{
-    if(Number.isFinite(Number(data.sparksRemaining)))currency.sparks=Number(data.sparksRemaining);
-    if(Number.isFinite(Number(data.pulsesRemaining)))currency.pulses=Number(data.pulsesRemaining);
+    if(Number.isFinite(sparks))currency.sparks=sparks;
+    if(Number.isFinite(pulses))currency.pulses=pulses;
     currency.save();
   }
   if(data.usage&&typeof data.usage==='object'){
@@ -304,9 +306,28 @@ function trackLoginBonuses(){
 }
 
 function safeAssetPath(path,fallback=''){
-  const v=String(path||'').trim();
-  const ok=['/profile_pictures/','/outputs/','/generated/','/uploads/'];
-  return ok.some(p=>v.startsWith(p))?v:fallback;
+  const value=String(path||'').trim();
+  if(!value)return fallback;
+
+  if(/^https?:\/\//i.test(value)){
+    return value;
+  }
+
+  const normalized=value.startsWith('/')?value:`/${value}`;
+  const allowedPrefixes=[
+    '/profile_pictures/',
+    '/images/',
+    '/outputs/',
+    '/generated/',
+    '/uploads/',
+    '/api/camera/',
+    '/api/camera/output/',
+    '/api/camera/generated/',
+    '/comfy/',
+    '/comfy/output/'
+  ];
+
+  return allowedPrefixes.some(prefix=>normalized.startsWith(prefix))?normalized:fallback;
 }
 function relative(ts){if(!ts)return '';const diff=Math.max(1,Math.floor((Date.now()-ts)/60000));if(diff<60)return`${diff}m`;const h=Math.floor(diff/60);if(h<24)return`${h}h`;return`${Math.floor(h/24)}d`;}
 function markInboxReadAll(){Object.keys(CHARACTERS).forEach(id=>localStorage.setItem(`v_read_${id}`,String(Date.now())));renderInboxes();}
@@ -773,7 +794,8 @@ document.getElementById('devNewGenerate')?.addEventListener('click',async()=>{
   btn.textContent='Generating…';if(status)status.textContent='Generating preview (~20s)…';
   try{
     const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character:id,mood})});
-    const imgPath=safeAssetPath(data.imageUrl||data.shot?.path,null);
+    const imageUrl=data.imageUrl||data.url||data.image||data.output||data.result||data.shot?.path;
+    const imgPath=safeAssetPath(imageUrl,null);
     if(!imgPath)throw new Error('No image returned');
     applyServerEconomy(data);
     const grid=document.querySelector('.gallery-grid');
@@ -903,7 +925,8 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
   btn.disabled=true;btn.textContent='Generating…';if(status)status.textContent='This may take 10–30 seconds…';
   try{
     const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood})});
-    const imgPath=safeAssetPath(data.imageUrl||data.shot?.path,null);
+    const imageUrl=data.imageUrl||data.url||data.image||data.output||data.result||data.shot?.path;
+    const imgPath=safeAssetPath(imageUrl,null);
     if(!imgPath)throw new Error('No image returned');
     applyServerEconomy(data);
     const grid=document.querySelector('.gallery-grid');

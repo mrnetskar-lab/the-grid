@@ -15,6 +15,9 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(express.static(__dirname));
 app.use('/admin_notes', express.static(__dirname + '/admin_notes'));
+app.use('/images', express.static(__dirname + '/images'));
+app.use('/outputs', express.static(__dirname + '/outputs'));
+app.use('/generated', express.static(__dirname + '/generated'));
 
 // Health check
 app.get('/api/health', (_req, res) => {
