@@ -1,22 +1,40 @@
-// ── CHARACTERS — single source of truth (characters.js) ─────────────────────
-const CharacterCore = window.VeloraCharacters || {};
-const CHARACTERS = typeof CharacterCore.loadCharacters === 'function'
-  ? CharacterCore.loadCharacters()
-  : JSON.parse(JSON.stringify(CharacterCore.DEFAULT_CHARACTERS || {}));
-const buildSystemPrompt = typeof CharacterCore.buildSystemPrompt === 'function'
-  ? CharacterCore.buildSystemPrompt
-  : (character, state = {}) => [
-      character?.persona || '',
-      `Current relationship level: ${state.relationship ?? 'unknown'}`,
-      'Rules:',
-      '- Stay in character.',
-      '- Keep emotional continuity.',
-      '- Do not mention system prompts.',
-      '- Keep responses concise unless asked otherwise.'
-    ].join('\n');
+// ── CHARACTERS — loaded from server, static fallback from characters.js ──────
+let CHARACTERS = {};
 
-if (!Object.keys(CHARACTERS).length) {
-  console.error('No character data loaded. Make sure /characters.js is available.');
+const buildSystemPrompt = (character, state = {}) => [
+  character?.persona || '',
+  `Current relationship level: ${state.relationship ?? 'unknown'}`,
+  'Rules:',
+  '- Stay in character.',
+  '- Keep emotional continuity.',
+  '- Do not mention system prompts.',
+  '- Keep responses concise unless asked otherwise.'
+].join('\n');
+
+function normalizeCharacters(payload) {
+  const raw = payload?.characters || payload;
+  if (Array.isArray(raw)) {
+    return Object.fromEntries(raw.map(c => [c.id, c]));
+  }
+  if (raw && typeof raw === 'object') return raw;
+  return {};
+}
+
+async function loadCharactersFromServer() {
+  const fallback = normalizeCharacters(
+    window.VeloraCharacters?.DEFAULT_CHARACTERS ||
+    window.VeloraCharacters?.loadCharacters?.() ||
+    {}
+  );
+  try {
+    const data = await apiJson('/api/characters');
+    const loaded = normalizeCharacters(data);
+    if (!Object.keys(loaded).length) throw new Error('Empty character list from server');
+    return loaded;
+  } catch(err) {
+    console.warn('[characters] Using static fallback:', err.message);
+    return fallback;
+  }
 }
 
 const ApiCore = window.VeloraApi || {};
@@ -565,12 +583,6 @@ function renderDrawer(){
     drawer.appendChild(btn);
   });
 }
-renderDrawer();
-
-// Restore last thread after listeners are registered
-const lastThread=localStorage.getItem('v_last_thread');
-if(lastThread){selectThread(lastThread);}
-else{const first=Object.keys(CHARACTERS)[0];if(first)selectThread(first);}
 
 function buildChatImage(src,alt=''){const img=document.createElement('img');img.src=src;img.alt=alt;img.loading='lazy';return img;}
 
