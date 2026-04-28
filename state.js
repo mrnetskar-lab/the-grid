@@ -10,8 +10,14 @@
     save() {
       localStorage.setItem('v_sparks', this.sparks);
       localStorage.setItem('v_pulses', this.pulses);
+    },
+    setFromServer(payload = {}) {
+      if (Number.isFinite(Number(payload.sparks))) this.sparks = Number(payload.sparks);
+      if (Number.isFinite(Number(payload.pulses))) this.pulses = Number(payload.pulses);
+      this.save();
     }
   };
+  // TODO(security): Eventually move ALL currency mutations to server-side APIs only.
 
   function localDateKey(d = new Date()) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -82,5 +88,10 @@
     canAffordScene,
     canGenerateScene,
     markSceneUsed
+  };
+
+  global.Velora = {
+    ...(global.Velora || {}),
+    State: global.VeloraState
   };
 })(window);
