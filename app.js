@@ -30,7 +30,13 @@ async function loadCharactersFromServer() {
     const data = await apiJson('/api/characters');
     const loaded = normalizeCharacters(data);
     if (!Object.keys(loaded).length) throw new Error('Empty character list from server');
-    return loaded;
+    // Merge: static fallback provides UI fields (photo, gallery, accent, tags, presence, etc.)
+    // Server provides narrative fields (bio, greeting, persona/identity, anchors, etc.)
+    const merged = {};
+    for (const id of Object.keys(loaded)) {
+      merged[id] = { ...(fallback[id] || {}), ...loaded[id] };
+    }
+    return merged;
   } catch(err) {
     console.warn('[characters] Using static fallback:', err.message);
     return fallback;
@@ -263,13 +269,25 @@ function updateCurrencyUI(flash=false){
 // Frontend role: receive server truth and sync local UI cache only.
 // Pattern: scene.js → POST /api/camera/generate → applyServerEconomy() → sync UI
 function applyServerEconomy(data={}){
-  const sparks = Number.isFinite(Number(data.sparksRemaining)) ? Number(data.sparksRemaining) : Number(data.sparks);
-  const pulses = Number.isFinite(Number(data.pulsesRemaining)) ? Number(data.pulsesRemaining) : Number(data.pulses);
-  if(typeof currency.setFromServer==='function'){
-    currency.setFromServer({sparks,pulses});
+  const payload={};
+
+  if(Number.isFinite(Number(data.sparksRemaining))){
+    payload.sparks=Number(data.sparksRemaining);
+  }else if(Number.isFinite(Number(data.sparks))){
+    payload.sparks=Number(data.sparks);
+  }
+
+  if(Number.isFinite(Number(data.pulsesRemaining))){
+    payload.pulses=Number(data.pulsesRemaining);
+  }else if(Number.isFinite(Number(data.pulses))){
+    payload.pulses=Number(data.pulses);
+  }
+
+  if(Object.keys(payload).length&&typeof currency.setFromServer==='function'){
+    currency.setFromServer(payload);
   }else{
-    if(Number.isFinite(sparks))currency.sparks=sparks;
-    if(Number.isFinite(pulses))currency.pulses=pulses;
+    if(Number.isFinite(payload.sparks))currency.sparks=payload.sparks;
+    if(Number.isFinite(payload.pulses))currency.pulses=payload.pulses;
     currency.save();
   }
   if(data.usage&&typeof data.usage==='object'){
@@ -917,8 +935,11 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
   try{
     const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood})});
     const imageUrl=data.imageUrl||data.url||data.image||data.output||data.result||data.shot?.path;
+    if(!imageUrl)throw new Error('Backend did not return an image URL');
     const imgPath=safeAssetPath(imageUrl,null);
-    if(!imgPath)throw new Error('No image returned');
+    const canOpenDirectly=imgPath?( /^https?:\/\//i.test(imgPath)?imgPath:`${location.origin}${imgPath}` ):'';
+    console.table({imageUrl,imgPath,canOpenDirectly});
+    if(!imgPath)throw new Error(`Rejected image path: ${imageUrl}`);
     applyServerEconomy(data);
     const grid=document.querySelector('.gallery-grid');
     const tile=document.createElement('article');tile.className='g-tile';
