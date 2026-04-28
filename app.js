@@ -126,6 +126,9 @@ function selectThread(thread){
   return ChatCore.selectThread(thread);
 }
 function configureSceneModule(){
+  // Server is authoritative for economy. Do NOT pass spendForScene or markSceneUsed.
+  // Server validates cost, deducts atomically, returns { sparksRemaining, usage }.
+  // Frontend's only role: applyServerEconomy() syncs the UI cache.
   window.VeloraSceneConfig={
     apiJson,
     safeAssetPath,
@@ -257,6 +260,11 @@ function updateCurrencyUI(flash=false){
   if(flash&&sparkCounter){sparkCounter.classList.remove('flash-spend');void sparkCounter.offsetWidth;sparkCounter.classList.add('flash-spend');}
   currency.save();
 }
+// ── SERVER ECONOMY AUTHORITY ──────────────────────────────────────────────────
+// DO NOT call spendForScene() or markSceneUsed() after server generation.
+// Server is authoritative: validates cost, deducts atomically, returns updated state.
+// Frontend role: receive server truth and sync local UI cache only.
+// Pattern: scene.js → POST /api/camera/generate → applyServerEconomy() → sync UI
 function applyServerEconomy(data={}){
   if(typeof currency.setFromServer==='function'){
     currency.setFromServer({sparks:data.sparksRemaining,pulses:data.pulsesRemaining});
@@ -267,6 +275,7 @@ function applyServerEconomy(data={}){
   }
   if(data.usage&&typeof data.usage==='object'){
     const usage=sceneUsage();
+    // Replace, not increment. Server is source of truth.
     usage[`d_${todayKey()}`]=Number(data.usage.daily)||0;
     usage[`m_${monthKey()}`]=Number(data.usage.monthly)||0;
     localStorage.setItem('v_scene_usage',JSON.stringify(usage));
