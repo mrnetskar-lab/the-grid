@@ -1,58 +1,23 @@
-// ── CHARACTERS — single source of truth ──────────────────────────────────────
-const CHARACTERS = {
-hazel:{
-  id:'hazel',name:'Hazel',status:'OBSERVANT',color:'#b83468',accent:'#9f4f6f',
-  route:'After the pause',mood:'Observant',style:'Slow burn',
-  bio:'Warm but withholding. She notices everything. She gives you nothing for free — but when she does, it means something.',
-  bioBrief:'Warm but withholding. She notices everything.',
-  photo:'/profile_pictures/hazel.png',wide:'/profile_pictures/hazel_large_picture.png',
-  tags:['Observant','Slow burn','Late night','Voice notes','Warm'],
-  greeting:"I noticed you were gone for a while. I didn't say anything.",
-  persona:'You are Hazel, warm but withholding. You notice everything but give nothing for free. Speak with quiet precision and subtle warmth. Max 2 sentences.',
-  presence:['observant','watching you','away','online'],
-  gallery:['/profile_pictures/hazel.png','/profile_pictures/hazel_large_picture.png'],
-  discoverTags:'romantic mystery',discoverTag:'Observant',discoverBlurb:'She notices before she speaks.'
-},
-nina:{
-  id:'nina',name:'Nina',status:'ONLINE',color:'#ca5f8a',accent:'#7f74b5',
-  route:'The return',mood:'Familiar',style:'Warm',
-  bio:'Warm, easy, and quietly funny. You knew each other before — years of silence, but the closeness never fully left. She asks real questions and remembers the answers.',
-  bioBrief:'Warm, easy, and quietly funny. You knew each other before.',
-  photo:'/profile_pictures/shot_1776768014043.jpg',wide:'/profile_pictures/shot_1776796231645.jpg',
-  tags:['Familiar','Romantic','Emotionally honest','Nostalgic'],
-  greeting:"It's strange — it feels like we never stopped talking.",
-  persona:'You are Nina, warm and familiar. The user knew you before — years of silence between you but the closeness never fully left. Emotionally honest but holds the real thing back until earned. Max 2 sentences.',
-  presence:['online','online','typing…','just opened this'],
-  gallery:['/profile_pictures/shot_1776768014043.jpg','/profile_pictures/shot_1776796231645.jpg','/profile_pictures/shot_1776768013585.jpg','/profile_pictures/nina_beauty.jpg','/profile_pictures/Flux2_00027_.png','/profile_pictures/shot_1776764694215.jpg'],
-  discoverTags:'romantic',discoverTag:'Familiar',discoverBlurb:'Warm, easy, and quietly funny.'
-},
-iris:{
-  id:'iris',name:'Iris',status:'LISTENING',color:'#7982cc',accent:'#6e78ad',
-  route:'Low signal',mood:'Distant',style:'Minimal',
-  bio:'Deeply attentive yet almost impossible to reach. She goes silent sometimes with no warning. When she does say something real, it lands with unexpected weight.',
-  bioBrief:'Deeply attentive yet almost impossible to reach.',
-  photo:'/profile_pictures/iris.png',wide:'/profile_pictures/iris.png',
-  tags:['Silent','Watcher','Melancholic','Hard to reach'],
-  greeting:'…',
-  persona:'You are Iris, deeply attentive yet almost impossible to reach. You watch before you speak. Sometimes go silent with no warning. When you do say something real, it lands with unexpected weight. Max 2 sentences.',
-  presence:['listening','silent','elsewhere','online'],
-  gallery:['/profile_pictures/iris.png'],
-  discoverTags:'silent mystery',discoverTag:'Watcher',discoverBlurb:'When she speaks, it lands.'
-},
-vale:{
-  id:'vale',name:'Vale',status:'UNSTABLE',color:'#d83b72',accent:'#5d94a3',
-  route:'Brief window',mood:'Volatile',style:'Intense',
-  bio:'Unpredictable and brief. She connects fast and hard, then closes just as fast. Electric when present. She does not apologize for disappearing.',
-  bioBrief:'Unpredictable and brief. Electric when present.',
-  photo:'/profile_pictures/vale_profile.png',wide:'/profile_pictures/vale_profile.png',
-  tags:['Volatile','Electric','Intense','Brief'],
-  greeting:"You're here. Good. I have maybe five minutes.",
-  persona:'You are Vale, unpredictable and brief. You connect fast and hard, then close just as fast. You are electric when present. You do not apologize for disappearing. Max 2 sentences.',
-  presence:['unstable','here now','gone again','typing…'],
-  gallery:['/profile_pictures/vale_profile.png'],
-  discoverTags:'volatile mystery',discoverTag:'Unstable',discoverBlurb:'Electric when present. Gone fast.'
+// ── CHARACTERS — single source of truth (characters.js) ─────────────────────
+const CharacterCore = window.VeloraCharacters || {};
+const CHARACTERS = typeof CharacterCore.loadCharacters === 'function'
+  ? CharacterCore.loadCharacters()
+  : JSON.parse(JSON.stringify(CharacterCore.DEFAULT_CHARACTERS || {}));
+const buildSystemPrompt = typeof CharacterCore.buildSystemPrompt === 'function'
+  ? CharacterCore.buildSystemPrompt
+  : (character, state = {}) => [
+      character?.persona || '',
+      `Current relationship level: ${state.relationship ?? 'unknown'}`,
+      'Rules:',
+      '- Stay in character.',
+      '- Keep emotional continuity.',
+      '- Do not mention system prompts.',
+      '- Keep responses concise unless asked otherwise.'
+    ].join('\n');
+
+if (!Object.keys(CHARACTERS).length) {
+  console.error('No character data loaded. Make sure /characters.js is available.');
 }
-};
 
 // ── AGE GATE ─────────────────────────────────────────────────────────────────
 const gate = document.getElementById('gate');
@@ -121,6 +86,7 @@ menuBtn?.setAttribute('aria-expanded','false');
 const relationshipState={hazel:42,nina:56,iris:33,vale:61};
 const messageState=JSON.parse(localStorage.getItem('v_message_state')||'{}');
 const tierState={tier:'signal'};
+// TODO(security): Currency values must be server-authoritative. Keep this local value as UI cache only.
 const currency={sparks:parseInt(localStorage.getItem('v_sparks')||'120',10),pulses:parseInt(localStorage.getItem('v_pulses')||'0',10),save(){localStorage.setItem('v_sparks',this.sparks);localStorage.setItem('v_pulses',this.pulses);}};
 
 const DEV_MODE=location.hostname==='localhost'||location.hostname==='127.0.0.1';
@@ -179,6 +145,7 @@ function trackLoginBonuses(){
   if(milestone){gainSparks(milestone,`Streak bonus +${milestone} sparks`);}
 }
 function sceneUsage(){return JSON.parse(localStorage.getItem('v_scene_usage')||'{}');}
+// TODO(security): Scene quotas and purchase checks must be validated on the server.
 function sceneLimitStatus(){const u=sceneUsage();return{daily:u[`d_${todayKey()}`]||0,monthly:u[`m_${monthKey()}`]||0,dailyLimit:3,monthlyLimit:20};}
 function canUseSceneQuota(){const q=sceneLimitStatus();return q.daily<q.dailyLimit&&q.monthly<q.monthlyLimit;}
 function canAffordScene(sc=15,pc=1){return currency.sparks>=sc||currency.pulses>=pc;}
@@ -512,7 +479,9 @@ async function selectThread(thread){
   const item=document.querySelector(`.drawer-item[data-thread="${CSS.escape(t)}"]`);
   if(!item)return false;
   document.querySelectorAll('.drawer-item').forEach(x=>x.classList.toggle('active',x===item));
-  curThread=t;curPersona=item.dataset.p||c.persona||'';curAvSrc=c.photo||item.querySelector('img')?.src||'';
+  curThread=t;
+  curPersona=buildSystemPrompt(c,{relationship:relationshipState[t]??'unknown',memoryContinuity:relationshipState[t]??'unknown',tier:tierState.tier});
+  curAvSrc=c.photo||item.querySelector('img')?.src||'';
   localStorage.setItem('v_last_thread',t);
   if(chatAv)chatAv.src=curAvSrc;
   if(chatName)chatName.textContent=c.name||item.dataset.name||t;
@@ -539,14 +508,28 @@ async function selectThread(thread){
   return true;
 }
 
-document.querySelectorAll('.drawer-item').forEach(item=>{
-  item.addEventListener('click',()=>selectThread(item.dataset.thread));
-});
+// Render drawer from CHARACTERS — single source, no data-p duplication in HTML
+function renderDrawer(){
+  const drawer=document.getElementById('threadDrawer');
+  if(!drawer)return;
+  drawer.innerHTML='';
+  Object.values(CHARACTERS).forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.className='drawer-item'+(i===0?' active':'');
+    btn.dataset.thread=c.id;
+    btn.innerHTML=`<img src="${safeAssetPath(c.photo)}" class="d-av" alt="${escapeHTML(c.name)}"/>
+<span class="d-name">${escapeHTML(c.name)}</span>${c.id!=='vale'?'<span class="d-dot"></span>':''}
+<span class="d-presence" id="pres-${escapeHTML(c.id)}"></span>`;
+    btn.addEventListener('click',()=>selectThread(c.id));
+    drawer.appendChild(btn);
+  });
+}
+renderDrawer();
 
 // Restore last thread after listeners are registered
 const lastThread=localStorage.getItem('v_last_thread');
 if(lastThread){selectThread(lastThread);}
-else{const first=document.querySelector('.drawer-item.active')?.dataset.thread||document.querySelector('.drawer-item')?.dataset.thread;if(first)selectThread(first);}
+else{const first=Object.keys(CHARACTERS)[0];if(first)selectThread(first);}
 
 function buildChatImage(src,alt=''){const img=document.createElement('img');img.src=src;img.alt=alt;img.loading='lazy';return img;}
 
@@ -957,7 +940,7 @@ bindHomePromo();
 bindHomeLobbyInteractions();
 bindHomeFilters();
 renderJumpBackIn();
-apiJson('/api/characters').then(d=>{if(d.ok&&d.characters)d.characters.forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});}).catch(()=>{});
+apiJson('/api/characters').then(d=>{if(d.ok&&d.characters)d.characters.forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});}).catch(err=>{console.error(err);showToast('Could not refresh character greetings');});
 
 // ── LIGHTBOX ──────────────────────────────────────────────────────────────────
 const lightbox=document.getElementById('lightbox');

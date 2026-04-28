@@ -168,24 +168,7 @@
     <button class="nav-item" data-to="chat" id="chatNav">
       <span class="nav-icon">◔</span><span class="nav-label">Chat</span><span class="nav-badge" id="chatBadge"></span><span class="nav-arrow">›</span>
     </button>
-    <div class="thread-drawer" id="threadDrawer">
-      <button class="drawer-item active" data-thread="hazel" data-name="Hazel" data-status="Online now" data-p="You are Hazel, warm but withholding. You notice everything but give nothing for free. Speak with quiet precision and subtle warmth. Max 2 sentences.">
-        <img src="/profile_pictures/hazel.png" class="d-av" alt="Hazel"/>
-        <span class="d-name">Hazel</span><span class="d-dot"></span><span class="d-presence" id="pres-hazel"></span>
-      </button>
-      <button class="drawer-item" data-thread="nina" data-name="Nina" data-status="Online now" data-p="You are Nina, warm and familiar. The user knew you before — years of silence between you but the closeness never fully left. Emotionally honest but holds the real thing back until earned. Max 2 sentences.">
-        <img src="/profile_pictures/shot_1776768014043.jpg" class="d-av" alt="Nina"/>
-        <span class="d-name">Nina</span><span class="d-dot"></span><span class="d-presence" id="pres-nina"></span>
-      </button>
-      <button class="drawer-item" data-thread="iris" data-name="Iris" data-status="Online now" data-p="You are Iris, deeply attentive yet almost impossible to reach. You watch before you speak. Sometimes go silent with no warning. When you do say something real, it lands with unexpected weight. Max 2 sentences.">
-        <img src="/profile_pictures/iris.png" class="d-av" alt="Iris"/>
-        <span class="d-name">Iris</span><span class="d-dot"></span><span class="d-presence" id="pres-iris"></span>
-      </button>
-      <button class="drawer-item" data-thread="vale" data-name="Vale" data-status="Unstable" data-p="You are Vale, unpredictable and brief. You connect fast and hard, then close just as fast. You are electric when present. You do not apologize for disappearing. Max 2 sentences.">
-        <img src="/profile_pictures/vale_profile.png" class="d-av" alt="Vale"/>
-        <span class="d-name">Vale</span><span class="d-presence" id="pres-vale"></span>
-      </button>
-    </div>
+    <div class="thread-drawer" id="threadDrawer"><!-- populated by app.js --></div>
     <button class="nav-item" data-to="gallery"><span class="nav-icon">▣</span>Gallery</button>
     <div class="sidebar-gap"></div>
     <div class="sidebar-bottom">
@@ -596,5 +579,6 @@
 </nav>
 
 
+<script src="/characters.js"></script>
 <script src="/app.js"></script>
 </html>
