@@ -101,6 +101,7 @@ const canGenerateScene = StateCore.canGenerateScene || (() => canAffordScene(15,
 const markSceneUsed = StateCore.markSceneUsed || (() => { const usage = sceneUsage(); usage[`d_${todayKey()}`] = (usage[`d_${todayKey()}`] || 0) + 1; usage[`m_${monthKey()}`] = (usage[`m_${monthKey()}`] || 0) + 1; localStorage.setItem('v_scene_usage', JSON.stringify(usage)); });
 
 const ChatCore = window.VeloraChat || {};
+const SceneCore = window.VeloraScene || {};
 function configureChatModule(){
   window.VeloraChatConfig={
     getCharacters:()=>CHARACTERS,
@@ -123,6 +124,21 @@ function configureChatModule(){
 function selectThread(thread){
   if(typeof ChatCore.selectThread!=='function')return false;
   return ChatCore.selectThread(thread);
+}
+function configureSceneModule(){
+  window.VeloraSceneConfig={
+    apiJson,
+    safeAssetPath,
+    showToast,
+    canAffordScene,
+    canUseSceneQuota,
+    sceneLimitStatus,
+    spendForScene,
+    markSceneUsed,
+    getCurrentThread:()=>ChatCore.getCurrentThread?.()||'hazel',
+    getCharacterAvatar:(thread)=>safeAssetPath(CHARACTERS[thread]?.photo,'/profile_pictures/hazel.png'),
+    renderSceneResult:(img,avSrc)=>ChatCore.renderChat?.({side:'theirs',text:'',avSrc,extraEl:img})
+  };
 }
 
 // ── DEV TEST USERS ───────────────────────────────────────────────────────────
@@ -842,17 +858,8 @@ document.querySelectorAll('.chat-btn')[0]?.addEventListener('click',async()=>{
 });
 
 // ── CHAT ACTION PILLS ────────────────────────────────────────────────────────
-function openSceneSheet(){
-  const sheet=document.getElementById('sceneSheet');
-  sheet?.classList.add('open');
-  sheet?.setAttribute('aria-hidden','false');
-  document.getElementById('sceneClose')?.focus();
-}
-function closeSceneSheet(){
-  const sheet=document.getElementById('sceneSheet');
-  sheet?.classList.remove('open');
-  sheet?.setAttribute('aria-hidden','true');
-}
+function openSceneSheet(){SceneCore.openScene?.();}
+function closeSceneSheet(){SceneCore.closeScene?.();}
 
 document.querySelectorAll('.chat-action-pill')[1]?.addEventListener('click',openSceneSheet);
 document.getElementById('sceneClose')?.addEventListener('click',closeSceneSheet);
@@ -864,36 +871,7 @@ document.querySelectorAll('.scene-pills').forEach(group=>{
   });
 });
 
-document.getElementById('sceneGenerate')?.addEventListener('click',async()=>{
-  if(!canAffordScene(15,1)){showToast('Not enough sparks — earn more by chatting');return;}
-  if(!canUseSceneQuota()){const q=sceneLimitStatus();showToast(`Scene limit reached — ${q.daily}/${q.dailyLimit} today`);return;}
-  const btn=document.getElementById('sceneGenerate');const status=document.getElementById('sceneStatus');
-  const oldText=btn?.textContent||'Generate scene';
-  const mood=document.querySelector('#sceneMood .scene-pill.active')?.dataset.val||'intimate';
-  const setting=document.querySelector('#sceneSetting .scene-pill.active')?.dataset.val||'bedroom';
-  const style=document.querySelector('#sceneStyle .scene-pill.active')?.dataset.val||'cinematic';
-  const detail=document.getElementById('sceneDetail')?.value.trim()||'';
-  const character=ChatCore.getCurrentThread?.()||'hazel';
-  btn.disabled=true;btn.textContent='Generating…';if(status)status.textContent='This may take 20–40 seconds…';
-  try{
-    const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood,setting,style,detail})});
-    const imageUrl=data.url||data.image||data.output||data.result||data.shot?.path;
-    const imgPath=safeAssetPath(imageUrl,null);
-    if(!imgPath)throw new Error('No image returned');
-    spendForScene(15,1);markSceneUsed();
-    const img=document.createElement('img');img.src=imgPath;img.alt=escapeHTML(character);img.loading='lazy';
-    closeSceneSheet();
-    ChatCore.renderChat?.({
-      side:'theirs',
-      text:'',
-      avSrc:safeAssetPath(CHARACTERS[character]?.photo,'/profile_pictures/hazel.png'),
-      extraEl:img
-    });
-    if(status)status.textContent='';
-    showToast('Scene generated');
-  }catch(err){console.error(err);if(status)status.textContent='Error: '+err.message;showToast('Scene generation failed');}
-  finally{btn.disabled=false;btn.textContent=oldText;}
-});
+document.getElementById('sceneGenerate')?.addEventListener('click',()=>SceneCore.generateScene?.());
 
 document.getElementById('genBtn')?.addEventListener('click',async()=>{
   if(!canAffordScene()){showToast('Not enough sparks — earn more by chatting');return;}
@@ -940,6 +918,7 @@ async function bootApp(){
   Object.values(CHARACTERS).forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});
 
   configureChatModule();
+  configureSceneModule();
 
   // Render all CHARACTERS-dependent UI
   renderDrawer();
@@ -963,7 +942,7 @@ bootApp();
 
 // ── CHARACTER REFRESH ─────────────────────────────────────────────────────────
 async function refreshCharacters(){
-  const prev=curThread;
+  const prev=ChatCore.getCurrentThread?.()||'hazel';
   const fresh=await loadCharactersFromServer();
   if(!Object.keys(fresh).length){
     console.warn('[refreshCharacters] Empty result — keeping current CHARACTERS');
@@ -971,6 +950,7 @@ async function refreshCharacters(){
   }
   CHARACTERS=fresh;
   Object.values(CHARACTERS).forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});
+  configureSceneModule();
   renderDrawer();
   renderInboxes();
   renderJumpBackIn?.();
