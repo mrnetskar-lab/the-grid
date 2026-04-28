@@ -321,4 +321,9 @@
     getCurrentAvatar,
     MAX_CHAT_IMAGE_BYTES
   };
+
+  global.Velora = {
+    ...(global.Velora || {}),
+    Chat: global.VeloraChat
+  };
 })(window);

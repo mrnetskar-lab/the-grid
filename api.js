@@ -63,4 +63,9 @@
     apiJson,
     apiDelete
   };
+
+  global.Velora = {
+    ...(global.Velora || {}),
+    Api: global.VeloraApi
+  };
 })(window);
