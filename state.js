@@ -32,9 +32,11 @@
 
       return {
         authStatus: state.authStatus || 'guest',
+        onboarded: Boolean(state.onboarded ?? fallbackOnboarded),
         onboardingStatus: state.onboardingStatus || (fallbackOnboarded ? 'completed' : 'new'),
         selectedCharacter: state.selectedCharacter || fallbackThread,
         lastActiveThread: state.lastActiveThread || fallbackThread,
+        firstChatDone: Boolean(state.firstChatDone),
         hasStartedChat: Boolean(state.hasStartedChat || state.firstChatDone || fallbackMessageCount > 0),
         messageCount: fallbackMessageCount,
         relationshipLevel: Number(state.relationshipLevel ?? 0),

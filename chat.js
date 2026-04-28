@@ -286,6 +286,7 @@
       typing?.remove();
       renderChat({ side: 'theirs', text: reply, avSrc: currentAvatar });
       persistMessage(thread, reply, 'assistant');
+      getConfig().onReplyReceived?.(thread, reply);
       getConfig().onReward?.(thread);
       return { ok: true, reply };
     } catch (err) {

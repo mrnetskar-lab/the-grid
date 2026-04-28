@@ -31,7 +31,7 @@
         </svg>
       </div>
       <div class="ob-title">Welcome to Velora</div>
-      <p class="ob-sub">Private AI companions with memory, mood, and emotional continuity. Choose who you want to meet first.</p>
+      <p class="ob-sub">One private companion experience with memory, mood, and emotional continuity.</p>
       <button class="ob-btn filled" onclick="obNext(2)">Get started</button>
       <button class="ob-skip" onclick="skipOnboard()">I have an account</button>
     </div>
@@ -164,17 +164,12 @@
     </div>
     <button class="nav-item active" data-to="home"><span class="nav-icon">⌂</span>Home</button>
     <button class="nav-item" data-to="discover"><span class="nav-icon">◈</span>Discover</button>
-    <button class="nav-item" data-to="inbox"><span class="nav-icon">✉</span>Inbox</button>
     <button class="nav-item" data-to="chat" id="chatNav">
       <span class="nav-icon">◔</span><span class="nav-label">Chat</span><span class="nav-badge" id="chatBadge"></span><span class="nav-arrow">›</span>
     </button>
     <div class="thread-drawer" id="threadDrawer"><!-- populated by app.js --></div>
     <button class="nav-item" data-to="gallery"><span class="nav-icon">▣</span>Gallery</button>
     <div class="sidebar-gap"></div>
-    <div class="sidebar-bottom">
-      <button class="sidebar-link">☺ &nbsp;Profile</button>
-      <button class="sidebar-link">⚙ &nbsp;Settings</button>
-    </div>
     <div class="sidebar-meta">VELORA.AI · 2026</div>
   </aside>
 
@@ -202,7 +197,7 @@
             <strong>4 companions are active tonight</strong>
             <span>Private scenes, memories, and new replies are waiting.</span>
           </div>
-          <button class="btn btn-primary" id="promoOpenChat" type="button">Open chat</button>
+          <button class="btn btn-primary" id="promoOpenChat" type="button">Start your first chat</button>
         </div>
 
         <div class="hero-banner">
@@ -215,8 +210,8 @@
             <h1>Your companion<br/>is waiting.</h1>
             <p>Exclusive personas, private galleries, and conversations that remember you.</p>
             <div class="hero-actions">
-              <button class="btn btn-primary" data-to="discover">Find a persona</button>
-              <button class="btn" data-to="chat">Open chat</button>
+              <button class="btn btn-primary" data-to="chat">Start your first chat</button>
+              <button class="btn" data-to="discover">Explore characters</button>
             </div>
             <div style="margin-top:10px"><span class="streak-badge" id="streakBadge">🔥 1 day streak</span></div>
           </div>
@@ -294,6 +289,43 @@
         <section class="home-section">
           <div class="sh"><h2>Messages</h2><button class="sh-link" data-to="chat">Open chat</button></div>
           <div class="inbox-card" id="homeInboxList"></div>
+        </section>
+
+        <section class="home-section">
+          <div class="sh"><h2>How Velora Works</h2></div>
+          <div class="inbox-card" style="padding:16px;display:grid;gap:10px;">
+            <div>1. Choose a companion</div>
+            <div>2. Start chatting and build connection</div>
+            <div>3. Unlock premium scenes and deeper moments</div>
+            <div>4. Return to conversations that remember you</div>
+          </div>
+        </section>
+
+        <section class="home-section">
+          <div class="sh"><h2>Sparks, Pulses, Premium</h2></div>
+          <div class="inbox-card" style="padding:16px;display:grid;gap:10px;">
+            <div><strong>Sparks:</strong> regular credits for everyday actions.</div>
+            <div><strong>Pulses:</strong> premium credits for higher-intensity experiences.</div>
+            <div><strong>Scenes:</strong> premium generation moments unlocked through engagement.</div>
+            <div><strong>Upgrade path:</strong> free chat first, then credits or premium when you are ready.</div>
+          </div>
+        </section>
+
+        <section class="home-section">
+          <div class="sh"><h2>Private and Safe</h2></div>
+          <div class="inbox-card" style="padding:16px;display:grid;gap:10px;">
+            <div>Private companion experience with user-controlled interactions.</div>
+            <div>Clear boundaries for premium actions and account controls.</div>
+            <div>Separate admin/testing tools from customer experience.</div>
+          </div>
+        </section>
+
+        <section class="home-section">
+          <div class="sh"><h2>Ready?</h2></div>
+          <div class="inbox-card" style="padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <div>Start one conversation now and continue where you left off later.</div>
+            <button class="btn btn-primary" data-to="chat" type="button">Start your first chat</button>
+          </div>
         </section>
       </section>
 
@@ -558,6 +590,33 @@
             <div class="user-connections" id="userConnections"></div>
           </div>
 
+          <div class="user-section" id="upgradeSection">
+            <div class="user-section-title">Upgrade options</div>
+            <div class="inbox-card" style="padding:14px;display:grid;gap:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div>
+                  <div style="font-weight:700">Free plan</div>
+                  <div style="color:var(--text-2);font-size:.82rem;">Chat access and core companion features.</div>
+                </div>
+                <span style="color:var(--text-2);font-size:.82rem;">Current</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div>
+                  <div style="font-weight:700">Credit pack</div>
+                  <div style="color:var(--text-2);font-size:.82rem;">Buy Sparks/Pulses for premium scenes.</div>
+                </div>
+                <button class="btn" id="upgradeCreditsBtn" type="button">Buy credits</button>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div>
+                  <div style="font-weight:700">Premium subscription</div>
+                  <div style="color:var(--text-2);font-size:.82rem;">More premium moments and deeper access.</div>
+                </div>
+                <button class="btn btn-primary" id="upgradePremiumBtn" type="button">Go premium</button>
+              </div>
+            </div>
+          </div>
+
           <div class="user-section">
             <div class="user-section-title">Danger zone</div>
             <button class="btn" id="userClearAll" style="width:100%;justify-content:center;color:#e05070;border-color:rgba(220,60,80,0.25)">Clear all chat history</button>
@@ -573,7 +632,6 @@
 <nav class="mob-nav">
   <button class="mob-tab active" data-to="home"><span>⌂</span><span>Home</span></button>
   <button class="mob-tab" data-to="discover"><span>◈</span><span>Discover</span></button>
-  <button class="mob-tab" data-to="inbox"><span>✉</span><span>Inbox</span></button>
   <button class="mob-tab" data-to="chat"><span>◔</span><span>Chat</span></button>
   <button class="mob-tab" data-to="gallery"><span>▣</span><span>Gallery</span></button>
 </nav>

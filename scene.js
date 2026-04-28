@@ -27,6 +27,10 @@
 
   function openScene() {
     const { sheet, closeBtn } = getSheetEls();
+    const cfg = getConfig();
+    const trackEvent = cfg.trackEvent || (() => {});
+    const getCurrentThread = cfg.getCurrentThread || global.VeloraChat?.getCurrentThread || (() => 'hazel');
+    trackEvent('scene_builder_opened', { character: getCurrentThread() || 'hazel' });
     sheet?.classList.add('open');
     sheet?.setAttribute('aria-hidden', 'false');
     closeBtn?.focus();
@@ -59,8 +63,6 @@
     const oldText = generateBtn?.textContent || 'Generate scene';
     const { mood, setting, style, detail } = getSelection();
     const character = getCurrentThread() || 'hazel';
-    trackEvent('scene_builder_opened', { character, mood, setting, style });
-
     if (generateBtn) {
       generateBtn.disabled = true;
       generateBtn.textContent = 'Generating…';

@@ -128,6 +128,13 @@ function configureChatModule(){
     applyCharAccent,
     updateCharPanel,
     onMessagesUpdated:()=>{renderInboxes();renderJumpBackIn();},
+    onReplyReceived:(thread,reply)=>{
+      trackEvent('reply_received',{thread,replyLength:String(reply||'').length});
+      const st=userState.read?.()||{};
+      if((st.returnStatus||'new')==='new'&&(st.messageCount||0)>3){
+        userState.setReturnStatus?.('returning');
+      }
+    },
     onReward:(thread)=>{
       userState.markFirstChatComplete?.(thread);
       setFunnelStage('engagement');
@@ -185,6 +192,7 @@ const ANALYTICS_ENABLED=true;
 function trackEvent(eventName,properties={}){
   if(!eventName)return;
   try{
+    const isDevHost=location.hostname==='localhost'||location.hostname==='127.0.0.1';
     const snapshot=userState.read?.()||{};
     const payload={
       event:eventName,
@@ -198,10 +206,11 @@ function trackEvent(eventName,properties={}){
       tier:snapshot.subscriptionTier||'signal',
       ...properties
     };
-    if(ANALYTICS_ENABLED&&DEV_MODE){console.log('[analytics]',payload);}
+    if(ANALYTICS_ENABLED&&isDevHost){console.log('[analytics]',payload);}
     window.dispatchEvent(new CustomEvent('velora:analytics',{detail:payload}));
   }catch(err){
-    if(DEV_MODE)console.warn('[analytics] failed',err);
+    const isDevHost=location.hostname==='localhost'||location.hostname==='127.0.0.1';
+    if(isDevHost)console.warn('[analytics] failed',err);
   }
 }
 
@@ -314,7 +323,10 @@ function finishOnboard(){
 }
 function obNext(step){
   const target=document.getElementById(`ob${step}`);if(!target)return;
-  if(step===2)trackEvent('onboarding_started',{source:'welcome_step'});
+  if(step===2){
+    userState.set?.('onboardingStatus','started');
+    trackEvent('onboarding_started',{source:'welcome_step'});
+  }
   document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('active'));
   if(step===3){const selected=document.querySelector('.ob-char.selected');if(selected)obSelect(selected);}
   target.classList.add('active');
@@ -332,6 +344,7 @@ menuBtn?.setAttribute('aria-expanded','false');
 
 const DEV_MODE=location.hostname==='localhost'||location.hostname==='127.0.0.1';
 if(!DEV_MODE){localStorage.removeItem('v_dev');}
+if(!DEV_MODE){document.getElementById('devPanel')?.remove();}
 function grantDevCurrency(){
   if(!DEV_MODE)return;
   const key='v_dev_bonus_added';
@@ -406,7 +419,12 @@ function applyServerEconomy(data={}){
   });
   updateCurrencyUI(true);
 }
-function gainSparks(amount,msg){currency.sparks+=amount;updateCurrencyUI();if(msg)showToast(msg);}
+function gainSparks(amount,msg){
+  currency.sparks+=amount;
+  userState.patch?.({sparks:currency.sparks,pulses:currency.pulses});
+  updateCurrencyUI();
+  if(msg)showToast(msg);
+}
 function trackLoginBonuses(){
   const today=todayKey();
   const retention=userState.getRetention?.()||{};
@@ -619,6 +637,7 @@ menuBtn?.addEventListener('click',()=>{if(sidebar?.classList.contains('open'))cl
 sbg?.addEventListener('click',closeSb);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSb();});
 const sv=userState.get?.('lastView',localStorage.getItem('v_view'));if(sv&&views[sv])goTo(sv);else toggleDrawer(false);
+if(!sv){setNextAction('home');trackEvent('homepage_viewed');}
 
 // ── DISCOVER FILTERS ──────────────────────────────────────────────────────────
 document.querySelectorAll('.fpill').forEach(p=>{p.addEventListener('click',()=>{document.querySelectorAll('.fpill').forEach(x=>x.classList.remove('active'));p.classList.add('active');const f=p.dataset.f;document.querySelectorAll('.discover-card').forEach(c=>c.classList.toggle('hidden',f!=='all'&&!(c.dataset.tags||'').includes(f)));});});
@@ -758,6 +777,7 @@ function openProfile(id){
 
 function startChat(thread){
   localStorage.setItem(`v_read_${thread}`,String(Date.now()));
+  userState.patch?.({lastActiveThread:thread,selectedCharacter:thread});
   trackEvent('first_chat_started',{characterId:thread});
   Promise.resolve(selectThread(thread)).then(ok=>{if(!ok)goTo('chat');});
   renderInboxes();
@@ -771,7 +791,7 @@ document.getElementById('profileBack')?.addEventListener('click',()=>goTo(window
 
 function openUserProfile(){
   const name=localStorage.getItem('v_user_name')||'You';
-  const streak=Number(localStorage.getItem('v_streak_count')||'0');
+  const streak=Number(userState.getRetention?.().streakCount||0);
   const totalChats=Object.keys(CHARACTERS).filter(id=>messageState[id]?.messages?.length>0).length;
   const el=n=>document.getElementById(n);
   if(el('userDisplayName'))el('userDisplayName').textContent=name;
@@ -817,6 +837,16 @@ document.getElementById('userNameSave')?.addEventListener('click',()=>{
   localStorage.setItem('v_user_name',val);
   const el=document.getElementById('userDisplayName');if(el)el.textContent=val;
   showToast('Name updated');
+});
+document.getElementById('upgradeCreditsBtn')?.addEventListener('click',()=>{
+  trackEvent('credit_pack_clicked',{source:'upgrade_section'});
+  trackEvent('purchase_intent_started',{source:'credit_pack'});
+  showToast('Credits checkout coming soon');
+});
+document.getElementById('upgradePremiumBtn')?.addEventListener('click',()=>{
+  trackEvent('subscription_clicked',{source:'upgrade_section'});
+  trackEvent('purchase_intent_started',{source:'subscription'});
+  showToast('Premium checkout coming soon');
 });
 document.getElementById('userClearAll')?.addEventListener('click',async()=>{
   if(!confirm('Clear all chat history with every character?'))return;
@@ -1019,9 +1049,11 @@ function showToast(msg,ms=2400){const t=document.getElementById('toast');if(!t)r
 function openPaywall(source='scene'){
   userState.markPremiumPromptSeen?.();
   setFunnelStage('upgrade');
+  trackEvent('upgrade_page_viewed',{source});
   trackEvent('upgrade_clicked',{source});
   trackEvent('purchase_intent_started',{source});
-  goTo('profile');
+  openUserProfile();
+  document.getElementById('upgradeSection')?.scrollIntoView({behavior:'smooth',block:'center'});
   showToast(source==='scene'?'Upgrade to unlock more premium scenes':'Upgrade to continue');
 }
 
@@ -1061,6 +1093,7 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
   const btn=document.getElementById('genBtn');const status=document.getElementById('genStatus');
   const character=document.getElementById('genCharSelect')?.value;
   const mood=document.getElementById('genMoodSelect')?.value;
+  trackEvent('scene_generate_clicked',{source:'gallery',character,mood});
   btn.disabled=true;btn.textContent='Generating…';if(status)status.textContent='This may take 10–30 seconds…';
   try{
     const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood})});
@@ -1071,13 +1104,25 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
     console.table({imageUrl,imgPath,canOpenDirectly});
     if(!imgPath)throw new Error(`Rejected image path: ${imageUrl}`);
     applyServerEconomy(data);
+    trackEvent('scene_generation_success',{source:'gallery',character,mood});
     const grid=document.querySelector('.gallery-grid');
     const tile=document.createElement('article');tile.className='g-tile';
     const safeChar=escapeHTML((character||''));
     const safeMood=escapeHTML(mood||'');
     tile.innerHTML=`<img src="${imgPath}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy"><div class="g-overlay"></div><div class="g-caption"><div class="g-name">${safeChar.charAt(0).toUpperCase()+safeChar.slice(1)}</div><div class="g-mood">AI Generated · ${safeMood}</div></div>`;
     grid?.prepend(tile);if(status)status.textContent='Done!';if(btn)btn.textContent='Generate photo';
-  }catch(err){console.error(err);if(status)status.textContent='Error: '+err.message;showToast(err.message||'Scene generation failed');if(btn)btn.textContent='Generate photo';}
+  }catch(err){
+    console.error(err);
+    const message=String(err?.message||'');
+    trackEvent('scene_generation_failed',{source:'gallery',character,mood,reason:message||'unknown'});
+    if(/not enough sparks|limit reached|402|429/i.test(message)){
+      trackEvent('insufficient_credits',{source:'gallery',character,reason:message});
+      openPaywall('scene');
+    }
+    if(status)status.textContent='Error: '+err.message;
+    showToast(err.message||'Scene generation failed');
+    if(btn)btn.textContent='Generate photo';
+  }
   finally{btn.disabled=false;}
 });
 
