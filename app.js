@@ -19,6 +19,70 @@ if (!Object.keys(CHARACTERS).length) {
   console.error('No character data loaded. Make sure /characters.js is available.');
 }
 
+const ApiCore = window.VeloraApi || {};
+const apiJson = typeof ApiCore.apiJson === 'function'
+  ? ApiCore.apiJson
+  : async (url, options = {}) => {
+      const response = await fetch(url, options);
+      const raw = await response.text();
+      const isJson = (response.headers.get('content-type') || '').toLowerCase().includes('application/json');
+      let data = null;
+      if (raw && isJson) {
+        try { data = JSON.parse(raw); } catch { throw new Error('Invalid JSON from server'); }
+      } else if (raw && !isJson) {
+        const preview = raw.replace(/\s+/g, ' ').slice(0, 160);
+        throw new Error(`Expected JSON from ${url}, got ${response.headers.get('content-type') || 'unknown'}: ${preview}`);
+      }
+      if (!response.ok || data?.ok === false) throw new Error(data?.error || `Request failed: ${response.status}`);
+      return data || { ok: true };
+    };
+const apiDelete = typeof ApiCore.apiDelete === 'function'
+  ? ApiCore.apiDelete
+  : async (url) => {
+      const response = await fetch(url, { method: 'DELETE' });
+      if (response.status === 204) {
+        if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
+        return { ok: true };
+      }
+      const raw = await response.text();
+      if (!raw) {
+        if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
+        return { ok: true };
+      }
+      const isJson = (response.headers.get('content-type') || '').toLowerCase().includes('application/json');
+      if (!isJson) throw new Error(`Delete failed: expected JSON, got ${response.headers.get('content-type') || 'unknown'}`);
+      let data;
+      try { data = JSON.parse(raw); } catch { throw new Error('Invalid JSON from delete endpoint'); }
+      if (!response.ok || data?.ok === false) throw new Error(data?.error || `Delete failed: ${response.status}`);
+      return data;
+    };
+
+// ── DEV TEST USERS ───────────────────────────────────────────────────────────
+(function applyDevTestUser(){
+  const isDev=location.hostname==='localhost'||location.hostname==='127.0.0.1';
+  if(!isDev)return;
+  const testUser=new URLSearchParams(location.search).get('testUser');
+  if(!testUser)return;
+  if(testUser==='reset'){
+    Object.keys(localStorage).filter(k=>k.startsWith('v_')).forEach(k=>localStorage.removeItem(k));
+    location.href=location.pathname;
+    return;
+  }
+  const today=new Date();
+  const todayStr=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const presets={
+    new:{v_sparks:'120',v_pulses:'0'},
+    returning:{v_sparks:'240',v_pulses:'2',v_onboarded:'1',v_in:'1',v_streak_count:'4',v_streak_last:todayStr},
+    out_of_sparks:{v_sparks:'0',v_pulses:'0',v_onboarded:'1',v_in:'1'},
+    whale:{v_sparks:'99999',v_pulses:'999',v_onboarded:'1',v_in:'1',v_streak_count:'30',v_streak_last:todayStr},
+  };
+  const preset=presets[testUser];
+  if(!preset){console.warn(`[testUser] Unknown preset: "${testUser}". Options: new, returning, out_of_sparks, whale, reset`);return;}
+  Object.entries(preset).forEach(([k,v])=>localStorage.setItem(k,v));
+  console.info(`[testUser] Applied preset "${testUser}"`);
+  location.href=location.pathname;
+})();
+
 // ── AGE GATE ─────────────────────────────────────────────────────────────────
 const gate = document.getElementById('gate');
 const gateEnter = document.getElementById('gateEnter');
@@ -155,31 +219,6 @@ function markSceneUsed(){
   usage[`d_${todayKey()}`]=(usage[`d_${todayKey()}`]||0)+1;
   usage[`m_${monthKey()}`]=(usage[`m_${monthKey()}`]||0)+1;
   localStorage.setItem('v_scene_usage',JSON.stringify(usage));
-}
-
-function isJsonResponse(r){return(r.headers.get('content-type')||'').toLowerCase().includes('application/json');}
-async function apiJson(url,options={}){
-  const response=await fetch(url,options);
-  const raw=await response.text();
-  let data=null;
-  if(raw&&isJsonResponse(response)){
-    try{data=JSON.parse(raw);}catch{throw new Error('Invalid JSON from server');}
-  }else if(raw&&!isJsonResponse(response)){
-    const preview=raw.replace(/\s+/g,' ').slice(0,160);
-    throw new Error(`Expected JSON from ${url}, got ${response.headers.get('content-type')||'unknown'}: ${preview}`);
-  }
-  if(!response.ok||data?.ok===false)throw new Error(data?.error||`Request failed: ${response.status}`);
-  return data||{ok:true};
-}
-async function apiDelete(url){
-  const r=await fetch(url,{method:'DELETE'});
-  if(r.status===204){if(!r.ok)throw new Error(`Delete failed: ${r.status}`);return{ok:true};}
-  const raw=await r.text();
-  if(!raw){if(!r.ok)throw new Error(`Delete failed: ${r.status}`);return{ok:true};}
-  if(!isJsonResponse(r))throw new Error(`Delete failed: expected JSON, got ${r.headers.get('content-type')||'unknown'}`);
-  let data;try{data=JSON.parse(raw);}catch{throw new Error('Invalid JSON from delete endpoint');}
-  if(!r.ok||data?.ok===false)throw new Error(data?.error||`Delete failed: ${r.status}`);
-  return data;
 }
 
 function safeAssetPath(path,fallback=''){
