@@ -982,18 +982,44 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
 // ── PRESENCE ──────────────────────────────────────────────────────────────────
 function setPresence(id,text){const el=document.getElementById('pres-'+id);if(el)el.textContent=text;}
 function randPresence(id){const p=CHARACTERS[id]?.presence||['online'];return p[Math.floor(Math.random()*p.length)];}
-Object.keys(CHARACTERS).forEach(id=>{setPresence(id,randPresence(id));function sched(){setTimeout(()=>{setPresence(id,randPresence(id));sched();},45000+Math.random()*45000);}sched();});
+function startPresenceCycle(){
+  Object.keys(CHARACTERS).forEach(id=>{
+    setPresence(id,randPresence(id));
+    function sched(){setTimeout(()=>{setPresence(id,randPresence(id));sched();},45000+Math.random()*45000);}
+    sched();
+  });
+}
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-grantDevCurrency();
-updateCurrencyUI();
-trackLoginBonuses();
-renderInboxes();
-bindHomePromo();
-bindHomeLobbyInteractions();
-bindHomeFilters();
-renderJumpBackIn();
-apiJson('/api/characters').then(d=>{if(d.ok&&d.characters)d.characters.forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});}).catch(err=>{console.error(err);showToast('Could not refresh character greetings');});
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+async function bootApp(){
+  CHARACTERS = await loadCharactersFromServer();
+
+  if(!Object.keys(CHARACTERS).length){
+    console.error('[boot] No characters loaded — app may not function correctly');
+  }
+
+  // Sync server greetings into cache
+  Object.values(CHARACTERS).forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});
+
+  // Render all CHARACTERS-dependent UI
+  renderDrawer();
+  renderInboxes();
+  startPresenceCycle();
+  grantDevCurrency();
+  updateCurrencyUI();
+  trackLoginBonuses();
+  bindHomePromo?.();
+  bindHomeLobbyInteractions?.();
+  bindHomeFilters?.();
+  renderJumpBackIn?.();
+
+  // Restore last active thread
+  const lastThread=localStorage.getItem('v_last_thread');
+  if(lastThread&&CHARACTERS[lastThread]){selectThread(lastThread);}
+  else{const first=Object.keys(CHARACTERS)[0];if(first)selectThread(first);}
+}
+
+bootApp();
 
 // ── LIGHTBOX ──────────────────────────────────────────────────────────────────
 const lightbox=document.getElementById('lightbox');
