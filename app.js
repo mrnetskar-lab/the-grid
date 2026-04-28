@@ -100,6 +100,31 @@ const canAffordScene = StateCore.canAffordScene || ((sc = 15, pc = 1) => currenc
 const canGenerateScene = StateCore.canGenerateScene || (() => canAffordScene(15, 1));
 const markSceneUsed = StateCore.markSceneUsed || (() => { const usage = sceneUsage(); usage[`d_${todayKey()}`] = (usage[`d_${todayKey()}`] || 0) + 1; usage[`m_${monthKey()}`] = (usage[`m_${monthKey()}`] || 0) + 1; localStorage.setItem('v_scene_usage', JSON.stringify(usage)); });
 
+const ChatCore = window.VeloraChat || {};
+function configureChatModule(){
+  window.VeloraChatConfig={
+    getCharacters:()=>CHARACTERS,
+    relationshipState,
+    tierState,
+    buildSystemPrompt,
+    goTo,
+    applyCharAccent,
+    updateCharPanel,
+    onMessagesUpdated:()=>{renderInboxes();renderJumpBackIn();},
+    onReward:(thread)=>{
+      gainSparks(2);
+      if(!localStorage.getItem(`v_first_chat_${thread}`)){
+        localStorage.setItem(`v_first_chat_${thread}`,'1');
+        gainSparks(25,`+25 sparks first chat with ${CHARACTERS[thread]?.name||thread}`);
+      }
+    }
+  };
+}
+function selectThread(thread){
+  if(typeof ChatCore.selectThread!=='function')return false;
+  return ChatCore.selectThread(thread);
+}
+
 // ── DEV TEST USERS ───────────────────────────────────────────────────────────
 (function applyDevTestUser(){
   const isDev=location.hostname==='localhost'||location.hostname==='127.0.0.1';
@@ -245,16 +270,6 @@ function safeAssetPath(path,fallback=''){
   const v=String(path||'').trim();
   const ok=['/profile_pictures/','/outputs/','/generated/','/uploads/'];
   return ok.some(p=>v.startsWith(p))?v:fallback;
-}
-function rememberMessage(character,text,role='assistant'){
-  const now=Date.now();
-  const slot=messageState[character]||{messages:[],lastAt:0};
-  slot.messages.push({text,role,ts:now});
-  slot.lastAt=now;
-  messageState[character]=slot;
-  localStorage.setItem('v_message_state',JSON.stringify(messageState));
-  renderInboxes();
-  renderJumpBackIn();
 }
 function relative(ts){if(!ts)return '';const diff=Math.max(1,Math.floor((Date.now()-ts)/60000));if(diff<60)return`${diff}m`;const h=Math.floor(diff/60);if(h<24)return`${h}h`;return`${Math.floor(h/24)}d`;}
 function markInboxReadAll(){Object.keys(CHARACTERS).forEach(id=>localStorage.setItem(`v_read_${id}`,String(Date.now())));renderInboxes();}
@@ -1020,6 +1035,31 @@ async function bootApp(){
 }
 
 bootApp();
+
+// ── CHARACTER REFRESH ─────────────────────────────────────────────────────────
+async function refreshCharacters(){
+  const prev=curThread;
+  const fresh=await loadCharactersFromServer();
+  if(!Object.keys(fresh).length){
+    console.warn('[refreshCharacters] Empty result — keeping current CHARACTERS');
+    return false;
+  }
+  CHARACTERS=fresh;
+  Object.values(CHARACTERS).forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});
+  renderDrawer();
+  renderInboxes();
+  renderJumpBackIn?.();
+  const genSelect=document.getElementById('genCharSelect');
+  if(genSelect){
+    genSelect.innerHTML=Object.values(CHARACTERS).map(c=>`<option value="${escapeHTML(c.id)}">${escapeHTML(c.name)}</option>`).join('');
+  }
+  const next=CHARACTERS[prev]?prev:Object.keys(CHARACTERS)[0];
+  if(next)selectThread(next);
+  console.info(`[refreshCharacters] Loaded ${Object.keys(CHARACTERS).length} characters`);
+  return true;
+}
+
+window.VeloraDev={...(window.VeloraDev||{}),refreshCharacters};
 
 // ── LIGHTBOX ──────────────────────────────────────────────────────────────────
 const lightbox=document.getElementById('lightbox');
