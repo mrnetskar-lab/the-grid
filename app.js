@@ -147,12 +147,14 @@ function configureChatModule(){
       if(!localStorage.getItem(`v_first_chat_${thread}`)){
         localStorage.setItem(`v_first_chat_${thread}`,'1');
         gainSparks(25,`+25 sparks first chat with ${CHARACTERS[thread]?.name||thread}`);
-        if(!userState.get?.('premiumPromptSeen',false)){
+        const gate=getPremiumEngagementStatus(thread);
+        if(gate.eligible&&!userState.get?.('premiumPromptSeen',false)){
           userState.markPremiumPromptSeen?.();
           setFunnelStage('premium_scene');
           showToast('Next step: generate a premium scene');
         }
       }
+      refreshPremiumActionUI();
     }
   };
 }
@@ -162,6 +164,7 @@ function selectThread(thread){
   if(ok){
     userState.selectCharacter?.(thread);
     trackEvent('thread_switched',{thread});
+    refreshPremiumActionUI();
   }
   return ok;
 }
@@ -225,6 +228,39 @@ function setNextAction(view){
     'user-profile':'continue_chat'
   };
   document.body.dataset.nextAction=actionByView[view]||'continue';
+}
+
+function getPremiumEngagementStatus(thread=ChatCore.getCurrentThread?.()||userState.get?.('selectedCharacter','hazel')){
+  const snapshot=userState.read?.()||{};
+  const messageCount=Number(snapshot.messageCount||0);
+  const relationship=Number(relationshipState?.[thread]??snapshot.relationshipLevel??0);
+  const hasStarted=Boolean(snapshot.hasStartedChat||messageCount>0);
+  const isDev=location.hostname==='localhost'||location.hostname==='127.0.0.1';
+  const eligible=isDev||(hasStarted&&messageCount>=4&&relationship>=45);
+  return {
+    eligible,
+    messageCount,
+    relationship,
+    hasStarted,
+    reason:eligible?'ready':'Send a few more messages to unlock premium scenes',
+    thread
+  };
+}
+
+function refreshPremiumActionUI(){
+  const status=getPremiumEngagementStatus();
+  const sceneBtn=document.querySelectorAll('.chat-action-pill')[0];
+  if(sceneBtn){
+    sceneBtn.disabled=!status.eligible;
+    sceneBtn.style.opacity=status.eligible?'1':'0.55';
+    sceneBtn.title=status.eligible?'Create a premium scene':'Send a few more messages to unlock scenes';
+  }
+  const genBtn=document.getElementById('genBtn');
+  if(genBtn){
+    genBtn.disabled=!status.eligible;
+    genBtn.style.opacity=status.eligible?'1':'0.55';
+    genBtn.title=status.eligible?'Generate premium scene':'Keep chatting to unlock premium generation';
+  }
 }
 
 function syncMainFunnel(){
@@ -741,6 +777,7 @@ document.getElementById('chatForm')?.addEventListener('submit',async e=>{
   trackEvent('chat_message_sent',{thread:activeThread,hasImage:!!pendingImg,length:txt.length});
   if(!wasStarted)trackEvent('first_message_sent',{thread:activeThread});
   userState.touchMessage?.(activeThread);
+  refreshPremiumActionUI();
   if(chatInput)chatInput.value='';if(sendBtn)sendBtn.disabled=true;
   try{
     if(typeof ChatCore.sendMessage==='function'){
@@ -1074,7 +1111,14 @@ document.querySelectorAll('.chat-btn')[0]?.addEventListener('click',async()=>{
 });
 
 // ── CHAT ACTION PILLS ────────────────────────────────────────────────────────
-function openSceneSheet(){SceneCore.openScene?.();}
+function openSceneSheet(){
+  const gate=getPremiumEngagementStatus();
+  if(!gate.eligible){
+    showToast(gate.reason);
+    return;
+  }
+  SceneCore.openScene?.();
+}
 function closeSceneSheet(){SceneCore.closeScene?.();}
 
 document.querySelectorAll('.chat-action-pill')[0]?.addEventListener('click',openSceneSheet);
@@ -1093,6 +1137,8 @@ document.getElementById('genBtn')?.addEventListener('click',async()=>{
   const btn=document.getElementById('genBtn');const status=document.getElementById('genStatus');
   const character=document.getElementById('genCharSelect')?.value;
   const mood=document.getElementById('genMoodSelect')?.value;
+  const gate=getPremiumEngagementStatus(character);
+  if(!gate.eligible){showToast(gate.reason);return;}
   trackEvent('scene_generate_clicked',{source:'gallery',character,mood});
   btn.disabled=true;btn.textContent='Generating…';if(status)status.textContent='This may take 10–30 seconds…';
   try{
@@ -1165,6 +1211,7 @@ async function bootApp(){
   bindHomeLobbyInteractions?.();
   bindHomeFilters?.();
   renderJumpBackIn?.();
+  refreshPremiumActionUI();
 
   // Restore last active thread
   const lastThread=userState.get?.('selectedCharacter',localStorage.getItem('v_last_thread'));
