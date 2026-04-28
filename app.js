@@ -95,10 +95,7 @@ const monthKey = StateCore.monthKey || (() => { const d = new Date(); return `${
 const sceneUsage = StateCore.sceneUsage || (() => JSON.parse(localStorage.getItem('v_scene_usage') || '{}'));
 // TODO(security): Scene quotas and purchase checks must be validated on the server.
 const sceneLimitStatus = StateCore.sceneLimitStatus || (() => { const u = sceneUsage(); return { daily: u[`d_${todayKey()}`] || 0, monthly: u[`m_${monthKey()}`] || 0, dailyLimit: 3, monthlyLimit: 20 }; });
-const canUseSceneQuota = StateCore.canUseSceneQuota || (() => { const q = sceneLimitStatus(); return q.daily < q.dailyLimit && q.monthly < q.monthlyLimit; });
-const canAffordScene = StateCore.canAffordScene || ((sc = 15, pc = 1) => currency.sparks >= sc || currency.pulses >= pc);
-const canGenerateScene = StateCore.canGenerateScene || (() => canAffordScene(15, 1));
-const markSceneUsed = StateCore.markSceneUsed || (() => { const usage = sceneUsage(); usage[`d_${todayKey()}`] = (usage[`d_${todayKey()}`] || 0) + 1; usage[`m_${monthKey()}`] = (usage[`m_${monthKey()}`] || 0) + 1; localStorage.setItem('v_scene_usage', JSON.stringify(usage)); });
+// Scene economy is server-authoritative. Local quota helpers removed.
 
 const ChatCore = window.VeloraChat || {};
 const SceneCore = window.VeloraScene || {};
@@ -285,12 +282,6 @@ function applyServerEconomy(data={}){
   updateCurrencyUI(true);
 }
 function gainSparks(amount,msg){currency.sparks+=amount;updateCurrencyUI();if(msg)showToast(msg);}
-function spendForScene(sparkCost,pulseCost){
-  if(currency.sparks>=sparkCost){currency.sparks-=sparkCost;updateCurrencyUI(true);return true;}
-  if(currency.pulses>=pulseCost){currency.pulses-=pulseCost;updateCurrencyUI(true);return true;}
-  showToast('Not enough sparks — earn more by chatting');
-  return false;
-}
 function trackLoginBonuses(){
   const today=todayKey();
   const last=localStorage.getItem('v_last_login');

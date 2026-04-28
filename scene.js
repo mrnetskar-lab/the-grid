@@ -72,8 +72,11 @@
       });
 
       const imageUrl = data.imageUrl || data.url || data.image || data.output || data.result || data.shot?.path;
+      console.log('[scene] response', data);
+      console.log('[scene] imageUrl', imageUrl);
       const imgPath = safeAssetPath(imageUrl, null);
-      if (!imgPath) throw new Error('No image returned');
+      console.log('[scene] imgPath', imgPath);
+      if (!imgPath) throw new Error(`Invalid image path returned: ${imageUrl || 'empty'}`);
 
       // Server is authoritative: validated cost, deducted atomically, returned updated state.
       // Do NOT call local spendForScene() or markSceneUsed().
