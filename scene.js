@@ -40,33 +40,16 @@
 
   async function generateScene() {
     const cfg = getConfig();
-    const state = getState();
     const apiJson = cfg.apiJson || global.VeloraApi?.apiJson;
     const safeAssetPath = cfg.safeAssetPath || ((v) => v);
     const showToast = cfg.showToast || (() => {});
-    const canAffordScene = cfg.canAffordScene || state.canAffordScene || (() => true);
-    const canUseSceneQuota = cfg.canUseSceneQuota || state.canUseSceneQuota || (() => true);
-    const sceneLimitStatus = cfg.sceneLimitStatus || state.sceneLimitStatus || (() => ({ daily: 0, dailyLimit: 0 }));
-    const spendForScene = cfg.spendForScene || (() => true);
-    const markSceneUsed = cfg.markSceneUsed || state.markSceneUsed || (() => {});
+    const onServerEconomy = cfg.onServerEconomy || (() => {});
     const getCurrentThread = cfg.getCurrentThread || global.VeloraChat?.getCurrentThread || (() => 'hazel');
     const getCharacterAvatar = cfg.getCharacterAvatar || (() => '/profile_pictures/hazel.png');
     const renderSceneResult = cfg.renderSceneResult || (() => {});
 
     if (typeof apiJson !== 'function') {
       showToast('Scene generation unavailable');
-      return;
-    }
-
-    // TODO(security): Final scene quota and currency validation must be enforced server-side.
-    if (!canAffordScene(15, 1)) {
-      showToast('Not enough sparks — earn more by chatting');
-      return;
-    }
-
-    if (!canUseSceneQuota()) {
-      const q = sceneLimitStatus();
-      showToast(`Scene limit reached — ${q.daily}/${q.dailyLimit} today`);
       return;
     }
 
@@ -88,12 +71,15 @@
         body: JSON.stringify({ character, mood, setting, style, detail })
       });
 
-      const imageUrl = data.url || data.image || data.output || data.result || data.shot?.path;
+      const imageUrl = data.imageUrl || data.url || data.image || data.output || data.result || data.shot?.path;
       const imgPath = safeAssetPath(imageUrl, null);
       if (!imgPath) throw new Error('No image returned');
 
-      if (!spendForScene(15, 1)) return;
-      markSceneUsed();
+      onServerEconomy({
+        sparks: data.sparksRemaining,
+        pulses: data.pulsesRemaining,
+        usage: data.usage
+      });
 
       const img = document.createElement('img');
       img.src = imgPath;
@@ -107,7 +93,7 @@
     } catch (err) {
       console.error(err);
       if (status) status.textContent = 'Error: ' + err.message;
-      showToast('Scene generation failed');
+      showToast(err.message || 'Scene generation failed');
     } finally {
       if (generateBtn) {
         generateBtn.disabled = false;
@@ -120,5 +106,10 @@
     openScene,
     closeScene,
     generateScene
+  };
+
+  global.Velora = {
+    ...(global.Velora || {}),
+    Scene: global.VeloraScene
   };
 })(window);
