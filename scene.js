@@ -72,11 +72,13 @@
       });
 
       const imageUrl = data.imageUrl || data.url || data.image || data.output || data.result || data.shot?.path;
-      console.log('[scene] response', data);
-      console.log('[scene] imageUrl', imageUrl);
+      if (!imageUrl) throw new Error('Backend did not return an image URL');
       const imgPath = safeAssetPath(imageUrl, null);
-      console.log('[scene] imgPath', imgPath);
-      if (!imgPath) throw new Error(`Invalid image path returned: ${imageUrl || 'empty'}`);
+      const canOpenDirectly = imgPath
+        ? (/^https?:\/\//i.test(imgPath) ? imgPath : `${location.origin}${imgPath}`)
+        : '';
+      console.table({ imageUrl, imgPath, canOpenDirectly });
+      if (!imgPath) throw new Error(`Rejected image path: ${imageUrl}`);
 
       // Server is authoritative: validated cost, deducted atomically, returned updated state.
       // Do NOT call local spendForScene() or markSceneUsed().
