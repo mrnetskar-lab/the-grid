@@ -75,6 +75,9 @@
       const imgPath = safeAssetPath(imageUrl, null);
       if (!imgPath) throw new Error('No image returned');
 
+      // Server is authoritative: validated cost, deducted atomically, returned updated state.
+      // Do NOT call local spendForScene() or markSceneUsed().
+      // Frontend's only role: sync the server truth to UI cache via onServerEconomy.
       onServerEconomy({
         sparks: data.sparksRemaining,
         pulses: data.pulsesRemaining,
