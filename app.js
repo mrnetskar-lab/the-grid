@@ -130,11 +130,7 @@ function configureSceneModule(){
     apiJson,
     safeAssetPath,
     showToast,
-    canAffordScene,
-    canUseSceneQuota,
-    sceneLimitStatus,
-    spendForScene,
-    markSceneUsed,
+    onServerEconomy:applyServerEconomy,
     getCurrentThread:()=>ChatCore.getCurrentThread?.()||'hazel',
     getCharacterAvatar:(thread)=>safeAssetPath(CHARACTERS[thread]?.photo,'/profile_pictures/hazel.png'),
     renderSceneResult:(img,avSrc)=>ChatCore.renderChat?.({side:'theirs',text:'',avSrc,extraEl:img})
@@ -260,6 +256,22 @@ function updateCurrencyUI(flash=false){
   if(planBadge)planBadge.textContent=`Plan: Signal`;
   if(flash&&sparkCounter){sparkCounter.classList.remove('flash-spend');void sparkCounter.offsetWidth;sparkCounter.classList.add('flash-spend');}
   currency.save();
+}
+function applyServerEconomy(data={}){
+  if(typeof currency.setFromServer==='function'){
+    currency.setFromServer({sparks:data.sparksRemaining,pulses:data.pulsesRemaining});
+  }else{
+    if(Number.isFinite(Number(data.sparksRemaining)))currency.sparks=Number(data.sparksRemaining);
+    if(Number.isFinite(Number(data.pulsesRemaining)))currency.pulses=Number(data.pulsesRemaining);
+    currency.save();
+  }
+  if(data.usage&&typeof data.usage==='object'){
+    const usage=sceneUsage();
+    usage[`d_${todayKey()}`]=Number(data.usage.daily)||0;
+    usage[`m_${monthKey()}`]=Number(data.usage.monthly)||0;
+    localStorage.setItem('v_scene_usage',JSON.stringify(usage));
+  }
+  updateCurrencyUI(true);
 }
 function gainSparks(amount,msg){currency.sparks+=amount;updateCurrencyUI();if(msg)showToast(msg);}
 function spendForScene(sparkCost,pulseCost){
@@ -751,11 +763,13 @@ document.getElementById('devNewGenerate')?.addEventListener('click',async()=>{
   await fetch('/api/camera/prompts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,value:look,devKey:DEV_CODE})});
   btn.textContent='Generating…';if(status)status.textContent='Generating preview (~20s)…';
   try{
-    const res=await fetch('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character:id,mood})});
-    const data=await res.json();if(!data.ok)throw new Error(data.error||'Failed');
+    const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character:id,mood})});
+    const imgPath=safeAssetPath(data.imageUrl||data.shot?.path,null);
+    if(!imgPath)throw new Error('No image returned');
+    applyServerEconomy(data);
     const grid=document.querySelector('.gallery-grid');
     const tile=document.createElement('article');tile.className='g-tile';
-    tile.innerHTML=`<img src="${data.shot.path}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy" alt="${id}"><div class="g-overlay"></div><div class="g-caption"><div class="g-name">${id.charAt(0).toUpperCase()+id.slice(1)}</div><div class="g-mood">New · ${mood}</div></div>`;
+    tile.innerHTML=`<img src="${imgPath}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy" alt="${escapeHTML(id)}"><div class="g-overlay"></div><div class="g-caption"><div class="g-name">${escapeHTML(id.charAt(0).toUpperCase()+id.slice(1))}</div><div class="g-mood">New · ${escapeHTML(mood)}</div></div>`;
     grid?.prepend(tile);if(status)status.textContent='Done!';loadDevLooks();
     const ni=document.getElementById('devNewId');const nl=document.getElementById('devNewLook');if(ni)ni.value='';if(nl)nl.value='';
   }catch(err){if(status)status.textContent='Error: '+err.message;}
@@ -874,24 +888,22 @@ document.querySelectorAll('.scene-pills').forEach(group=>{
 document.getElementById('sceneGenerate')?.addEventListener('click',()=>SceneCore.generateScene?.());
 
 document.getElementById('genBtn')?.addEventListener('click',async()=>{
-  if(!canAffordScene()){showToast('Not enough sparks — earn more by chatting');return;}
-  if(!canUseSceneQuota()){const q=sceneLimitStatus();showToast(`Scene limit reached — ${q.daily}/${q.dailyLimit} today`);return;}
   const btn=document.getElementById('genBtn');const status=document.getElementById('genStatus');
   const character=document.getElementById('genCharSelect')?.value;
   const mood=document.getElementById('genMoodSelect')?.value;
   btn.disabled=true;btn.textContent='Generating…';if(status)status.textContent='This may take 10–30 seconds…';
   try{
     const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood})});
-    const imgPath=safeAssetPath(data.shot?.path,null);
+    const imgPath=safeAssetPath(data.imageUrl||data.shot?.path,null);
     if(!imgPath)throw new Error('No image returned');
-    spendForScene(15,1);markSceneUsed();
+    applyServerEconomy(data);
     const grid=document.querySelector('.gallery-grid');
     const tile=document.createElement('article');tile.className='g-tile';
     const safeChar=escapeHTML((character||''));
     const safeMood=escapeHTML(mood||'');
     tile.innerHTML=`<img src="${imgPath}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy"><div class="g-overlay"></div><div class="g-caption"><div class="g-name">${safeChar.charAt(0).toUpperCase()+safeChar.slice(1)}</div><div class="g-mood">AI Generated · ${safeMood}</div></div>`;
     grid?.prepend(tile);if(status)status.textContent='Done!';if(btn)btn.textContent='Generate photo';
-  }catch(err){console.error(err);if(status)status.textContent='Error: '+err.message;if(btn)btn.textContent='Generate photo';}
+  }catch(err){console.error(err);if(status)status.textContent='Error: '+err.message;showToast(err.message||'Scene generation failed');if(btn)btn.textContent='Generate photo';}
   finally{btn.disabled=false;}
 });
 
