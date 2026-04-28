@@ -444,14 +444,13 @@ const sv=localStorage.getItem('v_view');if(sv&&views[sv])goTo(sv);else toggleDra
 document.querySelectorAll('.fpill').forEach(p=>{p.addEventListener('click',()=>{document.querySelectorAll('.fpill').forEach(x=>x.classList.remove('active'));p.classList.add('active');const f=p.dataset.f;document.querySelectorAll('.discover-card').forEach(c=>c.classList.toggle('hidden',f!=='all'&&!(c.dataset.tags||'').includes(f)));});});
 
 // ── CHAT ──────────────────────────────────────────────────────────────────────
-const chatMsgs=document.getElementById('chatMsgs'),chatInput=document.getElementById('chatInput'),sendBtn=document.querySelector('.send-btn');
+const chatInput=document.getElementById('chatInput'),sendBtn=document.querySelector('.send-btn');
 const imgAttachInput=document.getElementById('imgAttachInput');
 const imgAttachBtn=document.getElementById('imgAttachBtn');
 const imgAttachPreview=document.getElementById('imgAttachPreview');
 const imgAttachThumb=document.getElementById('imgAttachThumb');
-const MAX_CHAT_IMAGE_BYTES=5*1024*1024;
+const MAX_CHAT_IMAGE_BYTES=window.VeloraChat?.MAX_CHAT_IMAGE_BYTES||5*1024*1024;
 let pendingImg=null;
-const IMG_REACTIONS=['You look stunning in this.','I like this side of you.','Now that is hard to ignore.','You always know how to get my attention.'];
 
 function resetPendingChatImage(){
   pendingImg=null;
@@ -511,75 +510,9 @@ function updateCharPanel(thread){
   (c.gallery||[c.photo]).slice(0,5).forEach((src,i)=>{const el=document.getElementById('cpg'+i);if(el)el.src=safeAssetPath(src,'/profile_pictures/hazel.png');});
 }
 
-const chatAv=document.getElementById('chatAv'),chatName=document.getElementById('chatName'),chatStatus=document.getElementById('chatStatus');
-let curPersona='',curAvSrc='/profile_pictures/hazel.png',curThread='hazel';
-
 function applyCharAccent(thread){
   const color=CHARACTERS[thread]?.accent||'#b83468';
   document.getElementById('view-chat')?.style.setProperty('--chat-accent',color);
-}
-
-function ts(){const n=new Date();return`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
-
-function addMsg(side,text,avSrc,extraEl){
-  const row=document.createElement('div');row.className='msg'+(side==='mine'?' mine':'');
-  if(side!=='mine'){const a=document.createElement('img');a.src=avSrc;a.className='msg-av';a.alt='';row.appendChild(a);}
-  const w=document.createElement('div'),b=document.createElement('div'),t=document.createElement('div');
-  const isMedia=!text&&extraEl&&extraEl.tagName==='IMG';
-  b.className='bubble '+(isMedia?'media':(side==='mine'?'mine':'theirs'));
-  if(text){
-    const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const isTheirs=side!=='mine';
-    const actionColor=isTheirs?'#7a5c3a':'#f0c8b0';
-    b.innerHTML=escaped.replace(/\*([^*]+)\*/g,`<span style="color:${actionColor};font-style:italic">*$1*</span>`);
-  }
-  if(extraEl)b.appendChild(extraEl);
-  t.className='msg-time';t.textContent=ts();if(side==='mine')t.style.textAlign='right';
-  w.appendChild(b);w.appendChild(t);row.appendChild(w);chatMsgs?.appendChild(row);if(chatMsgs)chatMsgs.scrollTop=chatMsgs.scrollHeight;
-}
-
-function addTyping(avSrc){
-  const row=document.createElement('div');row.className='msg';row.id='trow';
-  const a=document.createElement('img');a.src=avSrc;a.className='msg-av';a.alt='';row.appendChild(a);
-  const tw=document.createElement('div');tw.className='typing-wrap';
-  for(let i=0;i<3;i++){const d=document.createElement('div');d.className='tdot';tw.appendChild(d);}
-  row.appendChild(tw);chatMsgs?.appendChild(row);if(chatMsgs)chatMsgs.scrollTop=chatMsgs.scrollHeight;return row;
-}
-
-async function selectThread(thread){
-  const t=String(thread||'').trim();
-  if(!t||!CHARACTERS[t])return false;
-  const c=CHARACTERS[t];
-  const item=document.querySelector(`.drawer-item[data-thread="${CSS.escape(t)}"]`);
-  if(!item)return false;
-  document.querySelectorAll('.drawer-item').forEach(x=>x.classList.toggle('active',x===item));
-  curThread=t;
-  curPersona=buildSystemPrompt(c,{relationship:relationshipState[t]??'unknown',memoryContinuity:relationshipState[t]??'unknown',tier:tierState.tier});
-  curAvSrc=c.photo||item.querySelector('img')?.src||'';
-  localStorage.setItem('v_last_thread',t);
-  if(chatAv)chatAv.src=curAvSrc;
-  if(chatName)chatName.textContent=c.name||item.dataset.name||t;
-  if(chatStatus)chatStatus.textContent=item.dataset.status||c.status||'Online';
-  applyCharAccent(t);updateCharPanel(t);
-  if(chatMsgs)chatMsgs.innerHTML='';
-  goTo('chat');
-  function _showGreeting(){
-    const tr=addTyping(curAvSrc);
-    apiJson(`/api/characters/${encodeURIComponent(t)}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'__greeting__'})})
-      .then(d=>{tr.remove();const reply=(d.reply||c.greeting||'…').trim();addMsg('theirs',reply,curAvSrc);rememberMessage(t,reply,'assistant');})
-      .catch(()=>{tr.remove();addMsg('theirs',c.greeting||'…',curAvSrc);rememberMessage(t,c.greeting||'…','assistant');});
-  }
-  try{
-    const d=await apiJson(`/api/characters/${encodeURIComponent(t)}/history`);
-    const hasBackend=Array.isArray(d.messages)&&d.messages.length>0;
-    const hasLocal=!!messageState[t]?.messages?.length;
-    if(hasBackend){
-      d.messages.forEach(m=>{addMsg(m.role==='user'?'mine':'theirs',String(m.content||''),m.role==='user'?'':curAvSrc);});
-      if(!messageState[t]?.lastAt){const last=d.messages[d.messages.length-1];if(last){const slot={messages:[{text:String(last.content||''),role:last.role,ts:Date.now()}],lastAt:Date.now()};messageState[t]=slot;localStorage.setItem('v_message_state',JSON.stringify(messageState));renderInboxes();}}
-    }
-    if(!hasBackend&&!hasLocal)_showGreeting();
-  }catch{if(!messageState[t]?.messages?.length)_showGreeting();}
-  return true;
 }
 
 // Render drawer from CHARACTERS — single source, no data-p duplication in HTML
@@ -599,36 +532,19 @@ function renderDrawer(){
   });
 }
 
-function buildChatImage(src,alt=''){const img=document.createElement('img');img.src=src;img.alt=alt;img.loading='lazy';return img;}
-
 document.getElementById('chatForm')?.addEventListener('submit',async e=>{
   e.preventDefault();
   const txt=chatInput?.value.trim()||'';
-  const hasText=!!txt;
-  const hasImage=!!pendingImg;
-  if(!hasText&&!hasImage)return;
+  const hasContent=!!txt||!!pendingImg;
+  if(!hasContent)return;
   if(chatInput)chatInput.value='';if(sendBtn)sendBtn.disabled=true;
-  if(hasImage&&hasText)addMsg('mine',txt,'',buildChatImage(pendingImg,'Attached image'));
-  else if(hasImage)addMsg('mine','', '',buildChatImage(pendingImg,'Attached image'));
-  else addMsg('mine',txt);
-  rememberMessage(curThread,hasText?txt:'[Image]','user');
-  if(hasImage&&!hasText){
-    const localReply=IMG_REACTIONS[Math.floor(Math.random()*IMG_REACTIONS.length)];
-    addMsg('theirs',localReply,curAvSrc);
-    rememberMessage(curThread,localReply,'assistant');
-    resetPendingChatImage();
-    if(sendBtn)sendBtn.disabled=false;
-    chatInput?.focus();
-    return;
-  }
-  const tr=addTyping(curAvSrc);
   try{
-    const data=await apiJson(`/api/characters/${encodeURIComponent(curThread||'hazel')}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt,image:hasImage?pendingImg:undefined})});
-    const reply=String(data.reply||data.result||'…').trim();
-    tr.remove();addMsg('theirs',reply,curAvSrc);rememberMessage(curThread,reply,'assistant');
-    gainSparks(2);
-    if(!localStorage.getItem(`v_first_chat_${curThread}`)){localStorage.setItem(`v_first_chat_${curThread}`,'1');gainSparks(25,`+25 sparks first chat with ${CHARACTERS[curThread]?.name||curThread}`);}
-  }catch(err){console.error(err);tr.remove();addMsg('theirs','I am having trouble replying right now. Try again in a moment.',curAvSrc);}
+    if(typeof ChatCore.sendMessage==='function'){
+      await ChatCore.sendMessage({text:txt,imageData:pendingImg});
+    }else{
+      showToast('Chat is unavailable right now');
+    }
+  }catch(err){console.error(err);}
   finally{resetPendingChatImage();if(sendBtn)sendBtn.disabled=false;chatInput?.focus();}
 });
 
@@ -657,7 +573,7 @@ function openProfile(id){
 
 function startChat(thread){
   localStorage.setItem(`v_read_${thread}`,String(Date.now()));
-  if(!selectThread(thread))goTo('chat');
+  Promise.resolve(selectThread(thread)).then(ok=>{if(!ok)goTo('chat');});
   renderInboxes();
 }
 
@@ -911,14 +827,15 @@ function openPaywall(){}
 
 // ── CHAT CLEAR HISTORY ────────────────────────────────────────────────────────
 document.querySelectorAll('.chat-btn')[0]?.addEventListener('click',async()=>{
-  const name=CHARACTERS[curThread]?.name||curThread||'this chat';
+  const activeThread=ChatCore.getCurrentThread?.()||'hazel';
+  const name=CHARACTERS[activeThread]?.name||activeThread||'this chat';
   if(!confirm(`Clear chat history with ${name}?`))return;
   try{
-    await apiDelete(`/api/characters/${encodeURIComponent(curThread)}/history`);
-    if(chatMsgs)chatMsgs.innerHTML='';
-    delete messageState[curThread];
+    await apiDelete(`/api/characters/${encodeURIComponent(activeThread)}/history`);
+    ChatCore.renderChat?.({clear:true});
+    delete messageState[activeThread];
     localStorage.setItem('v_message_state',JSON.stringify(messageState));
-    localStorage.removeItem(`v_read_${curThread}`);
+    localStorage.removeItem(`v_read_${activeThread}`);
     renderInboxes();
     showToast('Chat history cleared');
   }catch(err){console.error(err);showToast('Could not clear history');}
@@ -956,7 +873,7 @@ document.getElementById('sceneGenerate')?.addEventListener('click',async()=>{
   const setting=document.querySelector('#sceneSetting .scene-pill.active')?.dataset.val||'bedroom';
   const style=document.querySelector('#sceneStyle .scene-pill.active')?.dataset.val||'cinematic';
   const detail=document.getElementById('sceneDetail')?.value.trim()||'';
-  const character=curThread||'hazel';
+  const character=ChatCore.getCurrentThread?.()||'hazel';
   btn.disabled=true;btn.textContent='Generating…';if(status)status.textContent='This may take 20–40 seconds…';
   try{
     const data=await apiJson('/api/camera/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,mood,setting,style,detail})});
@@ -966,7 +883,13 @@ document.getElementById('sceneGenerate')?.addEventListener('click',async()=>{
     spendForScene(15,1);markSceneUsed();
     const img=document.createElement('img');img.src=imgPath;img.alt=escapeHTML(character);img.loading='lazy';
     closeSceneSheet();
-    addMsg('theirs','',curAvSrc,img);if(status)status.textContent='';
+    ChatCore.renderChat?.({
+      side:'theirs',
+      text:'',
+      avSrc:safeAssetPath(CHARACTERS[character]?.photo,'/profile_pictures/hazel.png'),
+      extraEl:img
+    });
+    if(status)status.textContent='';
     showToast('Scene generated');
   }catch(err){console.error(err);if(status)status.textContent='Error: '+err.message;showToast('Scene generation failed');}
   finally{btn.disabled=false;btn.textContent=oldText;}
@@ -1015,6 +938,8 @@ async function bootApp(){
 
   // Sync server greetings into cache
   Object.values(CHARACTERS).forEach(c=>{if(c.greeting)apiCharGreetings[c.id]=c.greeting;});
+
+  configureChatModule();
 
   // Render all CHARACTERS-dependent UI
   renderDrawer();
@@ -1090,5 +1015,6 @@ document.getElementById('charPanel')?.addEventListener('click',e=>{
 // Chat images → lightbox
 document.getElementById('chatMsgs')?.addEventListener('click',e=>{
   const img=e.target.closest('.bubble.media img');if(!img)return;
-  openLightbox(img.src,CHARACTERS[curThread]?.name||'');
+  const activeThread=ChatCore.getCurrentThread?.()||'hazel';
+  openLightbox(img.src,CHARACTERS[activeThread]?.name||'');
 });
