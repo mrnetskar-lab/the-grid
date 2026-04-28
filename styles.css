@@ -627,8 +627,10 @@ img{display:block;}
 }
 
 /* ── ACCESSIBILITY ── */
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+/* inputs use border-color change on focus — no outline */
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;}
+.chat-input-wrap input:focus{outline:none;}
+/* buttons and interactive elements get subtle outline */
 .nav-item:focus-visible,.drawer-item:focus-visible,.btn:focus-visible,.scene-pill:focus-visible,
-.char-card:focus-visible,.discover-card:focus-visible,button:focus-visible,
-input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+.char-card:focus-visible,.discover-card:focus-visible,button:focus-visible{outline:2px solid rgba(184,52,104,0.5);outline-offset:2px;}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important;transition-duration:.01ms !important;}}
