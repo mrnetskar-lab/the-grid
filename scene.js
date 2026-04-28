@@ -43,7 +43,9 @@
     const apiJson = cfg.apiJson || global.VeloraApi?.apiJson;
     const safeAssetPath = cfg.safeAssetPath || ((v) => v);
     const showToast = cfg.showToast || (() => {});
+    const trackEvent = cfg.trackEvent || (() => {});
     const onServerEconomy = cfg.onServerEconomy || (() => {});
+    const onUpgradeRequested = cfg.onUpgradeRequested || (() => {});
     const getCurrentThread = cfg.getCurrentThread || global.VeloraChat?.getCurrentThread || (() => 'hazel');
     const getCharacterAvatar = cfg.getCharacterAvatar || (() => '/profile_pictures/hazel.png');
     const renderSceneResult = cfg.renderSceneResult || (() => {});
@@ -57,6 +59,7 @@
     const oldText = generateBtn?.textContent || 'Generate scene';
     const { mood, setting, style, detail } = getSelection();
     const character = getCurrentThread() || 'hazel';
+    trackEvent('scene_builder_opened', { character, mood, setting, style });
 
     if (generateBtn) {
       generateBtn.disabled = true;
@@ -65,6 +68,7 @@
     if (status) status.textContent = 'This may take 20–40 seconds…';
 
     try {
+      trackEvent('scene_generate_clicked', { character, mood, setting, style });
       const data = await apiJson('/api/camera/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -96,10 +100,18 @@
 
       closeScene();
       renderSceneResult(img, getCharacterAvatar(character));
+      trackEvent('scene_generation_success', { character, imageUrl });
       if (status) status.textContent = '';
       showToast('Scene generated');
     } catch (err) {
       console.error(err);
+      const message = String(err?.message || '');
+      if (/not enough sparks|limit reached|402|429/i.test(message)) {
+        trackEvent('insufficient_credits', { character, reason: message });
+        trackEvent('upgrade_clicked_from_scene', { character });
+        onUpgradeRequested();
+      }
+      trackEvent('scene_generation_failed', { character, reason: message || 'unknown' });
       if (status) status.textContent = 'Error: ' + err.message;
       showToast(err.message || 'Scene generation failed');
     } finally {
