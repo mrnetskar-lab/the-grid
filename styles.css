@@ -31,8 +31,8 @@ img{display:block;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);border:none;background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;text-align:left;width:100%;font-size:.88rem;font-weight:500;}
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,0.05);}
 .nav-item.active{color:var(--text);background:rgba(184,52,104,0.1);box-shadow:inset 3px 0 0 var(--accent);}
-.nav-icon{width:17px;height:17px;flex:0 0 17px;opacity:.7;font-size:.85rem;display:grid;place-items:center;}
-.nav-item.active .nav-icon{opacity:1;color:var(--accent);}
+.nav-icon{width:17px;height:17px;flex:0 0 17px;opacity:.7;display:block;stroke:currentColor;}
+.nav-item.active .nav-icon{opacity:1;color:var(--accent);stroke:var(--accent);}
 .nav-arrow{font-size:.62rem;margin-left:auto;color:var(--text-3);transition:transform .22s;}
 .nav-item.open .nav-arrow{transform:rotate(90deg);}
 

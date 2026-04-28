@@ -22,12 +22,9 @@
     <!-- Step 1: Welcome -->
     <div class="ob-step active" id="ob1">
       <div class="ob-logo">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 228" fill="none" width="52" height="59">
-          <defs><linearGradient id="og" x1="100" y1="12" x2="100" y2="218" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#c8608a"/><stop offset="50%" stop-color="#b83468"/><stop offset="100%" stop-color="#5a0f30"/></linearGradient></defs>
-          <path d="M 100,14 C 115,14 186,55 186,98 C 186,123 166,123 140,123 A 52,52 0 1 1 100,208 A 52,52 0 1 1 60,123 C 34,123 14,123 14,98 C 14,55 85,14 100,14 Z" stroke="url(#og)" stroke-width="10" stroke-linejoin="round"/>
-          <line x1="100" y1="16" x2="100" y2="208" stroke="url(#og)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M 68,152 C 78,164 90,168 100,165" stroke="url(#og)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M 132,152 C 122,164 110,168 100,165" stroke="url(#og)" stroke-width="5" stroke-linecap="round"/>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="48" height="48">
+          <defs><linearGradient id="og" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d06090"/><stop offset="100%" stop-color="#8a1040"/></linearGradient></defs>
+          <path d="M3 4 L12 20 L21 4" stroke="url(#og)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
       <div class="ob-title">Welcome to Velora</div>
@@ -152,23 +149,31 @@
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="brand-dot">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 228" fill="none" width="22" height="25">
-          <defs><linearGradient id="lg" x1="100" y1="12" x2="100" y2="218" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#c8608a"/><stop offset="50%" stop-color="#b83468"/><stop offset="100%" stop-color="#5a0f30"/></linearGradient></defs>
-          <path d="M 100,14 C 115,14 186,55 186,98 C 186,123 166,123 140,123 A 52,52 0 1 1 100,208 A 52,52 0 1 1 60,123 C 34,123 14,123 14,98 C 14,55 85,14 100,14 Z" stroke="url(#lg)" stroke-width="10" stroke-linejoin="round"/>
-          <line x1="100" y1="16" x2="100" y2="208" stroke="url(#lg)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M 68,152 C 78,164 90,168 100,165" stroke="url(#lg)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M 132,152 C 122,164 110,168 100,165" stroke="url(#lg)" stroke-width="5" stroke-linecap="round"/>
+        <!-- V mark — clean, minimal, distinctive -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="22" height="22">
+          <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d06090"/><stop offset="100%" stop-color="#8a1040"/></linearGradient></defs>
+          <path d="M3 4 L12 20 L21 4" stroke="url(#lg)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
       <div class="brand-name">velora<span>.ai</span></div>
     </div>
-    <button class="nav-item active" data-to="home"><span class="nav-icon">⌂</span>Home</button>
-    <button class="nav-item" data-to="discover"><span class="nav-icon">◈</span>Discover</button>
+    <button class="nav-item active" data-to="home">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 4l9 8"/><path d="M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+      Home
+    </button>
+    <button class="nav-item" data-to="discover">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="16,8 10,10 8,16 14,14" fill="currentColor" stroke="none" opacity=".7"/></svg>
+      Discover
+    </button>
     <button class="nav-item" data-to="chat" id="chatNav">
-      <span class="nav-icon">◔</span><span class="nav-label">Chat</span><span class="nav-badge" id="chatBadge"></span><span class="nav-arrow">›</span>
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span class="nav-label">Chat</span><span class="nav-badge" id="chatBadge"></span><span class="nav-arrow">›</span>
     </button>
     <div class="thread-drawer" id="threadDrawer"><!-- populated by app.js --></div>
-    <button class="nav-item" data-to="gallery"><span class="nav-icon">▣</span>Gallery</button>
+    <button class="nav-item" data-to="gallery">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Gallery
+    </button>
     <div class="sidebar-gap"></div>
     <div class="sidebar-meta">VELORA.AI · 2026</div>
   </aside>
@@ -176,7 +181,9 @@
   <div class="main">
     <header class="topbar">
       <div class="topbar-left">
-        <button class="menu-btn" id="menuBtn">☰</button>
+        <button class="menu-btn" id="menuBtn" aria-label="Menu">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+        </button>
         <div class="tokens-pill" id="sparkCounter">⚡ <span id="sparkCount">0</span></div>
       </div>
       <div class="topbar-right">
