@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velora — Tester Access</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#08080f;color:#e8e4f0;font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .card{background:#111118;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:36px 32px;max-width:400px;width:100%;text-align:center;}
+    h1{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:8px;}
+    p{color:#9990a0;font-size:.9rem;line-height:1.6;margin-bottom:28px;}
+    .btn{display:block;width:100%;padding:14px;border-radius:10px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:.15s;margin-bottom:10px;font-family:inherit;}
+    .btn-primary{background:#b83468;color:#fff;}
+    .btn-primary:hover{background:#d0296e;}
+    .btn-secondary{background:#1e1e28;color:#c0b8d0;border:1px solid rgba(255,255,255,0.1);}
+    .btn-secondary:hover{background:#252530;}
+    .status{margin-top:16px;font-size:.78rem;color:#6e6880;min-height:20px;}
+    .logo{font-size:1.1rem;font-weight:800;letter-spacing:-.02em;margin-bottom:24px;color:#b83468;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">velora.ai</div>
+    <h1>Tester Access</h1>
+    <p>Choose how to start. This sets up your test account and takes you straight into the app.</p>
+    <button class="btn btn-primary" onclick="setup('fresh')">Start fresh — new user</button>
+    <button class="btn btn-secondary" onclick="setup('returning')">Returning user — skip onboarding</button>
+    <button class="btn btn-secondary" onclick="setup('reset')">Reset everything</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+    const presets = {
+      fresh: {
+        v_sparks: '240',
+        v_pulses: '2',
+        v_in: '1'
+      },
+      returning: {
+        v_sparks: '240',
+        v_pulses: '2',
+        v_onboarded: '1',
+        v_in: '1',
+        v_streak_count: '3',
+        v_streak_last: todayStr,
+        v_last_login: todayStr
+      }
+    };
+
+    function setup(type) {
+      const status = document.getElementById('status');
+
+      if (type === 'reset') {
+        Object.keys(localStorage).filter(k => k.startsWith('v_')).forEach(k => localStorage.removeItem(k));
+        status.textContent = 'Reset done — redirecting…';
+        setTimeout(() => { location.href = '/'; }, 800);
+        return;
+      }
+
+      const preset = presets[type];
+      if (!preset) return;
+
+      // Clear old state first
+      Object.keys(localStorage).filter(k => k.startsWith('v_')).forEach(k => localStorage.removeItem(k));
+
+      // Apply preset
+      Object.entries(preset).forEach(([k, v]) => localStorage.setItem(k, v));
+
+      status.textContent = 'Done — entering Velora…';
+      setTimeout(() => { location.href = '/'; }, 600);
+    }
+  </script>
+</body>
+</html>
