@@ -248,17 +248,19 @@ export async function runFalComfyWorkflow(workflow) {
   return generateViaFalComfy(workflow, key);
 }
 
-// ─── ComfyUI (local only) ─────────────────────────────────────────────────────
+// ─── ComfyUI (local or remote via COMFY_HOST / COMFY_PORT env vars) ──────────
 
-const COMFY_HOST = '127.0.0.1';
-const COMFY_PORT = 8188;
+const COMFY_HOST = process.env.COMFY_HOST || '127.0.0.1';
+const COMFY_PORT = parseInt(process.env.COMFY_PORT || '8188', 10);
+const COMFY_PROTOCOL = process.env.COMFY_PROTOCOL || 'http'; // set to 'https' if vast uses SSL
 const SD_MODEL = 'realisticVisionV60B1_v51HyperVAE.safetensors';
 const SD_NEGATIVE = '(man:2.0),(male:2.0),(boy:2.0),children,anime,cartoon,watermark,text,ugly,deformed,blurry,low quality';
 
 function comfyRequest(method, urlPath, body) {
   return new Promise((resolve, reject) => {
     const bodyStr = body ? JSON.stringify(body) : null;
-    const req = http.request({ hostname: COMFY_HOST, port: COMFY_PORT, path: urlPath, method,
+    const transport = COMFY_PROTOCOL === 'https' ? https : http;
+    const req = transport.request({ hostname: COMFY_HOST, port: COMFY_PORT, path: urlPath, method,
       headers: { 'Content-Type': 'application/json', ...(bodyStr ? { 'Content-Length': Buffer.byteLength(bodyStr) } : {}) },
     }, (res) => {
       let data = '';
@@ -306,7 +308,8 @@ async function generateViaComfy(prompt, character, seedOffset = 0, comfyParams =
   const filepath = path.join(IMAGES_DIR, filename);
   await new Promise((resolve, reject) => {
     const file = fs.createWriteStream(filepath);
-    http.get(`http://${COMFY_HOST}:${COMFY_PORT}/view?filename=${imgData.filename}&subfolder=${imgData.subfolder||''}&type=output`, res => {
+    const transport = COMFY_PROTOCOL === 'https' ? https : http;
+    transport.get(`${COMFY_PROTOCOL}://${COMFY_HOST}:${COMFY_PORT}/view?filename=${imgData.filename}&subfolder=${imgData.subfolder||''}&type=output`, res => {
       res.pipe(file); file.on('finish', () => file.close(resolve));
     }).on('error', reject);
   });
