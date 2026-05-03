@@ -9,8 +9,14 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config();
 
-// Priority: OPENROUTER → GROQ → TOGETHER → OPENAI
+// Priority: WENDY → OPENROUTER → GROQ → TOGETHER → OPENAI
 const PROVIDERS = [
+  {
+    name: 'wendy',
+    envKey: 'WENDY_API_KEY',
+    baseURL: process.env.WENDY_BASE_URL || null,
+    defaultModel: process.env.WENDY_MODEL || 'cognitivecomputations/dolphin3.0-qwen2.5-8b',
+  },
   {
     name: 'openrouter',
     envKey: 'OPENROUTER_API_KEY',
@@ -91,7 +97,7 @@ if (openai?.chat?.completions?.create) {
 export function ensureOpenAI() {
   if (!openai) {
     throw new Error(
-      'No AI API key found. Add GROQ_API_KEY, OPENROUTER_API_KEY, or OPENAI_API_KEY to .env'
+      'No AI API key found. Add WENDY_API_KEY, GROQ_API_KEY, OPENROUTER_API_KEY, or OPENAI_API_KEY to .env'
     );
   }
   return openai;
